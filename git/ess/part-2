@@ -1,0 +1,93 @@
+#! /bin/bash
+
+points=10
+repo=$1
+verbosity=$2
+out="/var/fenrir/out"
+err="/var/fenrir/err"
+
+
+log info "$verbosity" "P2: Validating commits tree.."
+
+if ! branch-exists "$verbosity" "$repo" "3" || \
+   ! branch-exists "$verbosity" "$repo" "4"; then
+        log err "$verbosity" "P2: Terminating.."
+        exit 1
+fi
+
+merge_commit=$(git log --merges --format="%h" origin/4)
+
+if [ -n "$merge_commit" ]; then
+    log err "$verbosity" "P2: There is a merge commit in branch <4>: <$merge_commit>"
+    exit 1
+fi
+
+merge_commit=$(git log --merges --format="%h" origin/3)
+
+if [ -n "$merge_commit" ]; then
+    log err "$verbosity" "P2: There is a merge commit in branch <3>: <$merge_commit>"
+    exit 1
+fi
+
+found=0
+
+for (( i = 0; i < 3; i++ )); do
+    if git branch -a --contains "origin/4~$i" | grep -q 3; then
+        hash=$(commit-hash "origin/4~$i")
+        branch3=$(commit-hash "origin/3")
+
+        if ! [ "$hash" = "$branch3" ]; then
+            log err "$verbosity" "P2: Expected commit <$hash> to equal to <$branch3>"
+            exit 1
+        fi
+
+        found=1
+        break
+    fi
+done
+
+if [ "$found" -ne 1 ]; then
+    log err "$verbosity" "P2: Branch 4 contains far too many commits (Branch 3 was not found)"
+fi
+
+log info "$verbosity" "P2: Validating files content.."
+
+if git show origin/4:3 > "$out" 2> "$err"; then
+    content=$(cat "$out")
+
+    if [ "$(echo "$content" | wc -w)" -eq 2 ] && \
+       [ "$(echo "$content" | sed '1p;d')" = "1" ] && \
+       [ "$(echo "$content" | sed '2p;d')" = "3" ]; then
+            if git show origin/4:4 > "$out" 2> "$err"; then
+                content=$(cat "$out")
+
+                if [ "$(echo "$content" | wc -w)" -eq 2 ] && \
+                   [ "$(echo "$content" | sed '1p;d')" = "1" ] && \
+                   [ "$(echo "$content" | sed '2p;d')" = "4" ]; then
+                        add-points "$points"
+                else
+                    log err "$verbosity" "P2:2 Incorrect files content"
+                    log warn "$verbosity" "<stdout>" "$(cat "$out")"
+                    log err "$verbosity" "<stderr>" "$(cat "$err")"
+                    exit 1
+                fi
+            else
+                log err "$verbosity" "P2: Something went wrong while reading the file"
+                log warn "$verbosity" "<stdout>" "$(cat "$out")"
+                log err "$verbosity" "<stderr>" "$(cat "$err")"
+                exit 1
+            fi
+    else
+        log err "$verbosity" "P2:1 Incorrect files content"
+        log warn "$verbosity" "<stdout>" "$(cat "$out")"
+        log err "$verbosity" "<stderr>" "$(cat "$err")"
+        exit 1
+    fi
+else
+    log err "$verbosity" "P2: Something went wrong while reading the file"
+    log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    log err "$verbosity" "<stderr>" "$(cat "$err")"
+    exit 1
+fi
+
+log succ "$verbosity" "P2: PASSED"

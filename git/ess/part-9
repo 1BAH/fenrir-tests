@@ -1,0 +1,50 @@
+#! /bin/bash
+
+points=10
+repo=$1
+verbosity=$2
+out="/var/fenrir/out"
+err="/var/fenrir/err"
+
+log info "$verbosity" "P9: Validating commits tree.."
+
+if ! branch-exists "$verbosity" "$repo" "14" || \
+   ! branch-exists "$verbosity" "$repo" "15"; then
+        log err "$verbosity" "P9: Terminating.."
+        exit 1
+fi
+
+if [ "$(commit-name "origin/14~0")" != '6003' ] || \
+   [ "$(commit-name "origin/14~1")" != '6006' ] || \
+   [ "$(commit-hash "origin/14~1")" != '4e7b0f2b' ] || \
+   [ "$(commit-hash "origin/15~0")" != '3319f09d' ]; then
+        log err "$verbosity" "P9: Invalid commit tree"
+        exit 1
+fi
+
+log info "$verbosity" "P9: Validating file content.."
+
+if git show origin/14:9.txt > "$out" 2> "$err"; then
+    content=$(cat "$out")
+
+    if [ "$(echo "$content" | wc -w)" -eq 4 ] && \
+       [ "$(echo "$content" | sed '1p;d')" = "5" ] && \
+       [ "$(echo "$content" | sed '2p;d')" = "4" ] && \
+       [ "$(echo "$content" | sed '3p;d')" = "3" ] && \
+       [ "$(echo "$content" | sed '4p;d')" = "2" ]; then
+            add-points "$points"
+    else
+        log err "$verbosity" "P9: Incorrect files content"
+        log warn "$verbosity" "<stdout>" "$(cat "$out")"
+        log err "$verbosity" "<stderr>" "$(cat "$err")"
+        exit 1
+    fi
+else
+    log err "$verbosity" "P9: Something went wrong while reading the file"
+    log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    log err "$verbosity" "<stderr>" "$(cat "$err")"
+    exit 1
+fi
+
+
+log succ "$verbosity" "P9: PASSED"

@@ -1,0 +1,28 @@
+#! /bin/bash
+
+points=10
+repo=$1
+verbosity=$2
+
+
+log info "$verbosity" "P7: Validating commits tree.."
+
+if ! branch-exists "$verbosity" "$repo" "12"; then
+        log err "$verbosity" "P7: Terminating.."
+        exit 1
+fi
+
+if [ "$(commit-name "origin/12")" != '27' ]; then
+        log err "$verbosity" "P7: Invalid last commit"
+        log err "$verbosity" "P7: Expected <$(commit-name "origin/12")> to be <27>"
+        exit 1
+fi
+
+if [ "$(commit-parent "origin/12")" != '5c468f81' ]; then
+        log err "$verbosity" "P7: Invalid last commit"
+        log err "$verbosity" "P7: Expected <$(commit-parent "origin/12")> to be <5c468f81>"
+        exit 1
+fi
+
+add-points "$points"
+log succ "$verbosity" "P7: PASSED"

@@ -1,0 +1,42 @@
+#! /bin/bash
+
+points=10
+repo=$1
+verbosity=$2
+out="/var/fenrir/out"
+err="/var/fenrir/err"
+
+log info "$verbosity" "P10: Validating commits tree.."
+
+if ! change-branch "$repo" "$verbosity" "16"; then
+    log err "$verbosity" "P10: Terminating.."
+    exit 1
+fi
+
+log info "$verbosity" "P10: Validating file mode.."
+
+if [ "$(file-type win.sh)" != '100755' ]; then
+    log err "$verbosity" "P10: Invalid file mode"
+    exit 1
+fi
+
+log info "$verbosity" "P10: Executing script.."
+
+if ! ./win.sh > "$out" 2> "$err"; then
+    log err "$verbosity"  "Failed"
+    log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    log err "$verbosity"  "<stderr>" "$(cat "$err")"
+    exit 1
+fi
+
+if [ "$(cat "$out")" != "HI" ] &&
+   [ -n "$(cat "$err")" ]; then
+    log err "$verbosity"  "Something went wrong:"
+    log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    log err "$verbosity"  "<stderr>" "$(cat "$err")"
+    exit 1
+fi
+
+add-points "$points"
+
+log succ "$verbosity" "P10: PASSED"

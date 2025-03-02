@@ -1,0 +1,72 @@
+#! /bin/bash
+
+points=10
+repo=$1
+verbosity=$2
+out="/var/fenrir/out"
+err="/var/fenrir/err"
+
+
+log info "$verbosity" "P1: Validating commits tree.."
+
+if ! branch-exists "$verbosity" "$repo" "1" || \
+   ! branch-exists "$verbosity" "$repo" "2"; then
+        log err "$verbosity" "P1: Terminating.."
+        exit 1
+fi
+
+merge_commit=$(git log --merges --format="%h" origin/1)
+
+if [ -z "$merge_commit" ]; then
+    log err "$verbosity" "P1: You haven't merged branch"
+    exit 1
+fi
+
+if ! [ "$merge_commit" = "$(commit-hash "origin/1~0")" ]; then
+    log err "$verbosity" "P1: Expected the merge commit to be the latest"
+    exit 1
+fi
+
+merge_commit=$(git log --merges --format="%h" origin/2)
+
+if [ -n "$merge_commit" ]; then
+    log err "$verbosity" "P1: Encountered merge commits in branch <2>"
+    exit 1
+fi
+
+if ! [ "$(commit-name "origin/1~0")" = "3" ]; then
+    log err "$verbosity" "P1: Expected commit message to be <3>"
+    exit 1
+fi
+
+log info "$verbosity" "P1: Validating files content.."
+
+if git show origin/1:1.txt > "$out" 2> "$err"; then
+    content=$(cat "$out")
+
+    if [ "$(echo "$content" | wc -w)" -eq 3 ] && \
+       [ "$(echo "$content" | sed '1p;d')" = "3" ] && \
+       [ "$(echo "$content" | sed '2p;d')" = "2" ] && \
+       [ "$(echo "$content" | sed '3p;d')" = "1" ]; then
+            if ! git show origin/1:2.txt > "$out" 2> "$err"; then
+                add-points "$points"
+            else
+                log err "$verbosity" "P1: Incorrect files content"
+                log warn "$verbosity" "<stdout>" "$(cat "$out")"
+                log err "$verbosity" "<stderr>" "$(cat "$err")"
+                exit 1
+            fi
+    else
+        log err "$verbosity" "P1: Incorrect files content"
+        log warn "$verbosity" "<stdout>" "$(cat "$out")"
+        log err "$verbosity" "<stderr>" "$(cat "$err")"
+        exit 1
+    fi
+else
+    log err "$verbosity" "P1: Something went wrong while reading the file"
+    log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    log err "$verbosity" "<stderr>" "$(cat "$err")"
+    exit 1
+fi
+
+log succ "$verbosity" "P1: PASSED"

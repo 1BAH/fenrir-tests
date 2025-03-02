@@ -1,0 +1,31 @@
+#! /bin/bash
+
+points=10
+repo=$1
+verbosity=$2
+
+
+log info "$verbosity" "P4: Validating commits tree.."
+
+if ! branch-exists "$verbosity" "$repo" "7" || \
+   ! branch-exists "$verbosity" "$repo" "8" || \
+   ! branch-exists "$verbosity" "$repo" "9"; then
+        log err "$verbosity" "P4: Terminating.."
+        exit 1
+fi
+
+if ! git branch -a --contains origin/9~2 | grep -q 7; then
+    log err "$verbosity" "P4: Incorrect rebase or extra commits present"
+    exit 1
+fi
+
+if [ "$(commit-name "origin/9")"   = "16" ] && \
+   [ "$(commit-name "origin/9~1")" = "15" ] && \
+   [ "$(commit-name "origin/9~2")" = "18" ]; then
+        add-points "$points"
+else
+    log err "$verbosity" "P4: Incorrect commit messages"
+    exit 1
+fi
+
+log succ "$verbosity" "P4: PASSED"
