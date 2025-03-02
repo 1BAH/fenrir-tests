@@ -1,0 +1,67 @@
+#! /bin/bash
+
+# repo=$1
+verbosity=$2
+destination=$(getroot)
+
+out="/var/fenrir/out"
+err="/var/fenrir/err"
+
+# Setup logs
+src=$(mktemp)
+l=$(mktemp)
+u=$(mktemp)
+
+dim=25
+
+log info "$verbosity" "LID: Testing identity matrix with dim='$dim'"
+
+{
+    for (( i = 0; i < dim - 1; ++i )); do
+        for (( j = 0; j < dim - 1; ++j )); do
+            if [ "$i" -ne "$j" ]; then
+                echo -n "0,"
+            else
+                echo -n "1,"
+            fi
+        done
+
+        echo "0"
+    done
+
+    for (( i = 0; i < dim - 1; ++i )); do
+        echo -n "0,"
+    done
+
+    echo "1"
+} >> "$src"
+
+cp "$src" "$HOME/in.csv"
+
+if ! "$destination/bash/lu/decomposition.sh" "$HOME/in.csv" "$l" "$u" "0" > "$out" 2> "$err"; then
+    log err "$verbosity" "LID: Script execution has failed"
+    log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    log err "$verbosity" "<stderr>" "$(cat "$err")"
+    exit 1
+fi
+
+if ! diff --minimal "$HOME/in.csv" "$src"; then
+    log err "$verbosity" "LID: You have modified source matrix"
+    exit 4
+fi
+
+if ! diff --minimal "$l" "$src"; then
+    log err "$verbosity" "LID: Wrong L matrix"
+    exit 3
+fi
+
+if ! diff --minimal "$u" "$src"; then
+    log err "$verbosity" "LID: Wrong U matrix"
+    exit 2
+fi
+
+log succ "$verbosity" "LID: PASSED"
+
+# Successfully passed all tests
+add-points 100
+

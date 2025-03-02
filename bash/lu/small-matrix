@@ -1,0 +1,44 @@
+#! /bin/bash
+
+# repo=$1
+verbosity=$2
+destination=$(getroot)
+
+log info "$verbosity" "SM: Running on small matrix (3x3).."
+
+# Setup logs
+src="/etc/fenrir/in_small.csv"
+l="/etc/fenrir/l_small.csv"
+u="/etc/fenrir/u_small.csv"
+
+out="/var/fenrir/out"
+err="/var/fenrir/err"
+
+out_l="$HOME/l.csv"
+out_u="$HOME/u.csv"
+
+cp "$src" "$HOME/in.csv"
+
+if ! "$destination/bash/lu/decomposition.sh" "$HOME/in.csv" "$out_l" "$out_u" "2" > "$out" 2> "$err"; then
+    log err "$verbosity" "SM: Script execution has failed"
+    log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    log err "$verbosity" "<stderr>" "$(cat "$err")"
+    exit 1
+fi
+
+if ! diff --minimal "$HOME/in.csv" "$src"; then
+    log err "$verbosity" "SM: You have modified source matrix"
+    exit 4
+fi
+
+if ! diff --minimal "$out_l" "$l"; then
+    log err "$verbosity" "SM: Wrong L matrix"
+    exit 3
+fi
+
+if ! diff --minimal "$out_u" "$u"; then
+    log err "$verbosity" "SM: Wrong U matrix"
+    exit 2
+fi
+
+log succ "$verbosity" "SM: PASSED"
