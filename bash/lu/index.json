@@ -16,5 +16,6 @@
         "u_large.csv",
         "u_small.csv"
     ],
-    "branch": "bash/lu"
+    "branch": "bash/lu",
+    "blocking": 1
 }
