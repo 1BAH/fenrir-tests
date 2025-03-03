@@ -1,0 +1,12 @@
+#! /bin/bash
+
+verbosity=$2
+
+log info "$verbosity" "RR: Validating root readme.."
+
+if ! [ -f "../README.md" ]; then
+    log err "$verbosity" "RR: Root README does not exist"
+    exit 5
+fi
+
+log succ "$verbosity" "RR: PASSED"
