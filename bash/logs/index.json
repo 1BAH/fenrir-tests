@@ -1,0 +1,10 @@
+{
+    "custom": [
+        "large",
+        "tiny",
+        "tricky"
+    ],
+    "cfgs": [],
+    "branch": "bash/logs",
+    "blocking": 1
+}
