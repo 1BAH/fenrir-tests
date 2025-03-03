@@ -15,5 +15,6 @@
         "u_broken.csv",
         "u_large.csv",
         "u_small.csv"
-    ]
+    ],
+    "branch": "bash/lu"
 }
