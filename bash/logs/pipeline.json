@@ -1,0 +1,11 @@
+{
+    "pre": [
+        "task-zero"
+    ],
+    "main": [
+        "walk-inspections",
+        "tiny",
+        "tricky",
+        "large"
+    ]
+}
