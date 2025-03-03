@@ -1,0 +1,19 @@
+{
+    "custom": [
+        "broken-matrix",
+        "large-Id",
+        "small-matrix",
+        "large-matrix"
+    ],
+    "cfgs": [
+        "in_broken.csv",
+        "in_large.csv",
+        "in_small.csv",
+        "l_broken.csv",
+        "l_large.csv",
+        "l_small.csv",
+        "u_broken.csv",
+        "u_large.csv",
+        "u_small.csv"
+    ]
+}
