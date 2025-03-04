@@ -2,9 +2,9 @@
 
 # repo=$1
 verbosity=$2
-destination=$(getroot)
+destination=$(fenrir-getroot)
 
-log info "$verbosity" "LM: Running on large matrix (7x7).."
+fenrir-log info "$verbosity" "LM: Running on large matrix (7x7).."
 
 # Setup logs
 src="/etc/fenrir/in_large.csv"
@@ -20,25 +20,25 @@ out_u="$HOME/u.csv"
 cp "$src" "$HOME/in.csv"
 
 if ! "$destination/bash/lu/decomposition.sh" "$HOME/in.csv" "$out_l" "$out_u" "3" > "$out" 2> "$err"; then
-    log err "$verbosity" "LM: Script execution has failed"
-    log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    log err "$verbosity" "<stderr>" "$(cat "$err")"
+    fenrir-log err "$verbosity" "LM: Script execution has failed"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
     exit 1
 fi
 
 if ! diff --minimal "$HOME/in.csv" "$src"; then
-    log err "$verbosity" "LM: You have modified source matrix"
+    fenrir-log err "$verbosity" "LM: You have modified source matrix"
     exit 4
 fi
 
 if ! diff --minimal "$out_l" "$l"; then
-    log err "$verbosity" "LM: Wrong L matrix"
+    fenrir-log err "$verbosity" "LM: Wrong L matrix"
     exit 3
 fi
 
 if ! diff --minimal "$out_u" "$u"; then
-    log err "$verbosity" "LM: Wrong U matrix"
+    fenrir-log err "$verbosity" "LM: Wrong U matrix"
     exit 2
 fi
 
-log succ "$verbosity" "LM: PASSED"
+fenrir-log succ "$verbosity" "LM: PASSED"

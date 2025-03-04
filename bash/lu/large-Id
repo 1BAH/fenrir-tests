@@ -2,7 +2,7 @@
 
 # repo=$1
 verbosity=$2
-destination=$(getroot)
+destination=$(fenrir-getroot)
 
 out="/var/fenrir/out"
 err="/var/fenrir/err"
@@ -14,7 +14,7 @@ u=$(mktemp)
 
 dim=25
 
-log info "$verbosity" "LID: Testing identity matrix with dim='$dim'"
+fenrir-log info "$verbosity" "LID: Testing identity matrix with dim='$dim'"
 
 {
     for (( i = 0; i < dim - 1; ++i )); do
@@ -39,29 +39,29 @@ log info "$verbosity" "LID: Testing identity matrix with dim='$dim'"
 cp "$src" "$HOME/in.csv"
 
 if ! "$destination/bash/lu/decomposition.sh" "$HOME/in.csv" "$l" "$u" "0" > "$out" 2> "$err"; then
-    log err "$verbosity" "LID: Script execution has failed"
-    log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    log err "$verbosity" "<stderr>" "$(cat "$err")"
+    fenrir-log err "$verbosity" "LID: Script execution has failed"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
     exit 1
 fi
 
 if ! diff --minimal "$HOME/in.csv" "$src"; then
-    log err "$verbosity" "LID: You have modified source matrix"
+    fenrir-log err "$verbosity" "LID: You have modified source matrix"
     exit 4
 fi
 
 if ! diff --minimal "$l" "$src"; then
-    log err "$verbosity" "LID: Wrong L matrix"
+    fenrir-log err "$verbosity" "LID: Wrong L matrix"
     exit 3
 fi
 
 if ! diff --minimal "$u" "$src"; then
-    log err "$verbosity" "LID: Wrong U matrix"
+    fenrir-log err "$verbosity" "LID: Wrong U matrix"
     exit 2
 fi
 
-log succ "$verbosity" "LID: PASSED"
+fenrir-log succ "$verbosity" "LID: PASSED"
 
 # Successfully passed all tests
-add-points 100
+fenrir-add-points 100
 
