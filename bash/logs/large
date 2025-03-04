@@ -36,4 +36,4 @@ fenrir-log succ "$verbosity" "LRG: PASSED"
 # All tests have passed
 fenrir-add-points 50
 
-rm -r /tmp/large
+rm -rf /tmp/large
