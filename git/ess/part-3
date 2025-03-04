@@ -7,33 +7,33 @@ out="/var/fenrir/out"
 err="/var/fenrir/err"
 
 
-log info "$verbosity" "P3: Validating commits tree.."
+fenrir-log info "$verbosity" "P3: Validating commits tree.."
 
-if ! branch-exists "$verbosity" "$repo" "5"   || \
-   ! branch-exists "$verbosity" "$repo" "6"; then
-        log err "$verbosity" "P3: Terminating.."
+if ! fenrir-branch-exists "$verbosity" "$repo" "5"   || \
+   ! fenrir-branch-exists "$verbosity" "$repo" "6"; then
+        fenrir-log err "$verbosity" "P3: Terminating.."
         exit 1
 fi
 
-if ! change-branch "$repo" "$verbosity" "5"; then
-    log err "$verbosity" "P3: Terminating.."
+if ! fenrir-change-branch "$repo" "$verbosity" "5"; then
+    fenrir-log err "$verbosity" "P3: Terminating.."
     exit 1
 fi
 
-log info "$verbosity" "P3: Merging.."
+fenrir-log info "$verbosity" "P3: Merging.."
 
 already=("modify/delete" "content")
 curr=()
 success=0
 
 ####################################################################
-if git merge origin/6 > "$out" 2> "$err"; then
-    log err "$verbosity" "P3: No error occurred"
+if git merge 6 > "$out" 2> "$err"; then
+    fenrir-log err "$verbosity" "P3: No error occurred"
     exit 1
 fi
 
 while IFS= read -r type; do
-    log info "$verbosity" "P3: Merge conflict's type is ($type)"
+    fenrir-log info "$verbosity" "P3: Merge conflict's type is ($type)"
     curr+=("$type")
     already+=("$type")
 
@@ -46,14 +46,14 @@ while IFS= read -r type; do
 done < <(sed -nE 's/.*CONFLICT \((.*)\).*/\1/p' "$out")
 
 if [ "$success" -ne 1 ]; then
-    log err "$verbosity" "P3: Such type <${curr[*]}> of MC occurred in previous parts"
-    log warn "$verbosity" "<stdout> $(cat "$out")"
-    log err "$verbosity" "<stderr> $(cat "$err")"
+    fenrir-log err "$verbosity" "P3: Such type <${curr[*]}> of MC occurred in previous parts"
+    fenrir-log warn "$verbosity" "<stdout> $(cat "$out")"
+    fenrir-log err "$verbosity" "<stderr> $(cat "$err")"
     exit 1
 fi
 
 git merge --abort
 
-add-points "$points"
+fenrir-add-points "$points"
 
-log succ "$verbosity" "P3: PASSED"
+fenrir-log succ "$verbosity" "P3: PASSED"

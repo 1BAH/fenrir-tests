@@ -10,7 +10,7 @@ fenrir-log info "$verbosity" "LRG: Running on large logs.."
 
 # Clone repo with large logs
 pushd ~ &> /dev/null
-if ! git clone https://gitlab.com/atpd/progtech/bash-logs-large.git large > "$out" 2> "$err"; then
+if ! git clone https://gitlab.com/atpd/progtech/bash-logs-large.git /tmp/large > "$out" 2> "$err"; then
     fenrir-log info "$verbosity" "$(cat "$out")"
     fenrir-log warn "$verbosity" "$(cat "$err")"
     exit 10
@@ -35,3 +35,5 @@ fenrir-log succ "$verbosity" "LRG: PASSED"
 
 # All tests have passed
 fenrir-add-points 50
+
+rm /tmp/large

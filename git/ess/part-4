@@ -5,27 +5,27 @@ repo=$1
 verbosity=$2
 
 
-log info "$verbosity" "P4: Validating commits tree.."
+fenrir-log info "$verbosity" "P4: Validating commits tree.."
 
-if ! branch-exists "$verbosity" "$repo" "7" || \
-   ! branch-exists "$verbosity" "$repo" "8" || \
-   ! branch-exists "$verbosity" "$repo" "9"; then
-        log err "$verbosity" "P4: Terminating.."
+if ! fenrir-branch-exists "$verbosity" "$repo" "7" || \
+   ! fenrir-branch-exists "$verbosity" "$repo" "8" || \
+   ! fenrir-branch-exists "$verbosity" "$repo" "9"; then
+        fenrir-log err "$verbosity" "P4: Terminating.."
         exit 1
 fi
 
-if ! git branch -a --contains origin/9~2 | grep -q 7; then
-    log err "$verbosity" "P4: Incorrect rebase or extra commits present"
+if ! git branch -a --contains 9~2 | grep -q 7; then
+    fenrir-log err "$verbosity" "P4: Incorrect rebase or extra commits present"
     exit 1
 fi
 
-if [ "$(commit-name "origin/9")"   = "16" ] && \
-   [ "$(commit-name "origin/9~1")" = "15" ] && \
-   [ "$(commit-name "origin/9~2")" = "18" ]; then
-        add-points "$points"
+if [ "$(fenrir-commit-name "9")"   = "16" ] && \
+   [ "$(fenrir-commit-name "9~1")" = "15" ] && \
+   [ "$(fenrir-commit-name "9~2")" = "18" ]; then
+        fenrir-add-points "$points"
 else
-    log err "$verbosity" "P4: Incorrect commit messages"
+    fenrir-log err "$verbosity" "P4: Incorrect commit messages"
     exit 1
 fi
 
-log succ "$verbosity" "P4: PASSED"
+fenrir-log succ "$verbosity" "P4: PASSED"
