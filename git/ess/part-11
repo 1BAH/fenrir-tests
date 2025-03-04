@@ -6,125 +6,125 @@ verbosity=$2
 out="/var/fenrir/out"
 err="/var/fenrir/err"
 
-log info "$verbosity" "P11: Validating commits tree.."
+fenrir-log info "$verbosity" "P11: Validating commits tree.."
 
-if ! change-branch "$repo" "$verbosity" "17"; then
-    log err "$verbosity" "P11: Terminating.."
+if ! fenrir-change-branch "$repo" "$verbosity" "17"; then
+    fenrir-log err "$verbosity" "P11: Terminating.."
     exit 1
 fi
 
-log info "$verbosity" "P11: Searching script.."
+fenrir-log info "$verbosity" "P11: Searching script.."
 
 if ! [ -x "install" ]; then
-    log err "$verbosity" "P11: 'install' was not found"
+    fenrir-log err "$verbosity" "P11: 'install' was not found"
     exit 1
 fi
 
-log succ "$verbosity" "P11: 'install' was found"
+fenrir-log succ "$verbosity" "P11: 'install' was found"
 
-log info "$verbosity" "P11: Installing hooks.."
+fenrir-log info "$verbosity" "P11: Installing hooks.."
 
 if ! ./install > "$out" 2> "$err"; then
-    log err "$verbosity"  "Failed"
-    log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    log err "$verbosity"  "<stderr>" "$(cat "$err")"
+    fenrir-log err "$verbosity"  "Failed"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err "$verbosity"  "<stderr>" "$(cat "$err")"
     exit 1
 fi
 
-log succ "$verbosity" "P11: Installed"
+fenrir-log succ "$verbosity" "P11: Installed"
 
-log info "$verbosity" "P11: Creating file 'file'.."
+fenrir-log info "$verbosity" "P11: Creating file 'file'.."
 touch file
 
-log info "$verbosity" "P11: Running 'git add file'.."
+fenrir-log info "$verbosity" "P11: Running 'git add file'.."
 git add file
 
-log info "$verbosity" "P11: Running 'git commit -m \"BAD MESSAGE\"'.."
+fenrir-log info "$verbosity" "P11: Running 'git commit -m \"BAD MESSAGE\"'.."
 if git commit -m "BAD MESSAGE" > "$out" 2> "$err"; then
-    log err "$verbosity" "File has been commited!"
-    log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    log err "$verbosity"  "<stderr>" "$(cat "$err")"
+    fenrir-log err "$verbosity" "File has been commited!"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err "$verbosity"  "<stderr>" "$(cat "$err")"
     exit 1
 fi
-log succ "$verbosity" "P11: Hook works correct"
+fenrir-log succ "$verbosity" "P11: Hook works correct"
 
-log info "$verbosity" "P11: Running 'git commit -m \"[FIX] BAD\"'.."
+fenrir-log info "$verbosity" "P11: Running 'git commit -m \"[FIX] BAD\"'.."
 if git commit -m "[FIX] BAD" > "$out" 2> "$err"; then
-    log err "$verbosity" "File has been commited!"
-    log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    log err "$verbosity"  "<stderr>" "$(cat "$err")"
+    fenrir-log err "$verbosity" "File has been commited!"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err "$verbosity"  "<stderr>" "$(cat "$err")"
     exit 1
 fi
-log succ "$verbosity" "P11: Hook works correct"
+fenrir-log succ "$verbosity" "P11: Hook works correct"
 
-log info "$verbosity" "P11: Running 'git commit -m \"[ АDD ] Tricky\"'.."
+fenrir-log info "$verbosity" "P11: Running 'git commit -m \"[ АDD ] Tricky\"'.."
 if git commit -m "[ АDD ] Tricky" > "$out" 2> "$err"; then
-    log err "$verbosity" "File has been commited! ('A' is cyrillic)"
-    log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    log err "$verbosity"  "<stderr>" "$(cat "$err")"
+    fenrir-log err "$verbosity" "File has been commited! ('A' is cyrillic)"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err "$verbosity"  "<stderr>" "$(cat "$err")"
     exit 1
 fi
-log succ "$verbosity" "P11: Hook works correct"
+fenrir-log succ "$verbosity" "P11: Hook works correct"
 
-log info "$verbosity" "P11: Running 'git commit -m \"[ ADD ]Tricky\"'.."
+fenrir-log info "$verbosity" "P11: Running 'git commit -m \"[ ADD ]Tricky\"'.."
 if git commit -m "[ ADD ]Tricky" > "$out" 2> "$err"; then
-    log err "$verbosity" "File has been commited!"
-    log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    log err "$verbosity"  "<stderr>" "$(cat "$err")"
+    fenrir-log err "$verbosity" "File has been commited!"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err "$verbosity"  "<stderr>" "$(cat "$err")"
     exit 1
-fi
+fenrir-fi
 log succ "$verbosity" "P11: Hook works correct"
 
-log info "$verbosity" "P11: Running 'git commit -m \" [ ADD ] Tricky\"'.."
+fenrir-log info "$verbosity" "P11: Running 'git commit -m \" [ ADD ] Tricky\"'.."
 if git commit -m " [ ADD ] Tricky" > "$out" 2> "$err"; then
-    log err "$verbosity" "File has been commited!"
-    log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    log err "$verbosity"  "<stderr>" "$(cat "$err")"
+    fenrir-log err "$verbosity" "File has been commited!"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err "$verbosity"  "<stderr>" "$(cat "$err")"
     exit 1
 fi
-log succ "$verbosity" "P11: Hook works correct"
+fenrir-log succ "$verbosity" "P11: Hook works correct"
 
-log info "$verbosity" "P11: Running 'git commit -m \"[ ADD ] Triсky\"'.."
+fenrir-log info "$verbosity" "P11: Running 'git commit -m \"[ ADD ] Triсky\"'.."
 if git commit -m "[ ADD ] Triсky" > "$out" 2> "$err"; then
-    log err "$verbosity" "File has been commited! ('с' is cyrillic)"
-    log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    log err "$verbosity"  "<stderr>" "$(cat "$err")"
+    fenrir-log err "$verbosity" "File has been commited! ('с' is cyrillic)"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err "$verbosity"  "<stderr>" "$(cat "$err")"
     exit 1
 fi
-log succ "$verbosity" "P11: Hook works correct"
+fenrir-log succ "$verbosity" "P11: Hook works correct"
 
-log info "$verbosity" "P11: Running 'git commit -m \"[ ADD ] Good\"'.."
+fenrir-log info "$verbosity" "P11: Running 'git commit -m \"[ ADD ] Good\"'.."
 if ! git commit -m "[ ADD ] Good" > "$out" 2> "$err"; then
-    log err "$verbosity" "File has not been commited!"
-    log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    log err "$verbosity"  "<stderr>" "$(cat "$err")"
+    fenrir-log err "$verbosity" "File has not been commited!"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err "$verbosity"  "<stderr>" "$(cat "$err")"
     exit 1
 fi
-log succ "$verbosity" "P11: Hook works correct"
+fenrir-log succ "$verbosity" "P11: Hook works correct"
 
 git reset --soft HEAD~1
 
-log info "$verbosity" "P11: Running 'git commit -m \"[ FIX ] Go0od\"'.."
+fenrir-log info "$verbosity" "P11: Running 'git commit -m \"[ FIX ] Go0od\"'.."
 if ! git commit -m "[ FIX ] Good" > "$out" 2> "$err"; then
-    log err "$verbosity" "File has not been commited!"
-    log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    log err "$verbosity"  "<stderr>" "$(cat "$err")"
+    fenrir-log err "$verbosity" "File has not been commited!"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err "$verbosity"  "<stderr>" "$(cat "$err")"
     exit 1
 fi
-log succ "$verbosity" "P11: Hook works correct"
+fenrir-log succ "$verbosity" "P11: Hook works correct"
 
 git reset --soft HEAD~1
 
-log info "$verbosity" "P11: Running 'git commit -m \"[ DEL ] 1G1o1O1d1\"'.."
+fenrir-log info "$verbosity" "P11: Running 'git commit -m \"[ DEL ] 1G1o1O1d1\"'.."
 if ! git commit -m "[ DEL ] 1G1o1O1d1" > "$out" 2> "$err"; then
-    log err "$verbosity" "File has not been commited!"
-    log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    log err "$verbosity"  "<stderr>" "$(cat "$err")"
+    fenrir-log err "$verbosity" "File has not been commited!"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err "$verbosity"  "<stderr>" "$(cat "$err")"
     exit 1
 fi
-log succ "$verbosity" "P11: Hook works correct"
+fenrir-log succ "$verbosity" "P11: Hook works correct"
 
-add-points "$points"
+fenrir-add-points "$points"
 
-log succ "$verbosity" "P11: PASSED"
+fenrir-log succ "$verbosity" "P11: PASSED"
 

@@ -6,37 +6,37 @@ verbosity=$2
 out="/var/fenrir/out"
 err="/var/fenrir/err"
 
-log info "$verbosity" "P10: Validating commits tree.."
+fenrir-log info "$verbosity" "P10: Validating commits tree.."
 
-if ! change-branch "$repo" "$verbosity" "16"; then
-    log err "$verbosity" "P10: Terminating.."
+if ! fenrir-change-branch "$repo" "$verbosity" "16"; then
+    fenrir-log err "$verbosity" "P10: Terminating.."
     exit 1
 fi
 
 log info "$verbosity" "P10: Validating file mode.."
 
-if [ "$(file-type win.sh)" != '100755' ]; then
-    log err "$verbosity" "P10: Invalid file mode"
+if [ "$(fenrir-file-type win.sh)" != '100755' ]; then
+    fenrir-log err "$verbosity" "P10: Invalid file mode"
     exit 1
 fi
 
-log info "$verbosity" "P10: Executing script.."
+fenrir-log info "$verbosity" "P10: Executing script.."
 
 if ! ./win.sh > "$out" 2> "$err"; then
-    log err "$verbosity"  "Failed"
-    log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    log err "$verbosity"  "<stderr>" "$(cat "$err")"
+    fenrir-log err "$verbosity"  "Failed"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err "$verbosity"  "<stderr>" "$(cat "$err")"
     exit 1
 fi
 
 if [ "$(cat "$out")" != "HI" ] &&
    [ -n "$(cat "$err")" ]; then
-    log err "$verbosity"  "Something went wrong:"
-    log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    log err "$verbosity"  "<stderr>" "$(cat "$err")"
+    fenrir-log err "$verbosity"  "Something went wrong:"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err "$verbosity"  "<stderr>" "$(cat "$err")"
     exit 1
 fi
 
-add-points "$points"
+fenrir-add-points "$points"
 
-log succ "$verbosity" "P10: PASSED"
+fenrir-log succ "$verbosity" "P10: PASSED"

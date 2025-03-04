@@ -5,18 +5,18 @@ repo=$1
 verbosity=$2
 
 
-log info "$verbosity" "P6: Validating commits tree.."
+fenrir-log info "$verbosity" "P6: Validating commits tree.."
 
-if ! branch-exists "$verbosity" "$repo" "11"; then
-        log err "$verbosity" "P6: Terminating.."
-        exit 1
+if ! fenrir-branch-exists "$verbosity" "$repo" "11"; then
+    fenrir-log err "$verbosity" "P6: Terminating.."
+    exit 1
 fi
 
-if [ "$(commit-hash "origin/11")" != '12a0b906' ]; then
-        log err "$verbosity" "P6: Invalid last commit"
-        log err "$verbosity" "P6: Expected <$(commit-hash "origin/11")> to be <12a0b906>"
-        exit 1
+if [ "$(fenrir-commit-hash "11")" != '12a0b906' ]; then
+    fenrir-log err "$verbosity" "P6: Invalid last commit"
+    fenrir-log err "$verbosity" "P6: Expected <$(fenrir-commit-hash "11")> to be <12a0b906>"
+    exit 1
 fi
 
-add-points "$points"
-log succ "$verbosity" "P6: PASSED"
+fenrir-add-points "$points"
+fenrir-log succ "$verbosity" "P6: PASSED"
