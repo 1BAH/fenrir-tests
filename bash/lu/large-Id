@@ -36,16 +36,17 @@ fenrir-log info "$verbosity" "LID: Testing identity matrix with dim='$dim'"
     echo "1"
 } >> "$src"
 
-cp "$src" "$HOME/in.csv"
+in_matrix=$(mktemp)
+cp "$src" "$in_matrix"
 
-if ! "$destination/bash/lu/decomposition.sh" "$HOME/in.csv" "$l" "$u" "0" > "$out" 2> "$err"; then
+if ! "$destination/bash/lu/decomposition.sh" "$in_matrix" "$l" "$u" "0" > "$out" 2> "$err"; then
     fenrir-log err "$verbosity" "LID: Script execution has failed"
     fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
     fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
     exit 1
 fi
 
-if ! diff --minimal "$HOME/in.csv" "$src"; then
+if ! diff --minimal "$in_matrix" "$src"; then
     fenrir-log err "$verbosity" "LID: You have modified source matrix"
     exit 4
 fi

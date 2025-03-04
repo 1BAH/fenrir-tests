@@ -2,11 +2,11 @@
 
 # repo=$1
 verbosity=$2
-destination=$(getroot)
+destination=$(fenrir-getroot)
 out="/var/fenrir/out"
 err="/var/fenrir/err"
 
-log info "$verbosity" "TR: Running on tricky logs.."
+fenrir-log info "$verbosity" "TR: Running on tricky logs.."
 
 # Setup logs
 dir=$(mktemp -d)
@@ -22,49 +22,49 @@ popd &> /dev/null
 
 # Running up
 if ! "$destination/bash/logs/parse-logs.sh" -o up -l 3 "$dir" > "$out" 2> "$err"; then
-    log err "$verbosity" "TR: Script execution has failed"
-    log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    log err "$verbosity" "<stderr>" "$(cat "$err")"
+    fenrir-log err "$verbosity" "TR: Script execution has failed"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
     exit 1
 fi
 
 content=$(cat "$out")
 
 if [ "$(echo "$content" | wc -l)" -ne 1 ]; then
-    log err "$verbosity" "TR: Expected 1 line but got '$(echo "$content" | wc -l)'"
+    fenrir-log err "$verbosity" "TR: Expected 1 line but got '$(echo "$content" | wc -l)'"
     exit 9
 fi
 
 if ! [ "$(echo "$content" | sed '1p;d')" = "[ WARNING ] 13:12:2024 1000000000001 FAILURE" ]; then
-        log err "$verbosity" "TR: Wrong output:"
-        log err "$verbosity" "    Expected <[ WARNING ] 13:12:2024 1000000000001 FAILURE>"
-        log err "$verbosity" "    Got <$(echo "$content" | sed '1p;d')>"
-        exit 1
+    fenrir-log err "$verbosity" "TR: Wrong output:"
+    fenrir-log err "$verbosity" "    Expected <[ WARNING ] 13:12:2024 1000000000001 FAILURE>"
+    fenrir-log err "$verbosity" "    Got <$(echo "$content" | sed '1p;d')>"
+    exit 1
 fi
 
 # Running down
 if ! "$destination/bash/logs/parse-logs.sh" --lines 33 --order down "$dir" > "$out" 2> "$err"; then
-    log err "$verbosity" "TR: Script execution has failed"
-    log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    log err "$verbosity" "<stderr>" "$(cat "$err")"
+    fenrir-log err "$verbosity" "TR: Script execution has failed"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
     exit 1
 fi
 
 content=$(cat "$out")
 
 if [ "$(echo "$content" | wc -l)" -ne 1 ]; then
-    log err "$verbosity" "TR: Expected 1 line but got '$(echo "$content" | wc -l)'"
+    fenrir-log err "$verbosity" "TR: Expected 1 line but got '$(echo "$content" | wc -l)'"
     exit 9
 fi
 
 if ! [ "$(echo "$content" | sed '1p;d')" = "[ WARNING ] 13:12:2024 1000000000001 FAILURE" ]; then
-        log err "$verbosity" "TR: Wrong output!"
-        log err "$verbosity" "    Expected <[ WARNING ] 13:12:2024 1000000000001 FAILURE>"
-        log err "$verbosity" "    Got <$(echo "$content" | sed '1p;d')>"
-        exit 1
+    fenrir-log err "$verbosity" "TR: Wrong output!"
+    fenrir-log err "$verbosity" "    Expected <[ WARNING ] 13:12:2024 1000000000001 FAILURE>"
+    fenrir-log err "$verbosity" "    Got <$(echo "$content" | sed '1p;d')>"
+    exit 1
 fi
 
 
-add-points 30
+fenrir-add-points 30
 
-log succ "$verbosity" "TR: PASSED"
+fenrir-log succ "$verbosity" "TR: PASSED"

@@ -14,22 +14,23 @@ u="/etc/fenrir/u_broken.csv"
 out="/var/fenrir/out"
 err="/var/fenrir/err"
 
-out_l="$HOME/l.csv"
-out_u="$HOME/u.csv"
+out_l="$(mktemp)"
+out_u="$(mktemp)"
 
-cp "$src" "$HOME/in.csv"
+in_matrix=$(mktemp)
+cp "$src" "$in_matrix"
 
 echo "Бугагашеньки" > "$out_u"
 echo "Buzzinga" > "$out_l"
 
-if ! "$destination/bash/lu/decomposition.sh" "$HOME/in.csv" "$out_l" "$out_u" "1" > "$out" 2> "$err"; then
+if ! "$destination/bash/lu/decomposition.sh" "$in_matrix" "$out_l" "$out_u" "1" > "$out" 2> "$err"; then
     fenrir-log err "$verbosity" "BM: Script execution has failed"
     fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
     fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
     exit 1
 fi
 
-if ! diff --minimal "$HOME/in.csv" "$src"; then
+if ! diff --minimal "$in_matrix" "$src"; then
     fenrir-log err "$verbosity" "BM: You have modified source matrix"
     exit 4
 fi

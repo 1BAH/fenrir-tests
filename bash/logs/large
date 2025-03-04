@@ -2,34 +2,36 @@
 
 # repo=$1
 verbosity=$2
-destination=$(getroot)
+destination=$(fenrir-getroot)
 out="/var/fenrir/out"
 err="/var/fenrir/err"
 
-log info "$verbosity" "LRG: Running on large logs.."
+fenrir-log info "$verbosity" "LRG: Running on large logs.."
 
 # Clone repo with large logs
 pushd ~ &> /dev/null
-git clone https://gitlab.com/atpd/progtech/bash-logs-large.git large > "$out" 2> "$err"
-log info "$verbosity" "$(cat "$out")"
-log warn "$verbosity" "$(cat "$err")"
+if ! git clone https://gitlab.com/atpd/progtech/bash-logs-large.git large > "$out" 2> "$err"; then
+    fenrir-log info "$verbosity" "$(cat "$out")"
+    fenrir-log warn "$verbosity" "$(cat "$err")"
+    exit 10
+fi
 popd &> /dev/null
 
 if ! "$destination/bash/logs/parse-logs.sh" -o down -l 50000 "$HOME/large" > "$out" 2> "$err"; then
-    log err "$verbosity" "LRG: Script execution has failed"
-    log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    log err "$verbosity" "<stderr>" "$(cat "$err")"
+    fenrir-log err "$verbosity" "LRG: Script execution has failed"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
     exit 1
 fi
 
 lines=$(wc -l < "$out")
 
 if [ "$lines" -ne 44069 ]; then
-    log err "$verbosity" "LRG: Expected valid logs count to be <44069> but got <$lines>"
+    fenrir-log err "$verbosity" "LRG: Expected valid logs count to be <44069> but got <$lines>"
     exit 1
 fi
 
-log succ "$verbosity" "LRG: PASSED"
+fenrir-log succ "$verbosity" "LRG: PASSED"
 
 # All tests have passed
-add-points 50
+fenrir-add-points 50
