@@ -14,10 +14,10 @@ if ! fenrir-branch-exists "$verbosity" "$repo" "14" || \
         exit 1
 fi
 
-if [ "$(fenrir-commit-name "14~0")" != '6003' ] || \
-   [ "$(fenrir-commit-name "14~1")" != '6006' ] || \
-   [ "$(fenrir-commit-hash "14~1")" != '4e7b0f2b' ] || \
-   [ "$(fenrir-commit-hash "15~0")" != '3319f09d' ]; then
+if [[ "$(fenrir-commit-name "14~0")" != '6003' ]] || \
+   [[ "$(fenrir-commit-name "14~1")" != '6006' ]] || \
+   [[ '4e7b0f2b' == "$(fenrir-commit-hash "14~1")"*  ]] || \
+   [[ '3319f09d' == "$(fenrir-commit-hash "15~0")"*  ]]; then
         fenrir-log err "$verbosity" "P9: Invalid commit tree"
         exit 1
 fi

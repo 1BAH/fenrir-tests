@@ -18,9 +18,9 @@ if [ "$(fenrir-commit-name "12")" != '27' ]; then
         exit 1
 fi
 
-if [ "$(fenrir-commit-parent "12")" != '5c468f81' ]; then
+if [[ '5c468f81' == "$(fenrir-commit-parent "12")"*  ]]; then
         fenrir-log err "$verbosity" "P7: Invalid last commit"
-        fenrir-log err "$verbosity" "P7: Expected <$(fenrir-commit-parent "12")> to be <5c468f81>"
+        fenrir-log err "$verbosity" "P7: Expected <$(fenrir-commit-parent "12")> to be prefix of <5c468f81>"
         exit 1
 fi
 
