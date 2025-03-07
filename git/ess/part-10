@@ -13,7 +13,7 @@ if ! fenrir-change-branch "$repo" "$verbosity" "16"; then
     exit 1
 fi
 
-log info "$verbosity" "P10: Validating file mode.."
+fenrir-log info "$verbosity" "P10: Validating file mode.."
 
 if [ "$(fenrir-file-type win.sh)" != '100755' ]; then
     fenrir-log err "$verbosity" "P10: Invalid file mode"
