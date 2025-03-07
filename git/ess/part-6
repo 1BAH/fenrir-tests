@@ -13,7 +13,7 @@ if ! fenrir-branch-exists "$verbosity" "$repo" "11"; then
 fi
 
 real=$(fenrir-commit-hash "11")
-if [[ 12a0b906 == $real*  ]]; then
+if [[ ! 12a0b906 == $real*  ]]; then
     fenrir-log err "$verbosity" "P6: Invalid last commit"
     fenrir-log err "$verbosity" "P6: Expected <$real> to be prefix of <12a0b906>"
     exit 1
