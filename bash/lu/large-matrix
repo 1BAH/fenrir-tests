@@ -17,7 +17,7 @@ err="/var/fenrir/err"
 out_l="$HOME/l.csv"
 out_u="$HOME/u.csv"
 
-in_matrix=$(mktemp)
+in_matrix=$(fenrir-tmp 2> /dev/null || mktemp)
 cp "$src" "$in_matrix"
 
 if ! "$destination/bash/lu/decomposition.sh" "$in_matrix" "$out_l" "$out_u" "3" > "$out" 2> "$err"; then

@@ -9,7 +9,7 @@ err="/var/fenrir/err"
 fenrir-log info "$verbosity" "TR: Running on tricky logs.."
 
 # Setup logs
-dir=$(mktemp -d)
+dir=$(fenrir-tmp -d 2> /dev/null || mktemp -dd)
 
 pushd "$dir" &> /dev/null
 {

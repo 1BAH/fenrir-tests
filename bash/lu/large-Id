@@ -8,9 +8,9 @@ out="/var/fenrir/out"
 err="/var/fenrir/err"
 
 # Setup logs
-src=$(mktemp)
-l=$(mktemp)
-u=$(mktemp)
+src=$(fenrir-tmp 2> /dev/null || mktemp)
+l=$(fenrir-tmp 2> /dev/null || mktemp)
+u=$(fenrir-tmp 2> /dev/null || mktemp)
 
 dim=25
 

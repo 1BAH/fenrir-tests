@@ -8,18 +8,16 @@ err="/var/fenrir/err"
 
 fenrir-log info "$verbosity" "LRG: Running on large logs.."
 
-# Clone repo with large logs
-if [ -d /tmp/large ]; then
-    rm -fr /tmp/large
-fi
+TMP=$(fenrir-tmp -d 2> /dev/null || mktemp -d)
 
-if ! git clone https://gitlab.com/atpd/progtech/bash-logs-large.git /tmp/large > "$out" 2> "$err"; then
+# Clone repo with large logs
+if ! git clone https://gitlab.com/atpd/progtech/bash-logs-large.git $TMP/large > "$out" 2> "$err"; then
     fenrir-log info "$verbosity" "$(cat "$out")"
     fenrir-log warn "$verbosity" "$(cat "$err")"
     exit 10
 fi
 
-if ! "$destination/bash/logs/parse-logs.sh" -o down -l 50000 "/tmp/large" > "$out" 2> "$err"; then
+if ! "$destination/bash/logs/parse-logs.sh" -o down -l 50000 "$TMP/large" > "$out" 2> "$err"; then
     fenrir-log err "$verbosity" "LRG: Script execution has failed"
     fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
     fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"

@@ -9,7 +9,7 @@ err="/var/fenrir/err"
 fenrir-log info "$verbosity" "TN: Running on tiny logs.."
 
 # Setup logs
-dir=$(mktemp -d)
+dir=$(fenrir-tmp -d 2> /dev/null || mktemp -d)
 
 pushd "$dir" &> /dev/null
 {

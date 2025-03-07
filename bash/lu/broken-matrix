@@ -14,10 +14,10 @@ u="/etc/fenrir/u_broken.csv"
 out="/var/fenrir/out"
 err="/var/fenrir/err"
 
-out_l="$(mktemp)"
-out_u="$(mktemp)"
+out_l=$(fenrir-tmp 2> /dev/null || mktemp)
+out_u=$(fenrir-tmp 2> /dev/null || mktemp)
 
-in_matrix=$(mktemp)
+in_matrix=$(fenrir-tmp 2> /dev/null || mktemp)
 cp "$src" "$in_matrix"
 
 echo "Бугагашеньки" > "$out_u"

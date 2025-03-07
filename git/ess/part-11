@@ -25,7 +25,7 @@ fenrir-log succ "$verbosity" "P11: 'install' was found"
 
 fenrir-log info "$verbosity" "P11: Saving '.git/hooks'.."
 
-backup=$(mktemp -d)
+backup=$(fenrir-tmp -d 2> /dev/null || mktemp -d)
 
 cp -r .git/hooks/ "$backup"
 
