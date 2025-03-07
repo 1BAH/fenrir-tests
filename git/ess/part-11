@@ -130,5 +130,7 @@ git reset --hard HEAD~1
 
 fenrir-add-points "$points"
 
+mv "$backup/hooks" .git/hooks/
+
 fenrir-log succ "$verbosity" "P11: PASSED"
 
