@@ -72,8 +72,8 @@ if git commit -m "[ ADD ]Tricky" > "$out" 2> "$err"; then
     fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
     fenrir-log err "$verbosity"  "<stderr>" "$(cat "$err")"
     exit 1
-fenrir-fi
-log succ "$verbosity" "P11: Hook works correct"
+fi
+fenrir-log succ "$verbosity" "P11: Hook works correct"
 
 fenrir-log info "$verbosity" "P11: Running 'git commit -m \" [ ADD ] Tricky\"'.."
 if git commit -m " [ ADD ] Tricky" > "$out" 2> "$err"; then
