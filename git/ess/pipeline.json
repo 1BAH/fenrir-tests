@@ -3,7 +3,6 @@
         "task-zero"
     ],
     "main": [
-        "switch-root",
         "part-1",
         "part-2",
         "part-3",

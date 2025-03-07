@@ -1,6 +1,0 @@
-#! /bin/bash
-
-# Fake job to return from task0 to project's root
-
-cd ..
-fenrir-log info -v "SR: Now inside project's root"
