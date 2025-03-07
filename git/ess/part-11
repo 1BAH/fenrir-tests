@@ -36,7 +36,8 @@ function backup_terminate {
     fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
     fenrir-log err "$verbosity"  "<stderr>" "$(cat "$err")"
 
-    mv "$backup/hooks" .git/hooks/
+    rm -r .git/hooks
+    mv "$backup/hooks" .git/
 
     if git status | grep -q bugaga; then
         git restore --staged bugaga
@@ -130,7 +131,8 @@ git reset --hard HEAD~1
 
 fenrir-add-points "$points"
 
-mv "$backup/hooks" .git/hooks/
+rm -r .git/hooks
+mv "$backup/hooks" .git/
 
 fenrir-log succ "$verbosity" "P11: PASSED"
 
