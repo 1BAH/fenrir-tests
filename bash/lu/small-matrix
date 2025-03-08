@@ -23,7 +23,7 @@ cp "$src" "$in_matrix"
 if ! "$destination/bash/lu/decomposition.sh" "$in_matrix" "$out_l" "$out_u" "2" > "$out" 2> "$err"; then
     fenrir-log err "$verbosity" "SM: Script execution has failed"
     fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    fenrir-fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
+    fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
     exit 1
 fi
 
