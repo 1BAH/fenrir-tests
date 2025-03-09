@@ -30,6 +30,8 @@ fi
 
 content=$(cat "$out")
 
+cat "$content"
+
 if [ "$(echo "$content" | wc -l)" -ne 2 ]; then
     fenrir-log err "$verbosity" "TN: Expected 2 lines but got '$(echo "$content" | wc -l)'"
     exit 9
