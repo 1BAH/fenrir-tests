@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # repo=$1
-verbosity=$2
+verbosity=${2-"$1"}
 destination=$(fenrir-getroot)
 
 fenrir-log info "$verbosity" "LM: Running on large matrix (7x7).."
