@@ -1,19 +1,20 @@
 #! /bin/bash
 
 points=10
-repo=$1
-verbosity=$2
+verbosity=$1
 out="/var/fenrir/out"
 err="/var/fenrir/err"
 
 
 fenrir-log info "$verbosity" "P2: Validating commits tree.."
 
-if ! fenrir-branch-exists "$verbosity" "$repo" "3" || \
-   ! fenrir-branch-exists "$verbosity" "$repo" "4"; then
+if ! fenrir-change-branch "$verbosity" "4" || \
+   ! fenrir-change-branch "$verbosity" "3"; then
         fenrir-log err "$verbosity" "P2: Terminating.."
         exit 1
 fi
+
+fenrir-change-branch "$verbosity" "task0" &> /dev/null
 
 merge_commit=$(git log --merges --format="%h" 4)
 

@@ -1,16 +1,15 @@
 #! /bin/bash
 
 points=10
-repo=$1
-verbosity=$2
+verbosity=$1
 out="/var/fenrir/out"
 err="/var/fenrir/err"
 
 
 fenrir-log info "$verbosity" "P1: Validating commits tree.."
 
-if ! fenrir-branch-exists "$verbosity" "$repo" "1" || \
-   ! fenrir-branch-exists "$verbosity" "$repo" "2"; then
+if ! fenrir-change-branch "$verbosity" "1" || \
+   ! fenrir-change-branch "$verbosity" "2"; then
         fenrir-log err "$verbosity" "P1: Terminating.."
         exit 1
 fi
