@@ -1,0 +1,24 @@
+#! /bin/bash
+
+points=15
+verbosity=$1
+out="/var/fenrir/out"
+err="/var/fenrir/err"
+json="/etc/fenrir/mumin.json"
+
+#jq -f task1.jq
+
+if ! jq -f task4.jq "$json" > "$out" 2> "$err"; then
+    fenrir-log err "$verbosity" "P4: Script execution has failed"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err  "$verbosity" "<stderr>" "$(cat "$err")"
+    exit 1
+fi
+
+if ! diff --minimal <(jq '.' "$out") <(jq '.' "/etc/fenrir/p4.json"); then
+    fenrir-log err "$verbosity" "P4: Wrong result"
+fi
+
+fenrir-add-points "$points"
+
+fenrir-log succ "$verbosity" "P4: PASSED"

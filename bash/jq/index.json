@@ -1,0 +1,23 @@
+{
+    "custom": [
+        "part-1",
+        "part-2",
+        "part-3",
+        "part-4",
+        "part-5",
+        "part-6"
+    ],
+    "cfgs": [
+        "p1.json",
+        "p2.json",
+        "p3.json",
+        "p4.json",
+        "p5.json",
+        "p6.json",
+        "mumin.json",
+        "gods.json",
+        "art.json"
+    ],
+    "branch": "bash/jq",
+    "blocking": 0
+}

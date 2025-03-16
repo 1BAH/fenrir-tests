@@ -1,0 +1,50 @@
+{
+    "greek": [
+        {
+            "name": "Aphrodite",
+            "roman": "Venus",
+            "father": "Zeus"
+        },
+        {
+            "name": "Zeus",
+            "roman": "Jupyter"
+        },
+        {
+            "name": "Hera",
+            "roman": "Juno"
+        },
+        {
+            "name": "Poseidon",
+            "roman": "Neptune"
+        },
+        {
+            "name": "Ares",
+            "roman": "Mars",
+            "father": "Zeus"
+        },
+        {
+            "name": "Athena",
+            "roman": "Minerva",
+            "father": "Zeus"
+        },
+        {
+            "name": "Artemis",
+            "roman": "Diana",
+            "father": "Zeus"
+        },
+        {
+            "name": "Hermes",
+            "roman": "Mercury",
+            "father": "Zeus"
+        },
+        {
+            "name": "Hephaestus",
+            "roman": "Vulcan"
+        },
+        {
+            "name": "Hades",
+            "roman": "Pluto"
+        }
+    ],
+    "roman": []
+}
