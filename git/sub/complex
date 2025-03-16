@@ -1,0 +1,100 @@
+#! /bin/bash
+
+verbosity=$1
+out="/var/fenrir/out"
+err="/var/fenrir/err"
+
+fenrir-log info "$verbosity" "S: Input = 'white blue green orange'"
+
+if ! ./runner.sh white blue green orange > "$out" 2> "$err"; then
+    fenrir-log err "$verbosity" "S: Script execution has failed"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err  "$verbosity" "<stderr>" "$(cat "$err")"
+    exit 1
+fi
+
+if [ "$(cat "$out")" -ne 9 ]; then
+    fenrir-log err "$verbosity" "S: Wrong answer"
+    fenrir-log err "$verbosity" "Expected:" "<9>"
+    fenrir-log err  "$verbosity" "Got:" "<$(cat "$out")>"
+    exit 1
+fi
+
+if [ -d "/proc/$(cat server/PID)" ]; then
+    fenrir-log err "$verbosity" "S: You have forgotten to shutdown the service!"
+    exit 200
+fi
+
+
+fenrir-log info "$verbosity" "S: Input = 'green' x100"
+
+arg="green"
+
+for (( i = 1; i < 100; ++i )); do
+    arg="$arg green"
+done
+
+# shellcheck disable=SC2086
+if ! ./runner.sh $arg > "$out" 2> "$err"; then
+    fenrir-log err "$verbosity" "S: Script execution has failed"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err  "$verbosity" "<stderr>" "$(cat "$err")"
+    exit 1
+fi
+
+if [ "$(cat "$out")" -ne 1100 ]; then
+    fenrir-log err "$verbosity" "S: Wrong answer"
+    fenrir-log err "$verbosity" "Expected:" "<1100>"
+    fenrir-log err  "$verbosity" "Got:" "<$(cat "$out")>"
+    exit 1
+fi
+
+if [ -d "/proc/$(cat server/PID)" ]; then
+    fenrir-log err "$verbosity" "S: You have forgotten to shutdown the service!"
+    exit 200
+fi
+
+fenrir-log info "$verbosity" "S: Input = 'magenta', 'green' x20, 'black' x10, 'yellow' x5, 'rose' x23"
+
+arg="magenta"
+
+for (( i = 0; i < 20; ++i )); do
+    arg="$arg green rose"
+done
+
+arg="rose $arg rose"
+
+for (( i = 0; i < 10; ++i )); do
+    arg="$arg black"
+done
+
+arg="$arg rose"
+
+for (( i = 0; i < 5; ++i )); do
+    arg="$arg yellow"
+done
+
+
+# shellcheck disable=SC2086
+if ! ./runner.sh $arg > "$out" 2> "$err"; then
+    fenrir-log err "$verbosity" "S: Script execution has failed"
+    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    fenrir-log err  "$verbosity" "<stderr>" "$(cat "$err")"
+    exit 1
+fi
+
+if [ "$(cat "$out")" -ne 131 ]; then
+    fenrir-log err "$verbosity" "S: Wrong answer"
+    fenrir-log err "$verbosity" "Expected:" "<131>"
+    fenrir-log err  "$verbosity" "Got:" "<$(cat "$out")>"
+    exit 1
+fi
+
+if [ -d "/proc/$(cat server/PID)" ]; then
+    fenrir-log err "$verbosity" "S: You have forgotten to shutdown the service!"
+    exit 200
+fi
+
+fenrir-add-points 80
+
+fenrir-log succ "$verbosity" "C: PASSED"

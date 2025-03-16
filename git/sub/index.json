@@ -1,0 +1,10 @@
+{
+    "custom": [
+        "setup-repo",
+        "simple",
+        "complex"
+    ],
+    "cfgs": [],
+    "branch": "git/sub",
+    "blocking": 1
+}
