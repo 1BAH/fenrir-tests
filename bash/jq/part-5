@@ -17,6 +17,7 @@ fi
 
 if ! diff --minimal <(jq '.' "$out") <(jq '.' "/etc/fenrir/p5.json"); then
     fenrir-log err "$verbosity" "P5: Wrong result"
+    exit 9
 fi
 
 fenrir-add-points "$points"
