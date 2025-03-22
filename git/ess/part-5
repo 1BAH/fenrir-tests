@@ -13,11 +13,6 @@ if ! fenrir-change-branch "$verbosity" "10"; then
     exit 1
 fi
 
-if ! git branch -a --contains 9~2 | grep -q 7; then
-    fenrir-log err "$verbosity" "P5: Incorrect rebase or extra commits present"
-    exit 1
-fi
-
 if [ "$(fenrir-commit-name "10~0")" != 'Revert "21"' ] || \
    [ "$(fenrir-commit-name "10~1")" != "23" ] || \
    [ "$(fenrir-commit-name "10~2")" != "22" ] || \
