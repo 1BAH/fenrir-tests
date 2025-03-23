@@ -1,0 +1,68 @@
+#! /bin/bash
+
+function test_forbidden {
+    if [ -d results ]; then
+        return 1
+    fi
+
+    if [ -d coverage ]; then
+        return 1
+    fi
+
+    if [ -d build ]; then
+        return 1
+    fi
+
+    if [ -f cmake/CodeCoverage.cmake ]; then
+        return 1
+    fi
+
+    return 0
+}
+
+function clean {
+    pushd "$(fenrir-getroot)" &> /dev/null
+    rm -r coverage &> /dev/null
+    rm -r results &> /dev/null
+    rm -r build &> /dev/null
+    rm -r cmake/CodeCoverage.cmake &> /dev/null
+    popd &> /dev/null
+}
+
+v=$1
+out="/var/fenrir/out"
+err="/var/fenrir/err"
+
+fenrir-log info "$v" "S3-1: Running stage 3 test 1.."
+
+if ! cmake -S . -B build -DDAY=ON -DBUILD_SOURCE_DIR="build" > "$out" 2> "$err"; then
+    fenrir-log err  "$v" "S3-1: Failed to run CMake"
+    fenrir-log warn "$v" "S3-1: <stdout>" "$(cat "$out")"
+    fenrir-log err  "$v" "S3-1: <stderr>" "$(cat "$err")"
+
+    clean
+    exit 11
+fi
+
+
+if ! cmake --build build --target clear > "$out" 2> "$err"; then
+    fenrir-log err  "$v" "S3-1: Failed to build with CMake"
+    fenrir-log warn "$v" "S3-1: <stdout>" "$(cat "$out")"
+    fenrir-log err  "$v" "S3-1: <stderr>" "$(cat "$err")"
+
+    clean
+    exit 11
+fi
+
+
+if test_forbidden; then
+    clean
+
+    fenrir-add-points 10
+    fenrir-log succ "$v" "S3-1: PASSED"
+else
+    fenrir-log err "$v" "Not all files were removed"
+
+    clean
+    exit 99
+fi

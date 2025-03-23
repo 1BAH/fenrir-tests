@@ -1,0 +1,97 @@
+#! /bin/bash
+
+function clean {
+    pushd "$(fenrir-getroot)" &> /dev/null
+    rm -r coverage &> /dev/null
+    rm -r results &> /dev/null
+    rm -r build &> /dev/null
+    rm -r cmake/CodeCoverage.cmake &> /dev/null
+    popd &> /dev/null
+}
+
+function tests {
+    fenrir-log info "$v" "S2-1: Running test 2 for profile $1.."
+
+    if ! cmake -S . -B build -D$1=ON > "$out" 2> "$err"; then
+        fenrir-log err  "$v" "S2-1: Failed to run CMake"
+        fenrir-log warn "$v" "S2-1: <stdout>" "$(cat "$out")"
+        fenrir-log err  "$v" "S2-1: <stderr>" "$(cat "$err")"
+
+        clean
+        exit 11
+    fi
+
+    if ! cmake --build build > "$out" 2> "$err"; then
+        fenrir-log err  "$v" "S2-1: Failed to build with CMake"
+        fenrir-log warn "$v" "S2-1: <stdout>" "$(cat "$out")"
+        fenrir-log err  "$v" "S2-1: <stderr>" "$(cat "$err")"
+
+        clean
+        exit 11
+    fi
+
+    if ! { pushd build && make test; } > "$out" 2> "$err"; then
+        fenrir-log err  "$v" "S2-1: Tests execution has failed"
+        fenrir-log warn "$v" "S2-1: <stdout>" "$(cat "$out")"
+        fenrir-log err  "$v" "S2-1: <stderr>" "$(cat "$err")"
+
+        clean
+        exit 11
+    fi
+
+    popd &> /dev/null
+
+    fenrir-log succ "$v" "S2-1: PASSED"
+}
+
+v=$1
+out="/var/fenrir/out"
+err="/var/fenrir/err"
+
+fenrir-log info "$v" "S2-1: Running stage 2 test 1 (gtest).."
+
+if ! cmake -S . -B build -DDAY=ON > "$out" 2> "$err"; then
+    fenrir-log err  "$v" "S2-1: Failed to run CMake"
+    fenrir-log warn "$v" "S2-1: <stdout>" "$(cat "$out")"
+    fenrir-log err  "$v" "S2-1: <stderr>" "$(cat "$err")"
+
+    clean
+    exit 11
+fi
+
+
+if ! cmake --build build > "$out" 2> "$err"; then
+    fenrir-log err  "$v" "S2-1: Failed to build with CMake"
+    fenrir-log warn "$v" "S2-1: <stdout>" "$(cat "$out")"
+    fenrir-log err  "$v" "S2-1: <stderr>" "$(cat "$err")"
+
+    clean
+    exit 11
+fi
+
+if ! { cat "$out" | grep -q "Executing linter"; }; then
+    fenrir-log err  "$v" "S2-1: Linter was not invoked or invoked incorrectly"
+    fenrir-log warn "$v" "S2-1: <stdout>" "$(cat "$out")"
+    fenrir-log err  "$v" "S2-1: <stderr>" "$(cat "$err")"
+
+    clean
+    exit 11
+fi
+
+if ! { cat "$out" | grep -q "> No relative inclusions were found"; }; then
+    fenrir-log err  "$v" "S2-1: Linter found relative includes - code was changed"
+    fenrir-log warn "$v" "S2-1:" "$(cat "$out" | grep ">")"
+
+    clean
+    exit 11
+fi
+
+if tests DAY; then
+    clean
+    if tests NIGHT; then
+        clean
+
+        fenrir-log succ "$v" "S2-1: PASSED"
+        fenrir-add-points 25
+    fi
+fi

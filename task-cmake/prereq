@@ -1,0 +1,90 @@
+#! /bin/bash
+
+function clean {
+    pushd "$(fenrir-getroot)" &> /dev/null
+    rm -r coverage &> /dev/null
+    rm -r results &> /dev/null
+    rm -r build &> /dev/null
+    rm -r cmake/CodeCoverage.cmake &> /dev/null
+    popd &> /dev/null
+}
+v=$1
+out="/var/fenrir/out"
+err="/var/fenrir/err"
+
+fenrir-log info "$v" "P: Executing essential task requirements.."
+
+if [ -d results ]; then
+    fenrir-log err "$v" "P: Found directory 'results'"
+    exit 3
+fi
+
+if [ -d coverage ]; then
+    fenrir-log err "$v" "P: Found directory 'coverage'"
+    exit 12
+fi
+
+if [ ! -f CMakeLists.txt ]; then
+    fenrir-log err "$v" "P: Root CMakeLists.txt was not found"
+    exit 13
+fi
+
+if cat CMakeLists.txt | grep -q "project(train_your_dragon"; then
+    fenrir-log info "$v" "P: Project name is correct"
+else
+    if cat CMakeLists.txt | grep -q "PROJECT(train_your_dragon"; then
+        fenrir-log info "$v" "P: Project name is correct"
+    else
+        fenrir-log err "$v" "P: Project name is incorrect"
+        exit 4
+    fi
+fi
+
+if cat CMakeLists.txt | grep -q "cmake_minimum_required(VERSION 3.11"; then
+    fenrir-log info "$v" "P: CMake version requirements are correct"
+else
+    if cat CMakeLists.txt | grep -q "CMAKE_MINIMUM_REQUIRED(VERSION 3.11"; then
+        fenrir-log info "$v" "P: CMake version requirements are correct"
+    else
+        fenrir-log err "$v" "P: CMake version requirements are incorrect"
+        exit 9
+    fi
+fi
+
+
+if [ ! -d cmake ]; then
+    fenrir-log err "$v" "P: /cmake was not found"
+    exit 7
+fi
+
+if [ -f cmake/CodeCoverage.cmake ]; then
+    fenrir-log err "$v" "P: CodeCoverage.cmake exists"
+    exit 6
+fi
+
+
+if ! cmake -S . -B build > "$out" 2> "$err"; then
+    fenrir-log err  "$v" "P: Failed to run CMake"
+    fenrir-log warn "$v" "P: <stdout>" "$(cat "$out")"
+    fenrir-log err  "$v" "P: <stderr>" "$(cat "$err")"
+
+    clean
+    exit 11
+fi
+
+if ! { cat "$out" | grep "C++ standard 17"; }; then
+    fenrir-log err "$v" "P: C++ standard is incorrect"
+
+    clean
+    exit 3
+fi
+
+if ! { cat "$out" | grep "C standard 17"; }; then
+    fenrir-log err "$v" "P: C standard is incorrect"
+
+    clean
+    exit 3
+fi
+
+clean
+fenrir-log succ "$v" "P: PASSED"
