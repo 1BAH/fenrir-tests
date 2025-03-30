@@ -1,0 +1,13 @@
+{
+  "pre": [
+    "task-zero"
+  ],
+  "main": [
+    "walk-inspections",
+    "codestyle",
+    "stage-1",
+    "stage-2",
+    "stage-3",
+    "stage-4"
+  ]
+}
