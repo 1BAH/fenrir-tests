@@ -51,6 +51,16 @@ else
     fi
 fi
 
+if cat CMakeLists.txt | grep -q "bin/cc"; then
+    fenrir-log info "$v" "P: C Compiler is invalid"
+    exit 9
+fi
+
+if cat CMakeLists.txt | grep -q "bin/c++"; then
+    fenrir-log info "$v" "P: CXX Compiler is invalid"
+    exit 9
+fi
+
 
 if [ ! -d cmake ]; then
     fenrir-log err "$v" "P: /cmake was not found"
