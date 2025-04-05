@@ -51,13 +51,13 @@ else
     fi
 fi
 
-if cat CMakeLists.txt | grep -q "bin/cc"; then
-    fenrir-log info "$v" "P: C Compiler is invalid"
+if cat CMakeLists.txt | grep -q "CMAKE_CXX_COMPILER"; then
+    fenrir-log info "$v" "P: Do not use 'CMAKE_CXX_COMPILER'. Use CXX env variable instead"
     exit 9
 fi
 
-if cat CMakeLists.txt | grep -q "bin/c++"; then
-    fenrir-log info "$v" "P: CXX Compiler is invalid"
+if cat CMakeLists.txt | grep -q "CMAKE_C_COMPILER"; then
+    fenrir-log info "$v" "P: Do not use 'CMAKE_C_COMPILER'. Use CC env variable instead"
     exit 9
 fi
 
