@@ -1,0 +1,12 @@
+
+pre=(
+    "task-zero"
+)
+
+main=(
+    "walk-inspections"
+    "small-matrix"
+    "broken-matrix"
+    "large-matrix"
+    "large-Id"
+)

@@ -1,20 +1,16 @@
-#! /bin/bash
+#! /usr/bin/env loki
 
-# repo=$1
-verbosity=${2-"$1"}
-destination=$(fenrir-getroot)
 
-out="/var/fenrir/out"
-err="/var/fenrir/err"
+destination=$(fenrir-read-conf main root)
 
 # Setup logs
-src=$(fenrir-tmp 2> /dev/null || mktemp)
-l=$(fenrir-tmp 2> /dev/null || mktemp)
-u=$(fenrir-tmp 2> /dev/null || mktemp)
+src=$(fenrir-tmp)
+l=$(fenrir-tmp)
+u=$(fenrir-tmp)
 
 dim=25
 
-fenrir-log info "$verbosity" "LID: Testing identity matrix with dim='$dim'"
+loki-log info "LID: Testing identity matrix with dim='$dim'"
 
 {
     for (( i = 0; i < dim - 1; ++i )); do
@@ -36,33 +32,31 @@ fenrir-log info "$verbosity" "LID: Testing identity matrix with dim='$dim'"
     echo "1"
 } >> "$src"
 
-in_matrix=$(mktemp)
+in_matrix=$(fenrir-tmp)
 cp "$src" "$in_matrix"
 
-if ! "$destination/bash/lu/decomposition.sh" "$in_matrix" "$l" "$u" "0" > "$out" 2> "$err"; then
-    fenrir-log err "$verbosity" "LID: Script execution has failed"
-    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
+if ! lokiw "$destination/bash/lu/decomposition.sh" "$in_matrix" "$l" "$u" "0"; then
+    loki-log fail "LID: Script execution has failed"
     exit 1
 fi
 
 if ! diff --minimal "$in_matrix" "$src"; then
-    fenrir-log err "$verbosity" "LID: You have modified source matrix"
+    loki-log err "LID: You have modified source matrix"
     exit 4
 fi
 
 if ! diff --minimal "$l" "$src"; then
-    fenrir-log err "$verbosity" "LID: Wrong L matrix"
+    loki-log err "LID: Wrong L matrix"
     exit 3
 fi
 
 if ! diff --minimal "$u" "$src"; then
-    fenrir-log err "$verbosity" "LID: Wrong U matrix"
+    loki-log err "LID: Wrong U matrix"
     exit 2
 fi
 
-fenrir-log succ "$verbosity" "LID: PASSED"
+loki-log succ "LID: PASSED"
 
 # Successfully passed all tests
-fenrir-add-points 100
+loki-points +100
 

@@ -1,10 +1,8 @@
-#! /bin/bash
+#! /usr/bin/env loki
 
-# repo=$1
-verbosity=${2-"$1"}
-destination=$(fenrir-getroot)
+destination=$(fenrir-read-conf main root)
 
-fenrir-log info "$verbosity" "BM: Running on broken csv (no LF).."
+loki-log info "BM: Running on broken csv (no LF).."
 
 # Setup logs
 src="/etc/fenrir/in_broken.csv"
@@ -14,35 +12,33 @@ u="/etc/fenrir/u_broken.csv"
 out="/var/fenrir/out"
 err="/var/fenrir/err"
 
-out_l=$(fenrir-tmp 2> /dev/null || mktemp)
-out_u=$(fenrir-tmp 2> /dev/null || mktemp)
+out_l=$(fenrir-tmp)
+out_u=$(fenrir-tmp)
 
-in_matrix=$(fenrir-tmp 2> /dev/null || mktemp)
+in_matrix=$(fenrir-tmp)
 cp "$src" "$in_matrix"
 
 echo "Бугагашеньки" > "$out_u"
-echo "Buzzinga" > "$out_l"
+echo "Buzzinga"     > "$out_l"
 
-if ! "$destination/bash/lu/decomposition.sh" "$in_matrix" "$out_l" "$out_u" "1" > "$out" 2> "$err"; then
-    fenrir-log err "$verbosity" "BM: Script execution has failed"
-    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
+if ! lokiw "$destination/bash/lu/decomposition.sh" "$in_matrix" "$out_l" "$out_u" "1"; then
+    loki-log fail "BM: Script execution has failed"
     exit 1
 fi
 
 if ! diff --minimal "$in_matrix" "$src"; then
-    fenrir-log err "$verbosity" "BM: You have modified source matrix"
+    loki-log err "BM: You have modified source matrix"
     exit 4
 fi
 
 if ! diff --minimal "$out_l" "$l"; then
-    fenrir-log err "$verbosity" "BM: Wrong L matrix"
+    loki-log err "BM: Wrong L matrix"
     exit 3
 fi
 
 if ! diff --minimal "$out_u" "$u"; then
-    fenrir-log err "$verbosity" "BM: Wrong U matrix"
+    loki-log err "BM: Wrong U matrix"
     exit 2
 fi
 
-fenrir-log succ "$verbosity" "BM: PASSED"
+loki-log succ "BM: PASSED"
