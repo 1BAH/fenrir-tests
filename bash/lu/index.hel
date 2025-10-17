@@ -1,5 +1,5 @@
 
-custom=(
+scripts=(
     "broken-matrix"
     "large-Id"
     "small-matrix"
