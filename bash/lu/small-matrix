@@ -10,6 +10,9 @@ src="$(fenrir-task-path cfgs)/in_small.csv"
 l="$(fenrir-task-path cfgs)/l_small.csv"
 u="$(fenrir-task-path cfgs)/u_small.csv"
 
+out_l=$(fenrir-tmp)
+out_u=$(fenrir-tmp)
+
 in_matrix=$(fenrir-tmp)
 cp "$src" "$in_matrix"
 
