@@ -6,12 +6,9 @@ destination=$(fenrir-read-conf main root)
 loki-log info "SM: Running on small matrix (3x3).."
 
 # Setup logs
-src="/etc/fenrir/in_small.csv"
-l="/etc/fenrir/l_small.csv"
-u="/etc/fenrir/u_small.csv"
-
-out_l=$(fenrir-tmp)
-out_u=$(fenrir-tmp)
+src="$(fenrir-task-path cfgs)/in_small.csv"
+l="$(fenrir-task-path cfgs)/l_small.csv"
+u="$(fenrir-task-path cfgs)/u_small.csv"
 
 in_matrix=$(fenrir-tmp)
 cp "$src" "$in_matrix"

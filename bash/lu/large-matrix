@@ -5,12 +5,9 @@ destination=$(fenrir-read-conf main root)
 loki-log info "LM: Running on large matrix (7x7).."
 
 # Setup logs
-src="/etc/fenrir/in_large.csv"
-l="/etc/fenrir/l_large.csv"
-u="/etc/fenrir/u_large.csv"
-
-out="/var/fenrir/out"
-err="/var/fenrir/err"
+src="$(fenrir-task-path cfgs)/in_large.csv"
+l="$(fenrir-task-path cfgs)/l_large.csv"
+u="$(fenrir-task-path cfgs)/u_large.csv"
 
 out_l=$(fenrir-tmp)
 out_u=$(fenrir-tmp)

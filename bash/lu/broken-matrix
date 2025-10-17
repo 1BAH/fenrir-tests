@@ -5,12 +5,9 @@ destination=$(fenrir-read-conf main root)
 loki-log info "BM: Running on broken csv (no LF).."
 
 # Setup logs
-src="/etc/fenrir/in_broken.csv"
-l="/etc/fenrir/l_broken.csv"
-u="/etc/fenrir/u_broken.csv"
-
-out="/var/fenrir/out"
-err="/var/fenrir/err"
+src="$(fenrir-task-path cfgs)/in_broken.csv"
+l="$(fenrir-task-path cfgs)/l_broken.csv"
+u="$(fenrir-task-path cfgs)/u_broken.csv"
 
 out_l=$(fenrir-tmp)
 out_u=$(fenrir-tmp)
