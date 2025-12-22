@@ -1,7 +1,7 @@
 #! /usr/bin/env loki
 
 
-destination=$(fenrir-read-conf main root)
+destination=$(fenrir-read-conf run root)
 
 loki-log info "SM: Running on small matrix (3x3).."
 
