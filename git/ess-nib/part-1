@@ -48,10 +48,11 @@ if [ "$(echo "$content" | wc -w)" -eq 3 ] && \
    [ "$(echo "$content" | sed '1p;d')" = "3" ] && \
    [ "$(echo "$content" | sed '2p;d')" = "2" ] && \
    [ "$(echo "$content" | sed '3p;d')" = "1" ]; then
-        lokiw -e git show 1:2.txt
 
+    lokiw git show 1:2.txt || {
         loki-points +10
-else
-    loki-log fail "Incorrect files content"
-    exit 1
+    }
 fi
+
+loki-log fail "Incorrect files content"
+exit 1

@@ -6,6 +6,9 @@ function commit-name {
     git show -s --format="%s" "$1"
 }
 
+function commit-hash {
+    git show -s --format="%h" "$1"
+}
 
 loki-log info "Validating commits tree.."
 
@@ -18,7 +21,7 @@ fi
 loki-prog "Validating last commit"
 
 loki-assert-eq '27' "$(commit-name "12")"
-loki-assert-regeq "^$(commit-name "12~1")*$" "5c468f81"
+loki-assert-regeq "^$(commit-hash "12~1")*$" "5c468f81"
 
 loki-gorp
 

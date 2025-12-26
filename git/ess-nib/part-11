@@ -94,7 +94,7 @@ fi
 loki-log succ "Hook works correct"
 
 loki-log info "Running 'git commit -m \"[ ADD ] Good\"'.."
-if lokiw git commit -m "[ ADD ] Good"; then
+if ! lokiw git commit -m "[ ADD ] Good"; then
     backup_terminate "File has not been commited!"
 fi
 loki-log succ "Hook works correct"
