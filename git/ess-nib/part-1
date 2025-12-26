@@ -51,6 +51,7 @@ if [ "$(echo "$content" | wc -w)" -eq 3 ] && \
 
     lokiw git show 1:2.txt || {
         loki-points +10
+        exit 0
     }
 fi
 
