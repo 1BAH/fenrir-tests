@@ -1,0 +1,49 @@
+#! /bin/bash
+
+loki-set-log-prefix "P3: "
+
+loki-log info "Validating commits tree.."
+
+if ! fenrir-change-branch "6"; then
+    loki-log err "Terminating.."
+    exit 1
+fi
+
+if ! fenrir-change-branch "5"; then
+    loki-log err "Terminating.."
+    exit 1
+fi
+
+loki-log info "Merging.."
+
+already=("modify/delete" "content")
+curr=()
+success=0
+
+####################################################################
+if lokiw git merge 6; then
+    loki-log err "No error occurred"
+    exit 1
+fi
+
+while IFS= read -r type; do
+    loki-log info "Merge conflict's type is ($type)"
+    curr+=("$type")
+    already+=("$type")
+
+    for forbidden in "${already[@]}"; do
+        if [ "$type" != "$forbidden" ]; then
+            success=1
+        fi
+    done
+
+done < <(sed -nE 's/.*CONFLICT \((.*)\).*/\1/p' "$OUT_FILE")
+
+if [ "$success" -ne 1 ]; then
+    loki-log fail "Such type <${curr[*]}> of MC occurred in previous parts"
+    exit 1
+fi
+
+git merge --abort
+
+loki-points +20

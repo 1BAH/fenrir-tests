@@ -1,0 +1,79 @@
+#! /bin/bash
+
+loki-set-log-prefix "P2: "
+
+function commit-hash {
+    git show -s --format="%h" "$1"
+}
+
+points=10
+verbosity=$1
+out="/var/fenrir/out"
+err="/var/fenrir/err"
+
+
+loki-log info "Validating commits tree.."
+
+if ! fenrir-change-branch "4" || \
+   ! fenrir-change-branch "3"; then
+        loki-log err "Terminating.."
+        exit 1
+fi
+
+fenrir-change-branch "task0" &> /dev/null
+
+merge_commit=$(git log --merges --format="%h" 4)
+
+if [ -n "$merge_commit" ]; then
+    loki-log err "There is a merge commit in branch <4>: <$merge_commit>"
+    exit 1
+fi
+
+merge_commit=$(git log --merges --format="%h" 3)
+
+if [ -n "$merge_commit" ]; then
+    loki-log err "There is a merge commit in branch <3>: <$merge_commit>"
+    exit 1
+fi
+
+found=0
+
+for (( i = 0; i < 3; i++ )); do
+    if git branch -a --contains "4~$i" | grep -q 3; then
+        hash=$(commit-hash "4~$i")
+        branch3=$(commit-hash "3")
+
+        loki-assert-eq "$branch3" "$hash"
+
+        found=1
+        break
+    fi
+done
+
+if [ "$found" -ne 1 ]; then
+    loki-log err "Branch 4 contains far too many commits (Branch 3 was not found)"
+fi
+
+loki-log info "Validating files content.."
+
+lokiw -e git show 4:3; then
+content=$(loki-get-out)
+
+if [ "$(echo "$content" | wc -w)" -eq 2 ] && \
+   [ "$(echo "$content" | sed '1p;d')" = "1" ] && \
+   [ "$(echo "$content" | sed '2p;d')" = "3" ]; then
+        lokiw -e git show 4:4; then
+        content=$(loki-get-out)
+
+        if [ "$(echo "$content" | wc -w)" -eq 2 ] && \
+           [ "$(echo "$content" | sed '1p;d')" = "1" ] && \
+           [ "$(echo "$content" | sed '2p;d')" = "4" ]; then
+                loki-points +10
+        else
+            loki-log fail "Incorrect content of file <4:4>"
+            exit 1
+        fi
+else
+    loki-log fail "Incorrect content of file <4:3>"
+    exit 1
+fi

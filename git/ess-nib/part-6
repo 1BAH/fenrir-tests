@@ -1,0 +1,16 @@
+#! /bin/bash
+
+
+loki-set-log-prefix "P6: "
+
+loki-log info "Validating commits tree.."
+
+if ! fenrir-change-branch "11"; then
+    loki-log err "Terminating.."
+    exit 1
+fi
+
+
+loki-assert-regeq "^$(git show -s --format="%h" "11")$" 12a0b906
+
+loki-points +10

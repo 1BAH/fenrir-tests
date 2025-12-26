@@ -1,0 +1,7 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "P8: "
+
+loki-log warn "This is a test mock. No tests are executed!"
+
+loki-points +20

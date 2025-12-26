@@ -1,0 +1,39 @@
+#! /bin/bash
+
+loki-set-log-prefix "P5: "
+
+function commit-name {
+    git show -s --format="%s" "$1"
+}
+
+
+loki-log info "Validating commits tree.."
+
+if ! fenrir-change-branch "10"; then
+    loki-log err "Terminating.."
+    exit 1
+fi
+
+if [ "$(commit-name "10~0")" != 'Revert "21"' ] || \
+   [ "$(commit-name "10~1")" != "23" ] || \
+   [ "$(commit-name "10~2")" != "22" ] || \
+   [ "$(commit-name "10~3")" != "21" ]; then
+        loki-log err "You have not undone the changes"
+        exit 1
+fi
+
+loki-log info "Validating files content.."
+
+lokiw -e -u 'git show -s --format=%b 10 | grep "This reverts commit abcee"'
+lokiw -e git show 10:5.txt
+content=$(loki-get-out)
+
+if [ "$(echo "$content" | wc -w)" -eq 3 ] && \
+    [ "$(echo "$content" | sed '1p;d')" = "1" ] && \
+    [ "$(echo "$content" | sed '2p;d')" = "2" ] && \
+    [ "$(echo "$content" | sed '3p;d')" = "3" ]; then
+        loki-points +10
+else
+    loki-log fail "Incorrect files content"
+    exit 1
+fi

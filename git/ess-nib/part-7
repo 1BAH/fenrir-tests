@@ -1,0 +1,25 @@
+#! /bin/bash
+
+loki-set-log-prefix "P7: "
+
+function commit-name {
+    git show -s --format="%s" "$1"
+}
+
+
+loki-log info "Validating commits tree.."
+
+if ! fenrir-change-branch "12"; then
+        loki-log err "Terminating.."
+        exit 1
+fi
+
+
+loki-prog "Validating last commit"
+
+loki-assert-eq '27' "$(commit-name "12")"
+loki-assert-regeq "^$(commit-parent "12")*$" "5c468f81"
+
+loki-gorp
+
+loki-points +10

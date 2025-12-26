@@ -1,0 +1,30 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "P10: "
+
+loki-log info "Validating commits tree.."
+
+if ! fenrir-change-branch "16"; then
+    loki-log err "Terminating.."
+    exit 1
+fi
+
+loki-log info "Validating file mode.."
+
+meta=(`git ls-files -s "win.sh"`)
+if [ "${meta[0]}" != '100755' ]; then
+    loki-log err "Invalid file mode"
+    exit 1
+fi
+
+loki-log info "Executing script.."
+
+lokiw -e ./win.sh
+
+if [ "$(loki-get-out)" != "HI" ] &&
+   [ -n "$(loki-get-err)" ]; then
+    loki-log fail "Something went wrong.."
+    exit 1
+fi
+
+loki-points +10

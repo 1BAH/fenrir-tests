@@ -1,0 +1,31 @@
+#! /bin/bash
+
+loki-set-log-prefix "P4: "
+
+function commit-name {
+    git show -s --format="%s" "$1"
+}
+
+
+loki-log info "Validating commits tree.."
+
+if ! fenrir-change-branch "7" || \
+   ! fenrir-change-branch "8" || \
+   ! fenrir-change-branch "9"; then
+        loki-log err "Terminating.."
+        exit 1
+fi
+
+if ! git branch -a --contains 9~2 | grep -q 7; then
+    loki-log err "Incorrect rebase or extra commits present"
+    exit 1
+fi
+
+if [ "$(commit-name "9")"   = "16" ] && \
+   [ "$(commit-name "9~1")" = "15" ] && \
+   [ "$(commit-name "9~2")" = "18" ]; then
+        loki-points +10
+else
+    loki-log err "Incorrect commit messages"
+    exit 1
+fi
