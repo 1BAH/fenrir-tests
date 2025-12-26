@@ -57,7 +57,7 @@ content=$(loki-get-out)
 if [ "$(echo "$content" | wc -w)" -eq 2 ] && \
    [ "$(echo "$content" | sed '1p;d')" = "1" ] && \
    [ "$(echo "$content" | sed '2p;d')" = "3" ]; then
-        lokiw -e git show 4:4; then
+        lokiw -e git show 4:4
         content=$(loki-get-out)
 
         if [ "$(echo "$content" | wc -w)" -eq 2 ] && \
