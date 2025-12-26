@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env loki
 
 loki-set-log-prefix "P1: "
 
@@ -34,7 +34,7 @@ if [ -n "$merge_commit" ]; then
     exit 1
 fi
 
-if ! [ "$(fenrir-commit-name "1~0")" = "3" ]; then
+if ! [ "$(git show -s --format="%s" "1~0")" = "3" ]; then
     loki-log err "Expected commit message to be <3>"
     exit 1
 fi

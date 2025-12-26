@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env loki
 
 loki-set-log-prefix "P4: "
 

@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env loki
 
 loki-set-log-prefix "P7: "
 
@@ -18,7 +18,7 @@ fi
 loki-prog "Validating last commit"
 
 loki-assert-eq '27' "$(commit-name "12")"
-loki-assert-regeq "^$(commit-parent "12")*$" "5c468f81"
+loki-assert-regeq "^$(commit-name "12~1")*$" "5c468f81"
 
 loki-gorp
 
