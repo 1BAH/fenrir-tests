@@ -2,16 +2,8 @@
 
 
 loki-set-log-prefix "TZ: "
-destination=$(fenrir-read-conf run root)
 
 loki-log info "Validating task0"
-
-if ! fenrir-change-branch "task0"; then
-    loki-log err "Validation failed"
-    exit 3
-fi
-
-lokiw -e pushd "$destination/task0"
 
 if ! [ -x "run.sh" ]; then
     loki-log err "File 'run.sh' does not exist or is not executable"
