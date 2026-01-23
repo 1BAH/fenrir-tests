@@ -1,12 +1,12 @@
-#! /bin/bash
+#! /usr/bin/env loki
 
-verbosity=$2
+loki-set-log-prefix "RR: "
 
-fenrir-log info "$verbosity" "RR: Validating root readme.."
+loki-log info "Validating root readme.."
 
 if ! [ -f "../README.md" ]; then
-    fenrir-log err "$verbosity" "RR: Root README does not exist"
+    loki-log fail "Root README does not exist"
     exit 5
 fi
 
-fenrir-log succ "$verbosity" "RR: PASSED"
+loki-points +100

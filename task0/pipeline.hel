@@ -1,0 +1,8 @@
+
+pre=()
+
+main=(
+    "walk-inspections"
+    "task-zero"
+    "root-readme"
+)
