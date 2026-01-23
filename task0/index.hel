@@ -1,6 +1,7 @@
 
 scripts=(
     "root-readme"
+    "task-zero"
 )
 
 cfgs=()

@@ -9,4 +9,4 @@ if ! [ -f "../README.md" ]; then
     exit 5
 fi
 
-loki-points +100
+loki-points +50
