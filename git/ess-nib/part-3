@@ -21,10 +21,11 @@ curr=()
 success=0
 
 ####################################################################
-if lokiw git merge 6; then
+
+lokiw git merge 6 || {
     loki-log err "No error occurred"
     exit 1
-fi
+}
 
 while IFS= read -r type; do
     loki-log info "Merge conflict's type is ($type)"
@@ -46,4 +47,4 @@ fi
 
 git merge --abort
 
-loki-points +20
+loki-points +10
