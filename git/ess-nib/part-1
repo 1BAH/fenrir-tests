@@ -45,9 +45,9 @@ lokiw -e git show 1:1.b
 content=$(loki-get-out)
 
 if [ "$(echo "$content" | wc -w)" -eq 3 ] && \
-   [ "$(echo "$content" | sed '1p;d')" = "3" ] && \
-   [ "$(echo "$content" | sed '2p;d')" = "2" ] && \
-   [ "$(echo "$content" | sed '3p;d')" = "1" ]; then
+   [ "$(echo "$content" | sed '1p;d')" = "A" ] && \
+   [ "$(echo "$content" | sed '2p;d')" = "B" ] && \
+   [ "$(echo "$content" | sed '3p;d')" = "C" ]; then
 
     lokiw git show 1:2.b || {
         loki-points +10
