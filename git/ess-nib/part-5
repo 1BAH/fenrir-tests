@@ -14,26 +14,24 @@ if ! fenrir-change-branch "10"; then
     exit 1
 fi
 
-if [ "$(commit-name "10~0")" != 'Revert "21"' ] || \
-   [ "$(commit-name "10~1")" != "23" ] || \
-   [ "$(commit-name "10~2")" != "22" ] || \
-   [ "$(commit-name "10~3")" != "21" ]; then
-        loki-log err "You have not undone the changes"
-        exit 1
+if [ "$(commit-name "10~0")" != 'Revert "11"' ] ; then
+    loki-log err "Wrong commit message"
+    exit 1
 fi
 
 loki-log info "Validating files content.."
 
-lokiw -e -u 'git show -s --format=%b 10 | grep "This reverts commit abcee"'
-lokiw -e git show 10:5.txt
+lokiw -e git blame 10:10.q
 content=$(loki-get-out)
 
-if [ "$(echo "$content" | wc -w)" -eq 3 ] && \
-    [ "$(echo "$content" | sed '1p;d')" = "1" ] && \
-    [ "$(echo "$content" | sed '2p;d')" = "2" ] && \
-    [ "$(echo "$content" | sed '3p;d')" = "3" ]; then
-        loki-points +10
-else
-    loki-log fail "Incorrect files content"
-    exit 1
-fi
+loki-assert-eq 3 "$(echo "$content" | wc -w)"
+
+loki-assert-regeq "^$(echo "$content" | sed '1p;d' | cut -f1 -d' ')*$" "040c6b3b"
+loki-assert-regeq "^$(echo "$content" | sed '2p;d' | cut -f1 -d' ')*$" "b64dc139"
+loki-assert-regeq "^$(echo "$content" | sed '3p;d' | cut -f1 -d' ')*$" "fd55e56e"
+
+loki-assert-eq "$(echo "$content" | sed '1p;d' | cut -f7 -d' ')" "A"
+loki-assert-eq "$(echo "$content" | sed '2p;d' | cut -f7 -d' ')" "C"
+loki-assert-eq "$(echo "$content" | sed '3p;d' | cut -f7 -d' ')" "D"
+
+loki-points +10
