@@ -15,4 +15,4 @@ cfgs=()
 
 branch="git/ess-nib"
 blocking=0
-inline=NO
+inline=0
