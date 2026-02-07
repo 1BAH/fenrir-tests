@@ -14,5 +14,5 @@ scripts=(
 cfgs=()
 
 branch="git/ess-nib"
-blocking=0
+blocking=1
 inline=0
