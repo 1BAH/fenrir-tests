@@ -1,49 +1,30 @@
 #! /usr/bin/env loki
 
-loki-set-log-prefix "P9: "
-
-function commit-hash {
-    git show -s --format="%h" "$1"
-}
-
-function commit-name {
-    git show -s --format="%s" "$1"
-}
-
+loki-set-log-prefix "P10: "
 
 loki-log info "Validating commits tree.."
 
-if ! fenrir-change-branch "14" || \
-   ! fenrir-change-branch "15"; then
-        loki-log err "Terminating.."
-        exit 1
+if ! fenrir-change-branch "15"; then
+    loki-log err "Terminating.."
+    exit 1
 fi
 
-real1=$(commit-hash "14~1")
-real2=$(commit-hash "15~0")
-if [[ "$(commit-name "14~0")" != '6003' ]] || \
-   [[ "$(commit-name "14~1")" != '6006' ]] || \
-   [[ ! 4e7b0f2b == $real1*  ]] || \
-   [[ ! 3319f09d == $real2*  ]]; then
-        loki-log err "Invalid commit tree"
-        exit 1
+loki-log info "Validating file mode.."
+
+meta=(`git ls-files -s "win.sh"`)
+if [ "${meta[0]}" != '100755' ]; then
+    loki-log err "Invalid file mode"
+    exit 1
 fi
 
-loki-log info "Validating file content.."
+loki-log info "Executing script.."
 
-if lokiw git show 14:9.txt; then
-    content=$(loki-get-out)
+lokiw -e ./win.sh
 
-    if [ "$(echo "$content" | wc -w)" -eq 4 ] && \
-       [ "$(echo "$content" | sed '1p;d')" = "5" ] && \
-       [ "$(echo "$content" | sed '2p;d')" = "4" ] && \
-       [ "$(echo "$content" | sed '3p;d')" = "3" ] && \
-       [ "$(echo "$content" | sed '4p;d')" = "2" ]; then
-            loki-points +10
-
-            exit 0 # Success
-    fi
+if [ "$(loki-get-out)" != "HI" ] &&
+   [ -n "$(loki-get-err)" ]; then
+    loki-log fail "Something went wrong.."
+    exit 1
 fi
 
-loki-log fail "File content is invalid!"
-exit 1
+loki-points +10
