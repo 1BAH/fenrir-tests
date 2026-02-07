@@ -15,8 +15,6 @@ if ! fenrir-change-branch "4" || \
         exit 1
 fi
 
-fenrir-change-branch "task0" &> /dev/null
-
 merge_commit=$(git log --merges --format="%h" 4)
 
 if [ -n "$merge_commit" ]; then
@@ -31,44 +29,23 @@ if [ -n "$merge_commit" ]; then
     exit 1
 fi
 
-found=0
-
-for (( i = 0; i < 3; i++ )); do
-    if git branch -a --contains "4~$i" | grep -q 3; then
-        hash=$(commit-hash "4~$i")
-        branch3=$(commit-hash "3")
-
-        loki-assert-eq "$branch3" "$hash"
-
-        found=1
-        break
-    fi
-done
-
-if [ "$found" -ne 1 ]; then
-    loki-log err "Branch 4 contains far too many commits (Branch 3 was not found)"
+if ! [ "$(git show -s --format="%s" "4~0")" = "4" ]; then
+    loki-log err "Expected commit message to be <4>"
+    exit 1
 fi
+
+loki-assert-regeq "^$(commit-hash "4~1")*$" "edafdd8" "Too many commits on branch 4"
 
 loki-log info "Validating files content.."
 
-lokiw -e git show 4:3
-content=$(loki-get-out)
+fenrir-change-branch "4"
 
-if [ "$(echo "$content" | wc -w)" -eq 2 ] && \
-   [ "$(echo "$content" | sed '1p;d')" = "1" ] && \
-   [ "$(echo "$content" | sed '2p;d')" = "3" ]; then
-        lokiw -e git show 4:4
-        content=$(loki-get-out)
+lokiw -e ./script.kts
+loki-assert-eq 'Meow!' "$(loki-get-out)" "File 'scripts.kts' is broken"
 
-        if [ "$(echo "$content" | wc -w)" -eq 2 ] && \
-           [ "$(echo "$content" | sed '1p;d')" = "1" ] && \
-           [ "$(echo "$content" | sed '2p;d')" = "4" ]; then
-                loki-points +10
-        else
-            loki-log fail "Incorrect content of file <4:4>"
-            exit 1
-        fi
-else
-    loki-log fail "Incorrect content of file <4:3>"
-    exit 1
-fi
+fenrir-change-branch "3"
+
+lokiw -e ./script.kts
+loki-assert-neq 'Meow!' "$(loki-get-out)" "File 'scripts.kts' is broken"
+
+loki-points +10
