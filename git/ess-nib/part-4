@@ -21,9 +21,9 @@ if ! git branch -a --contains 9~2 | grep -q 7; then
     exit 1
 fi
 
-if [ "$(commit-name "9")"   = "16" ] && \
-   [ "$(commit-name "9~1")" = "15" ] && \
-   [ "$(commit-name "9~2")" = "18" ]; then
+if [ "$(commit-name "9")"   = "99" ] && \
+   [ "$(commit-name "9~1")" = "99" ] && \
+   [ "$(commit-name "9~2")" = "77" ]; then
         loki-points +10
 else
     loki-log err "Incorrect commit messages"
