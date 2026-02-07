@@ -21,7 +21,7 @@ fi
 
 loki-log info "Validating files content.."
 
-lokiw -e git blame 10:10.q
+lokiw -e git blame 10.q
 content=$(loki-get-out)
 
 loki-assert-eq 3 "$(echo "$content" | wc -w)"
