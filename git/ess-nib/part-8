@@ -26,7 +26,7 @@ loki-assert-eq '133' "$(commit-name "14")" "Invalid message"
 
 loki-log info "Validating file content.."
 
-lokiw -e git blame 13.q
+lokiw -e git blame 13.p
 content=$(loki-get-out)
 
 loki-assert-eq 5 "$(echo "$content" | wc -l)"
