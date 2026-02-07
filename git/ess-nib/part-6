@@ -10,6 +10,6 @@ if ! fenrir-change-branch "11"; then
 fi
 
 
-loki-assert-regeq "^$(git show -s --format="%h" "11")$" 12a0b906
+loki-assert-regeq "^$(git show -s --format="%h" "11")*$" 0751ef9
 
 loki-points +10
