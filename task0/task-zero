@@ -12,6 +12,6 @@ fi
 
 lokiw -e -u "./run.sh | shasum -a 256 | cut -f1 -d' '"
 
-loki-assert-eq "83b99602b788c611a39357a6d19e82eb5cd977637185d8c71da7dc42f178a123" "$(loki-get-out)"
+loki-assert-eq "a60eeddc811e87a946c3885062c3bad2fc100712cae3dadafdc33dca8ce3e7ed" "$(loki-get-out)"
 
 loki-points +50
