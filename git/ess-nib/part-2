@@ -16,18 +16,10 @@ if ! fenrir-change-branch "4" || \
 fi
 
 merge_commit=$(git log --merges --format="%h" 4)
-
-if [ -n "$merge_commit" ]; then
-    loki-log err "There is a merge commit in branch <4>: <$merge_commit>"
-    exit 1
-fi
+loki-assert-regeq "^${merge_commit}*$" "ef2f0f6" "You have used wrong command!"
 
 merge_commit=$(git log --merges --format="%h" 3)
-
-if [ -n "$merge_commit" ]; then
-    loki-log err "There is a merge commit in branch <3>: <$merge_commit>"
-    exit 1
-fi
+loki-assert-regeq "^${merge_commit}*$" "ef2f0f6" "You have used wrong command!"
 
 if ! [ "$(git show -s --format="%s" "4~0")" = "4" ]; then
     loki-log err "Expected commit message to be <4>"
