@@ -29,7 +29,7 @@ loki-log info "Validating file content.."
 lokiw -e git blame 13.p
 content=$(loki-get-out)
 
-loki-assert-eq 5 "$(echo "$content" | wc -l)"
+loki-assert-eq 5 "$(echo "$content" | wc -l | tr -d "$IFS")"
 
 loki-assert-regeq "^$(echo "$content" | sed '1p;d' | cut -f1 -d' ')*$" "467dd8ea"
 loki-assert-regeq "^$(echo "$content" | sed '2p;d' | cut -f1 -d' ')*$" "da5b6520"
