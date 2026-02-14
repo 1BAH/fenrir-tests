@@ -57,21 +57,21 @@ CORRECT
 )" "$(git show rebase~3:script.sh)"
 
 loki-assert-eq "$(cat <<- CORRECT
-#! /usr/bin/env nash
+#! /usr/bin/env bash
 
 echo 'Pizza & Pasta'
 CORRECT
 )" "$(git show rebase~2:script.sh)"
 
 loki-assert-eq "$(cat <<- CORRECT
-#! /usr/bin/env nash
+#! /usr/bin/env bash
 
 echo 'Pizza & Pasta & Vino'
 CORRECT
 )" "$(git show rebase~1:script.sh)"
 
 loki-assert-eq "$(cat <<- CORRECT
-#! /usr/bin/env nash
+#! /usr/bin/env bash
 
 echo 'Tartufo'
 CORRECT
