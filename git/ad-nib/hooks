@@ -104,7 +104,7 @@ if ! lokiw git commit -m "[ DEL ] 1G1o1O1d1"; then
 fi
 loki-log succ "Hook works correct"
 
-git reset --hard HEAD~1
+git reset --hard HEAD~1 &> /dev/null
 
 rm -r .git/hooks
 
