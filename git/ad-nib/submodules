@@ -1,0 +1,59 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "RB: "
+
+function commit-hash {
+    git show -s --format="%h" "$1"
+}
+
+
+loki-log info "Validating commits tree.."
+
+if ! fenrir-change-branch "1" || \
+   ! fenrir-change-branch "2"; then
+        loki-log err "Terminating.."
+        exit 1
+fi
+
+merge_commit=$(git log --merges --format="%h" 1)
+
+if [ -z "$merge_commit" ]; then
+    loki-log err "You haven't merged branch"
+    exit 1
+fi
+
+if ! [ "$merge_commit" = "$(commit-hash "1~0")" ]; then
+    loki-log err "Expected the merge commit to be the latest"
+    exit 1
+fi
+
+merge_commit=$(git log --merges --format="%h" 2)
+
+if [ -n "$merge_commit" ]; then
+    loki-log err "Encountered merge commits in branch <2>"
+    exit 1
+fi
+
+if ! [ "$(git show -s --format="%s" "1~0")" = "3" ]; then
+    loki-log err "Expected commit message to be <3>"
+    exit 1
+fi
+
+loki-log info "Validating files content.."
+
+lokiw -e git show 1:1.b
+content=$(loki-get-out)
+
+if [ "$(echo "$content" | wc -w)" -eq 3 ] && \
+   [ "$(echo "$content" | sed '1p;d')" = "A" ] && \
+   [ "$(echo "$content" | sed '2p;d')" = "B" ] && \
+   [ "$(echo "$content" | sed '3p;d')" = "C" ]; then
+
+    lokiw git show 1:2.b || {
+        loki-points +10
+        exit 0
+    }
+fi
+
+loki-log fail "Incorrect files content"
+exit 1

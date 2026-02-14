@@ -1,0 +1,32 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "RB: "
+
+function get-info {
+    git show -s --format="$1" "$2"
+}
+
+
+loki-log info "Validating commits tree.."
+
+if ! fenrir-change-branch "rebase"; then
+    loki-log err "Terminating.."
+    exit 1
+fi
+
+merge_commit=$(git log --merges --format="%h" rebase)
+
+if [ -n "$merge_commit" ]; then
+    loki-log err "You have a merge commit"
+    exit 1
+fi
+
+loki-assert-eq "venezia" "$(get-info "%s" rebase~0)"
+loki-assert-eq "milano" "$(get-info "%s" rebase~1)"
+loki-assert-eq "torino" "$(get-info "%s" rebase~2)"
+loki-assert-eq "roma" "$(get-info "%s" rebase~3)"
+loki-assert-eq "napoli" "$(get-info "%s" rebase~4)"
+
+loki-assert-regeq "^$(get-info "%h" rebase~5)*$" "918367f"
+
+loki-points +10

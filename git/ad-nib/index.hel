@@ -1,0 +1,14 @@
+scripts=(
+    "rebase"
+    "hooks"
+    "lfs"
+    "submodules"
+    "ignore"
+)
+
+cfgs=()
+
+branch="git/ad-nib"
+blocking=0
+inline=0
+host=0
