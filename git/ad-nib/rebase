@@ -79,4 +79,16 @@ CORRECT
 
 loki-gorp
 
+loki-prog "Validating file mode"
+
+loki-assert-eq "100755" "$(git ls-tree rebase~0 script.sh | cut -f1 -d' ')"
+loki-assert-eq "100755" "$(git ls-tree rebase~1 script.sh | cut -f1 -d' ')"
+loki-assert-eq "100755" "$(git ls-tree rebase~2 script.sh | cut -f1 -d' ')"
+loki-assert-eq "100755" "$(git ls-tree rebase~3 script.sh | cut -f1 -d' ')"
+loki-assert-eq "100644" "$(git ls-tree rebase~4 script.sh | cut -f1 -d' ')"
+
+loki-gorp
+
+loki-prog "Testing 
+
 loki-points +10
