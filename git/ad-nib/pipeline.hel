@@ -4,7 +4,7 @@ pre=(
 
 main=(
     "rebase"
-#    "hooks"
+    "hooks"
 #    "lfs"
 #    "submodules"
 #    "ignore"

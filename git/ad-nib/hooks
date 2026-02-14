@@ -2,58 +2,110 @@
 
 loki-set-log-prefix "HK: "
 
-function commit-hash {
-    git show -s --format="%h" "$1"
+function finalise {
+    msg=$1
+
+    loki-log fail "$msg"
+
+    rm -r .git/hooks
+
+    if git status | grep -q bugaga; then
+        git restore --staged bugaga
+    fi
+
+    if [ -f bugaga ]; then
+        rm bugaga
+    fi
+
+    exit 2
 }
 
 
 loki-log info "Validating commits tree.."
 
-if ! fenrir-change-branch "1" || \
-   ! fenrir-change-branch "2"; then
-        loki-log err "Terminating.."
-        exit 1
-fi
-
-merge_commit=$(git log --merges --format="%h" 1)
-
-if [ -z "$merge_commit" ]; then
-    loki-log err "You haven't merged branch"
+if ! fenrir-change-branch "hooks"; then
+    loki-log err "Terminating.."
     exit 1
 fi
 
-if ! [ "$merge_commit" = "$(commit-hash "1~0")" ]; then
-    loki-log err "Expected the merge commit to be the latest"
+loki-prog "Installing script.."
+
+if ! [ -x "install" ]; then
+    loki-log err "Script 'install' was not found!"
     exit 1
 fi
 
-merge_commit=$(git log --merges --format="%h" 2)
+lokiw -e ./install
 
-if [ -n "$merge_commit" ]; then
-    loki-log err "Encountered merge commits in branch <2>"
-    exit 1
+loki-gorp
+
+
+loki-log info "Creating file 'bugaga'.."
+touch bugaga
+
+loki-log info "Running 'git add bugaga'.."
+git add bugaga
+
+loki-log info "Running 'git commit -m \"BAD MESSAGE\"'.."
+if lokiw git commit -m "BAD MESSAGE"; then
+    finalise "File has been commited!"
 fi
+loki-log succ "Hook works correct"
 
-if ! [ "$(git show -s --format="%s" "1~0")" = "3" ]; then
-    loki-log err "Expected commit message to be <3>"
-    exit 1
+loki-log info "Running 'git commit -m \"[FIX] BAD\"'.."
+if lokiw git commit -m "[FIX] BAD"; then
+    finalise "File has been commited!"
 fi
+loki-log succ "Hook works correct"
 
-loki-log info "Validating files content.."
-
-lokiw -e git show 1:1.b
-content=$(loki-get-out)
-
-if [ "$(echo "$content" | wc -w)" -eq 3 ] && \
-   [ "$(echo "$content" | sed '1p;d')" = "A" ] && \
-   [ "$(echo "$content" | sed '2p;d')" = "B" ] && \
-   [ "$(echo "$content" | sed '3p;d')" = "C" ]; then
-
-    lokiw git show 1:2.b || {
-        loki-points +10
-        exit 0
-    }
+loki-log info "Running 'git commit -m \"[ АDD ] Tricky\"'.."
+if lokiw git commit -m "[ АDD ] Tricky"; then
+    finalise "File has been commited! ('A' is cyrillic)"
 fi
+loki-log succ "Hook works correct"
 
-loki-log fail "Incorrect files content"
-exit 1
+loki-log info "Running 'git commit -m \"[ ADD ]Tricky\"'.."
+if lokiw git commit -m "[ ADD ]Tricky"; then
+    finalise "File has been commited!"
+fi
+loki-log succ "Hook works correct"
+
+loki-log info "Running 'git commit -m \" [ ADD ] Tricky\"'.."
+if lokiw git commit -m " [ ADD ] Tricky"; then
+    finalise "File has been commited!"
+fi
+loki-log succ "Hook works correct"
+
+loki-log info "Running 'git commit -m \"[ ADD ] Triсky\"'.."
+if lokiw git commit -m "[ ADD ] Triсky"; then
+    finalise "File has been commited! ('с' is cyrillic)"
+fi
+loki-log succ "Hook works correct"
+
+loki-log info "Running 'git commit -m \"[ ADD ] Good\"'.."
+if lokiw git commit -m "[ ADD ] Good"; then
+    finalise "File has not been commited!"
+fi
+loki-log succ "Hook works correct"
+
+git reset --soft HEAD~1
+
+loki-log info "Running 'git commit -m \"[ FIX ] Go0od\"'.."
+if ! lokiw git commit -m "[ FIX ] Good"; then
+    finalise "File has not been commited!"
+fi
+loki-log succ "Hook works correct"
+
+git reset --soft HEAD~1
+
+loki-log info "Running 'git commit -m \"[ DEL ] 1G1o1O1d1\"'.."
+if ! lokiw git commit -m "[ DEL ] 1G1o1O1d1"; then
+    finalise "File has not been commited!"
+fi
+loki-log succ "Hook works correct"
+
+git reset --hard HEAD~1
+
+rm -r .git/hooks
+
+loki-points +10
