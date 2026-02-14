@@ -24,15 +24,15 @@ fi
 loki-prog "Validating messages & bodies"
 
 loki-assert-eq "venezia" "$(get-info "%s" rebase~0)"
-loki-assert-eq "" "$(get-info "%b" rebase~0)"
+loki-assert-eq "%" "%$(get-info "%b" rebase~0)"
 loki-assert-eq "milano"  "$(get-info "%s" rebase~1)"
-loki-assert-eq "" "$(get-info "%b" rebase~1)"
+loki-assert-eq "%" "%$(get-info "%b" rebase~1)"
 loki-assert-eq "torino"  "$(get-info "%s" rebase~2)"
 loki-assert-eq "firenze & bologna" "$(get-info "%b" rebase~2)"
 loki-assert-eq "roma"    "$(get-info "%s" rebase~3)"
-loki-assert-eq "" "$(get-info "%b" rebase~3)"
+loki-assert-eq "%" "%$(get-info "%b" rebase~3)"
 loki-assert-eq "napoli"  "$(get-info "%s" rebase~4)"
-loki-assert-eq "" "$(get-info "%b" rebase~4)"
+loki-assert-eq "%" "%$(get-info "%b" rebase~4)"
 
 loki-gorp
 
