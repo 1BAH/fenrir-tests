@@ -89,6 +89,4 @@ loki-assert-eq "100644" "$(git ls-tree rebase~4 script.sh | cut -f1 -d' ')"
 
 loki-gorp
 
-loki-prog "Testing 
-
 loki-points +10
