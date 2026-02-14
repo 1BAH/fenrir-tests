@@ -11,4 +11,4 @@ cfgs=()
 branch="git/ad-nib"
 blocking=0
 inline=0
-host=0
+inhost=0
