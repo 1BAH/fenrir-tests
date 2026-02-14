@@ -40,4 +40,43 @@ loki-prog "Validating root commit"
 loki-assert-regeq "^$(get-info "%h" rebase~5)*$" "918367f"
 loki-gorp
 
+loki-prog "Validating file contents"
+
+loki-assert-eq "$(cat <<- CORRECT
+#! /usr/bin/env nash
+
+echo HI
+CORRECT
+)" "$(git show rebase~4:script.sh)"
+
+loki-assert-eq "$(cat <<- CORRECT
+#! /usr/bin/env bash
+
+echo HI
+CORRECT
+)" "$(git show rebase~3:script.sh)"
+
+loki-assert-eq "$(cat <<- CORRECT
+#! /usr/bin/env nash
+
+echo 'Pizza & Pasta'
+CORRECT
+)" "$(git show rebase~2:script.sh)"
+
+loki-assert-eq "$(cat <<- CORRECT
+#! /usr/bin/env nash
+
+echo 'Pizza & Pasta & Vino'
+CORRECT
+)" "$(git show rebase~1:script.sh)"
+
+loki-assert-eq "$(cat <<- CORRECT
+#! /usr/bin/env nash
+
+echo 'Tartufo'
+CORRECT
+)" "$(git show rebase~0:script.sh)"
+
+loki-gorp
+
 loki-points +10
