@@ -1,6 +1,6 @@
 #! /usr/bin/env loki
 
-loki-set-log-prefix "RB: "
+loki-set-log-prefix "SM: "
 
 function commit-hash {
     git show -s --format="%h" "$1"
@@ -9,51 +9,23 @@ function commit-hash {
 
 loki-log info "Validating commits tree.."
 
-if ! fenrir-change-branch "1" || \
-   ! fenrir-change-branch "2"; then
-        loki-log err "Terminating.."
-        exit 1
-fi
-
-merge_commit=$(git log --merges --format="%h" 1)
-
-if [ -z "$merge_commit" ]; then
-    loki-log err "You haven't merged branch"
+if ! fenrir-change-branch "submodules"; then
+    loki-log err "Terminating.."
     exit 1
 fi
 
-if ! [ "$merge_commit" = "$(commit-hash "1~0")" ]; then
-    loki-log err "Expected the merge commit to be the latest"
-    exit 1
-fi
+loki-prog "Inspecting module 'koshchei'.."
 
-merge_commit=$(git log --merges --format="%h" 2)
+koshej_repo=$(cat .gitmodules | grep -A 1 koshchei | grep url | cut -f2 -d'=')
+koshej_namespace=$(dirname "$koshej_repo")
+koshej_project=$(basename "$koshej_repo" '.git')
 
-if [ -n "$merge_commit" ]; then
-    loki-log err "Encountered merge commits in branch <2>"
-    exit 1
-fi
+koshej_meta=$(curl --url "https://gitlab.com/api/v4/projects/${koshej_namespace}%2F${koshej_project}" &> /dev/null)
 
-if ! [ "$(git show -s --format="%s" "1~0")" = "3" ]; then
-    loki-log err "Expected commit message to be <3>"
-    exit 1
-fi
+lokiw -e -u "echo '$koshej_meta' | grep -q forked_from_project"
+lokiw -e -u "echo '$koshej_meta' | grep -oE '\"namespace\":{[^{}]*}' | head -n 1 | grep -q '\"kind\":\"user\"'"
+lokiw -e -u "echo '$koshej_meta' | grep -q '\"name\":\"koshej\"'"
 
-loki-log info "Validating files content.."
+loki-gorp
 
-lokiw -e git show 1:1.b
-content=$(loki-get-out)
-
-if [ "$(echo "$content" | wc -w)" -eq 3 ] && \
-   [ "$(echo "$content" | sed '1p;d')" = "A" ] && \
-   [ "$(echo "$content" | sed '2p;d')" = "B" ] && \
-   [ "$(echo "$content" | sed '3p;d')" = "C" ]; then
-
-    lokiw git show 1:2.b || {
-        loki-points +10
-        exit 0
-    }
-fi
-
-loki-log fail "Incorrect files content"
-exit 1
+loki-points +10
