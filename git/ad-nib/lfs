@@ -12,7 +12,7 @@ if ! [ -f logo.png ]; then
     exit 2
 fi
 
-loki-assert-eq "46417a170bd3af222ada40222e992a8ff3121048465e4db45fc86abbfc447f83" \
+loki-assert-eq "927e0cea650aa65e30adeea0974099f1c3e676059c87700babadd789830a8fa4" \
                "$(cat logo.png | shasum -a 256 | cut -f1 -d' ')" \
                "File 'logo.png' is corrupted!"
 
