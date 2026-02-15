@@ -6,9 +6,6 @@ function get-info {
     git show -s --format="$1" "$2"
 }
 
-
-loki-log info "Validating commits tree.."
-
 if ! fenrir-change-branch "rebase"; then
     loki-log err "Terminating.."
     exit 1

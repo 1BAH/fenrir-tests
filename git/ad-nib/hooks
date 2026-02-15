@@ -21,8 +21,6 @@ function finalise {
 }
 
 
-loki-log info "Validating commits tree.."
-
 if ! fenrir-change-branch "hooks"; then
     loki-log err "Terminating.."
     exit 1

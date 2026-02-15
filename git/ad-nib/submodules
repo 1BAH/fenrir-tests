@@ -2,13 +2,6 @@
 
 loki-set-log-prefix "SM: "
 
-function commit-hash {
-    git show -s --format="%h" "$1"
-}
-
-
-loki-log info "Validating commits tree.."
-
 if ! fenrir-change-branch "submodules"; then
     loki-log err "Terminating.."
     exit 1
