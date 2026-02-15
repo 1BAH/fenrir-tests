@@ -28,4 +28,26 @@ lokiw -e -u "echo '$koshej_meta' | grep -q '\"name\":\"koshej\"'"
 
 loki-gorp
 
+loki-prog "Setting up the repository.."
+
+if ! [ -x "setup.sh" ]; then
+    loki-log fail "Cannot find 'setup.sh'"
+    exit 3
+fi
+
+lokiw -e ./setup.sh
+
+loki-gorp
+
+loki-prog "Killing Koshchei.."
+
+if ! [ -x "oak/hare/duck/egg.sh" ]; then
+    loki-log fail "Cannot find the egg!"
+    exit 3
+fi
+
+./oak/hare/duck/egg.sh
+
+loki-gorp
+
 loki-points +10
