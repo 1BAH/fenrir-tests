@@ -1,5 +1,10 @@
 #! /usr/bin/env loki
 
+function get-info {
+    git show -s --format="$1" "$2"
+}
+
+
 loki-set-log-prefix "IGN: "
 
 if ! fenrir-change-branch "ignore"; then
