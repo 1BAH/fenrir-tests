@@ -46,4 +46,4 @@ loki-assert-eq "%" "%$(loki-get-err)"
 
 loki-gorp
 
-loki-points +10
+loki-points +20

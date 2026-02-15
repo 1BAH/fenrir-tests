@@ -106,4 +106,4 @@ git reset --hard HEAD~1 &> /dev/null
 
 rm -r .git/hooks
 
-loki-points +10
+loki-points +20
