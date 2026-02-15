@@ -6,6 +6,6 @@ main=(
     "rebase"
     "hooks"
     "lfs"
-    "submodules"
     "ignore"
+    "submodules"
 )
