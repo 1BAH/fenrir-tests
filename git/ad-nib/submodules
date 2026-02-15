@@ -17,13 +17,13 @@ fi
 loki-prog "Inspecting module 'koshchei'.."
 
 koshej_repo=$(cat .gitmodules | grep -A 1 koshchei | grep url | cut -f2 -d'=')
-koshej_namespace=$(dirname "$koshej_repo")
+koshej_namespace=$(basename "$(dirname "$koshej_repo")")
 koshej_project=$(basename "$koshej_repo" '.git')
 
-koshej_meta=$(curl --url "https://gitlab.com/api/v4/projects/${koshej_namespace}%2F${koshej_project}" &> /dev/null)
+koshej_meta=$(curl --url "https://gitlab.com/api/v4/projects/${koshej_namespace}%2F${koshej_project}" 2> /dev/null)
 
 lokiw -e -u "echo '$koshej_meta' | grep -q forked_from_project"
-lokiw -e -u "echo '$koshej_meta' | grep -oE '\"namespace\":{[^{}]*}' | head -n 1 | grep -q '\"kind\":\"user\"'"
+lokiw -e -u "echo '$koshej_meta' | grep -oE '\"namespace\":\\{[^{}]*\\}' | head -n 1 | grep -q '\"kind\":\"user\"'"
 lokiw -e -u "echo '$koshej_meta' | grep -q '\"name\":\"koshej\"'"
 
 loki-gorp
@@ -46,7 +46,10 @@ if ! [ -x "oak/hare/duck/egg.sh" ]; then
     exit 3
 fi
 
-./oak/hare/duck/egg.sh
+lokiw -e ./oak/hare/duck/egg.sh
+
+loki-assert-eq "Er ist tot!" "$(loki-get-out)"
+loki-assert-eq "%" "%$(loki-get-err)"
 
 loki-gorp
 
