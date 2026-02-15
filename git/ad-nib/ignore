@@ -1,59 +1,53 @@
 #! /usr/bin/env loki
 
-loki-set-log-prefix "RB: "
+loki-set-log-prefix "IGN: "
 
-function commit-hash {
-    git show -s --format="%h" "$1"
-}
-
-
-loki-log info "Validating commits tree.."
-
-if ! fenrir-change-branch "1" || \
-   ! fenrir-change-branch "2"; then
-        loki-log err "Terminating.."
-        exit 1
-fi
-
-merge_commit=$(git log --merges --format="%h" 1)
-
-if [ -z "$merge_commit" ]; then
-    loki-log err "You haven't merged branch"
+if ! fenrir-change-branch "ignore"; then
+    loki-log err "Terminating.."
     exit 1
 fi
 
-if ! [ "$merge_commit" = "$(commit-hash "1~0")" ]; then
-    loki-log err "Expected the merge commit to be the latest"
-    exit 1
-fi
 
-merge_commit=$(git log --merges --format="%h" 2)
+loki-prog "Validating bundle usage"
 
-if [ -n "$merge_commit" ]; then
-    loki-log err "Encountered merge commits in branch <2>"
-    exit 1
-fi
+loki-assert-regeq "^$(get-info "%h" rebase~1)*$" "64bcbce"
 
-if ! [ "$(git show -s --format="%s" "1~0")" = "3" ]; then
-    loki-log err "Expected commit message to be <3>"
-    exit 1
-fi
+lokiw -e ./sh.sh
+loki-assert-eq "123" "$(loki-get-out)"
 
-loki-log info "Validating files content.."
+loki-gorp
 
-lokiw -e git show 1:1.b
-content=$(loki-get-out)
 
-if [ "$(echo "$content" | wc -w)" -eq 3 ] && \
-   [ "$(echo "$content" | sed '1p;d')" = "A" ] && \
-   [ "$(echo "$content" | sed '2p;d')" = "B" ] && \
-   [ "$(echo "$content" | sed '3p;d')" = "C" ]; then
+loki-prog "Validating gitignore"
 
-    lokiw git show 1:2.b || {
-        loki-points +10
-        exit 0
-    }
-fi
+echo 1 > o.o
+lokiw -e -u "git status | grep -q 'nothing to commit'"
 
-loki-log fail "Incorrect files content"
-exit 1
+mkdir -p s/s/s/s
+
+echo 1 > s/o.o
+lokiw -e -u "git status | grep -q 'nothing to commit'"
+
+echo 1 > s/s/o.o
+lokiw -e -u "git status | grep -q 'nothing to commit'"
+
+echo 1 > s/s/s/o.o
+lokiw -e -u "git status | grep -q 'nothing to commit'"
+
+echo 1 > s/s/s/s/o.o
+lokiw -e -u "git status | grep -q 'nothing to commit'"
+
+echo 1 > bin
+lokiw -e -u "! git status | grep -q 'nothing to commit'"
+
+rm bin
+mkdir bin
+echo 1 > bin/a
+lokiw -e -u "git status | grep -q 'nothing to commit'"
+
+echo 1 > bin/o.o
+lokiw -e -u "! git status | grep -q 'nothing to commit'"
+
+loki-gorp
+
+loki-points +10

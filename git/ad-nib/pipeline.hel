@@ -7,5 +7,5 @@ main=(
     "hooks"
     "lfs"
     "submodules"
-#    "ignore"
+    "ignore"
 )

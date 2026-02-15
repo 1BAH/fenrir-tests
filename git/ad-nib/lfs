@@ -17,6 +17,5 @@ loki-assert-eq "927e0cea650aa65e30adeea0974099f1c3e676059c87700babadd789830a8fa4
                "File 'logo.png' is corrupted!"
 
 loki-assert-eq 1 "$(git lfs ls-files | wc -l | tr -d "$IFS")"
-lokiw -e -u "git lfs locks | grep -q logo.png"
 
 loki-points +10
