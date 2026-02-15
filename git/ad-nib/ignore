@@ -26,7 +26,7 @@ loki-gorp
 loki-prog "Validating gitignore"
 
 echo 1 > o.o
-lokiw -e -u "git status | grep -q 'nothing to commit'"
+lokiw -e -u "git status | grep 'nothing to commit'"
 
 mkdir -p s/s/s/s
 
