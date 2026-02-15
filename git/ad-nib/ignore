@@ -1,9 +1,5 @@
 #! /usr/bin/env loki
 
-function get-info {
-    git show -s --format="$1" "$2"
-}
-
 
 loki-set-log-prefix "IGN: "
 
@@ -15,7 +11,7 @@ fi
 
 loki-prog "Validating bundle usage"
 
-loki-assert-regeq "^$(get-info "%h" ignore~1)*$" "64bcbce"
+loki-assert-regeq "^$(git show -s --format="%h" ignore~1)*$" "64bcbce"
 
 lokiw -e ./sh.sh
 loki-assert-eq "123" "$(loki-get-out)"
@@ -25,33 +21,33 @@ loki-gorp
 
 loki-prog "Validating gitignore"
 
+echo 1 > q.o
+lokiw -e -u "git status |& grep 'nothing to commit'"
+
 echo 1 > o.o
-lokiw -e -u "git status | grep 'nothing to commit'"
+lokiw -e -u "! git status |& grep -q 'nothing to commit'"
 
 mkdir -p s/s/s/s
 
 echo 1 > s/o.o
-lokiw -e -u "git status | grep -q 'nothing to commit'"
+lokiw -e -u "git status |& grep -q 'nothing to commit'"
 
 echo 1 > s/s/o.o
-lokiw -e -u "git status | grep -q 'nothing to commit'"
+lokiw -e -u "git status |& grep -q 'nothing to commit'"
 
 echo 1 > s/s/s/o.o
-lokiw -e -u "git status | grep -q 'nothing to commit'"
+lokiw -e -u "git status |& grep -q 'nothing to commit'"
 
 echo 1 > s/s/s/s/o.o
-lokiw -e -u "git status | grep -q 'nothing to commit'"
+lokiw -e -u "git status |& grep -q 'nothing to commit'"
 
 echo 1 > bin
-lokiw -e -u "! git status | grep -q 'nothing to commit'"
+lokiw -e -u "! git status |& grep -q 'nothing to commit'"
 
 rm bin
 mkdir bin
 echo 1 > bin/a
-lokiw -e -u "git status | grep -q 'nothing to commit'"
-
-echo 1 > bin/o.o
-lokiw -e -u "! git status | grep -q 'nothing to commit'"
+lokiw -e -u "git status |& grep -q 'nothing to commit'"
 
 loki-gorp
 
