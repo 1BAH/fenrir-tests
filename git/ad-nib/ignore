@@ -15,7 +15,7 @@ fi
 
 loki-prog "Validating bundle usage"
 
-loki-assert-regeq "^$(get-info "%h" rebase~1)*$" "64bcbce"
+loki-assert-regeq "^$(get-info "%h" ignore~1)*$" "64bcbce"
 
 lokiw -e ./sh.sh
 loki-assert-eq "123" "$(loki-get-out)"
