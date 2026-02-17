@@ -1,86 +1,45 @@
-#! /bin/bash
+#! /usr/bin/env loki
 
-# repo=$1
-verbosity=${2-"$1"}
-destination=$(fenrir-getroot)
-out="/var/fenrir/out"
-err="/var/fenrir/err"
-
-fenrir-log info "$verbosity" "TN: Running on tiny logs.."
+loki-set-log-prefix "TN: "
+loki-log info "Running on tiny logs.."
 
 # Setup logs
-dir=$(fenrir-tmp -d 2> /dev/null || mktemp -d)
+dir=$(fenrir-tmp -d)
 
-pushd "$dir" &> /dev/null
+lokiw -e pushd "$dir"
 {
     echo "[ ERROR ] 11:12:2024 7 PANIC"
     echo "[ DEBUG ] 12:12:2024 2 START"
     echo "[ INFO ] 12:12:2024 4 RELOAD"
     echo "[ WARNING ] 13:12:2024 10 FAILURE"
 } > log.log
-popd &> /dev/null
+lokiw -e popd
 
 # Running up
-if ! "$destination/bash/logs/parse-logs.sh" "-l" "2" "$dir" > "$out" 2> "$err"; then
-    fenrir-log err "$verbosity" "TN: Script execution has failed"
-    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
-    exit 1
-fi
+lokiw -e "$destination/bash/logs/parse-logs.sh" "-l" "2" "$dir"
 
-content=$(cat "$out")
-
-echo "$content"
+content=$(loki-get-out)
 
 if [ "$(echo "$content" | wc -l)" -ne 2 ]; then
-    fenrir-log err "$verbosity" "TN: Expected 2 lines but got '$(echo "$content" | wc -l)'"
+    loki-log fail "Expected 2 lines but got '$(echo "$content" | wc -l)'"
     exit 9
 fi
 
-if ! [ "$(echo "$content" | sed '1p;d')" = "[ WARNING ] 13:12:2024 10 FAILURE" ]; then
-        fenrir-log err "$verbosity" "TN: Wrong output:"
-        fenrir-log err "$verbosity" "    Expected <[ WARNING ] 13:12:2024 10 FAILURE>"
-        fenrir-log err "$verbosity" "    Got <$(echo "$content" | sed '1p;d')>"
-        exit 1
-fi
-
-if ! [ "$(echo "$content" | sed '2p;d')" = "[ ERROR ] 11:12:2024 7 PANIC" ]; then
-        fenrir-log err "$verbosity" "TN: Wrong output:"
-        fenrir-log err "$verbosity" "    Expected <[ ERROR ] 11:12:2024 7 PANIC>"
-        fenrir-log err "$verbosity" "    Got <$(echo "$content" | sed '2p;d')>"
-        exit 1
-fi
+loki-assert-eq "[ WARNING ] 13:12:2024 10 FAILURE" "$(echo "$content" | sed '1p;d')"
+loki-assert-eq "[ ERROR ] 11:12:2024 7 PANIC"      "$(echo "$content" | sed '2p;d')"
 
 
 # Running down
-if ! "$destination/bash/logs/parse-logs.sh" "--lines" "2" "-o" "down" "$dir" > "$out" 2> "$err"; then
-    fenrir-log err "$verbosity" "TN: Script execution has failed"
-    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
-    exit 1
-fi
+lokiw -e "$destination/bash/logs/parse-logs.sh" "--lines" "2" "-o" "down" "$dir"
 
-content=$(cat "$out")
+content=$(loki-get-out)
 
 if [ "$(echo "$content" | wc -l)" -ne 2 ]; then
-    fenrir-log err "$verbosity" "TN: Expected 2 lines but got '$(echo "$content" | wc -l)'"
+    loki-log fail "Expected 2 lines but got '$(echo "$content" | wc -l)'"
     exit 9
 fi
 
-if ! [ "$(echo "$content" | sed '1p;d')" = "[ INFO ] 12:12:2024 4 RELOAD" ]; then
-        fenrir-log err "$verbosity" "TN: Wrong output!"
-        fenrir-log err "$verbosity" "    Expected <[ INFO ] 12:12:2024 4 RELOAD>"
-        fenrir-log err "$verbosity" "    Got <$(echo "$content" | sed '1p;d')>"
-        exit 1
-fi
+loki-assert-eq "[ INFO ] 12:12:2024 4 RELOAD" "$(echo "$content" | sed '1p;d')"
+loki-assert-eq "[ DEBUG ] 12:12:2024 2 START" "$(echo "$content" | sed '2p;d')"
 
-if ! [ "$(echo "$content" | sed '2p;d')" = "[ DEBUG ] 12:12:2024 2 START" ]; then
-        fenrir-log err "$verbosity" "TN: Wrong output!"
-        fenrir-log err "$verbosity" "    Expected <[ DEBUG ] 12:12:2024 2 START>"
-        fenrir-log err "$verbosity" "    Got <$(echo "$content" | sed '2p;d')>"
-        exit 1
-fi
-
-fenrir-add-points 20
-
-fenrir-log succ "$verbosity" "TN: PASSED"
+loki-points +20

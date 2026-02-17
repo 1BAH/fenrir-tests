@@ -1,39 +1,18 @@
-#! /bin/bash
+#! /usr/bin/env loki
 
-# repo=$1
-verbosity=${2-"$1"}
-destination=$(fenrir-getroot)
-out="/var/fenrir/out"
-err="/var/fenrir/err"
+loki-set-log-prefix "LRG: "
+loki-log info "Running on large logs.."
 
-fenrir-log info "$verbosity" "LRG: Running on large logs.."
-
-TMP=$(fenrir-tmp -d 2> /dev/null || mktemp -d)
+TMP=$(fenrir-tmp -d)
 
 # Clone repo with large logs
-if ! git clone https://gitlab.com/atpd/progtech/bash-logs-large.git $TMP/large > "$out" 2> "$err"; then
-    fenrir-log info "$verbosity" "$(cat "$out")"
-    fenrir-log warn "$verbosity" "$(cat "$err")"
-    exit 10
-fi
+lokiw -e git clone https://gitlab.com/atpd/progtech/bash-logs-large.git $TMP/large
 
-if ! "$destination/bash/logs/parse-logs.sh" -o down -l 50000 "$TMP/large" > "$out" 2> "$err"; then
-    fenrir-log err "$verbosity" "LRG: Script execution has failed"
-    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
-    exit 1
-fi
+lokiw -e "$destination/bash/logs/parse-logs.sh" -o down -l 50000 "$TMP/large"
 
 lines=$(wc -l < "$out")
+loki-assert-eq 44069 "${lines}"
 
-if [ "$lines" -ne 44069 ]; then
-    fenrir-log err "$verbosity" "LRG: Expected valid logs count to be <44069> but got <$lines>"
-    exit 1
-fi
-
-fenrir-log succ "$verbosity" "LRG: PASSED"
 
 # All tests have passed
-fenrir-add-points 50
-
-rm -rf /tmp/large
+loki-points +50

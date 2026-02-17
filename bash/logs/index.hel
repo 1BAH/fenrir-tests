@@ -1,0 +1,12 @@
+
+scripts=(
+    "tiny"
+    "tricky"
+    "large"
+)
+
+cfgs=(
+)
+
+branch="bash/logs"
+blocking=1
