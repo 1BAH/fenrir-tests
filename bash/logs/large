@@ -3,12 +3,14 @@
 loki-set-log-prefix "LRG: "
 loki-log info "Running on large logs.."
 
+destination=$(fenrir-read-conf run root)
+
 TMP=$(fenrir-tmp -d)
 
 # Clone repo with large logs
 lokiw -e git clone https://gitlab.com/atpd/progtech/bash-logs-large.git $TMP/large
 
-lokiw -e "./bash/logs/parse-logs.sh" -o down -l 50000 "$TMP/large"
+lokiw -e "$destination/bash/logs/parse-logs.sh" -o down -l 50000 "$TMP/large"
 
 lines=$(wc -l < "$out")
 loki-assert-eq 44069 "${lines}"

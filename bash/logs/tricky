@@ -4,6 +4,8 @@
 loki-set-log-prefix "TR: "
 loki-log info "Running on tricky logs.."
 
+destination=$(fenrir-read-conf run root)
+
 # Setup logs
 dir=$(fenrir-tmp -d)
 
@@ -17,7 +19,7 @@ lokiw -e pushd "$dir"
 lokiw -e popd
 
 # Running up
-lokiw -e "./bash/logs/parse-logs.sh" -o up -l 3 "$dir"
+lokiw -e "$destination/bash/logs/parse-logs.sh" -o up -l 3 "$dir"
 
 content=$(loki-get-out)
 
@@ -30,7 +32,7 @@ loki-assert-eq "[ WARNING ] 13:12:2024 1000000000001 FAILURE" "$(echo "$content"
 
 
 # Running down
-lokiw -e "./bash/logs/parse-logs.sh" --lines 33 --order down "$dir"
+lokiw -e "$destination/bash/logs/parse-logs.sh" --lines 33 --order down "$dir"
 
 content=$(cat "$out")
 

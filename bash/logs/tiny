@@ -2,6 +2,7 @@
 
 loki-set-log-prefix "TN: "
 loki-log info "Running on tiny logs.."
+destination=$(fenrir-read-conf run root)
 
 # Setup logs
 dir=$(fenrir-tmp -d)
@@ -16,7 +17,7 @@ lokiw -e pushd "$dir"
 lokiw -e popd
 
 # Running up
-lokiw -e "./bash/logs/parse-logs.sh" "-l" "2" "$dir"
+lokiw -e "$destination/bash/logs/parse-logs.sh" "-l" "2" "$dir"
 
 content=$(loki-get-out)
 
@@ -30,7 +31,7 @@ loki-assert-eq "[ ERROR ] 11:12:2024 7 PANIC"      "$(echo "$content" | sed '2p;
 
 
 # Running down
-lokiw -e "./bash/logs/parse-logs.sh" "--lines" "2" "-o" "down" "$dir"
+lokiw -e "$destination/bash/logs/parse-logs.sh" "--lines" "2" "-o" "down" "$dir"
 
 content=$(loki-get-out)
 
