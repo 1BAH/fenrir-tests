@@ -16,7 +16,7 @@ lokiw -e pushd "$dir"
 lokiw -e popd
 
 # Running up
-lokiw -e "$destination/bash/logs/parse-logs.sh" "-l" "2" "$dir"
+lokiw -e "./bash/logs/parse-logs.sh" "-l" "2" "$dir"
 
 content=$(loki-get-out)
 
@@ -30,7 +30,7 @@ loki-assert-eq "[ ERROR ] 11:12:2024 7 PANIC"      "$(echo "$content" | sed '2p;
 
 
 # Running down
-lokiw -e "$destination/bash/logs/parse-logs.sh" "--lines" "2" "-o" "down" "$dir"
+lokiw -e "./bash/logs/parse-logs.sh" "--lines" "2" "-o" "down" "$dir"
 
 content=$(loki-get-out)
 
