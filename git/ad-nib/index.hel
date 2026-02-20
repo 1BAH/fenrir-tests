@@ -12,4 +12,4 @@ branch="git/ad-nib"
 blocking=0
 inline=0
 inhost=0
-image="registry.gitlab.com/atpd/progtech/tech-tasks/containers/git-ad"
+image="registry.gitlab.com/atpd/progtech/tech-tasks/git-ad/git-ad:latest"
