@@ -21,26 +21,22 @@ lokiw -e popd
 # Running up
 lokiw -e "$destination/bash/logs/parse-logs.sh" -o up -l 3 "$dir"
 
-content=$(loki-get-out)
-
-if [ "$(echo "$content" | wc -l)" -ne 1 ]; then
-    loki-log fail "Expected 1 line but got '$(echo "$content" | wc -l)'"
+if [ "$(loki-get-out | wc -l)" -ne 1 ]; then
+    loki-log fail "Expected 1 line but got '$(loki-get-out | wc -l)'"
     exit 9
 fi
 
-loki-assert-eq "[ WARNING ] 13:12:2024 1000000000001 FAILURE" "$(echo "$content" | sed '1p;d')"
+loki-assert-eq "[ WARNING ] 13:12:2024 1000000000001 FAILURE" "$(loki-get-out | sed '1p;d')"
 
 
 # Running down
 lokiw -e "$destination/bash/logs/parse-logs.sh" --lines 33 --order down "$dir"
 
-content=$(cat "$out")
-
-if [ "$(echo "$content" | wc -l)" -ne 1 ]; then
-    loki-log fail "Expected 1 line but got '$(echo "$content" | wc -l)'"
+if [ "$(loki-get-out | wc -l)" -ne 1 ]; then
+    loki-log fail "Expected 1 line but got '$(loki-get-out | wc -l)'"
     exit 9
 fi
 
-loki-assert-eq "[ WARNING ] 13:12:2024 1000000000001 FAILURE" "$(echo "$content" | sed '1p;d')"
+loki-assert-eq "[ WARNING ] 13:12:2024 1000000000001 FAILURE" "$(loki-get-out | sed '1p;d')"
 
 loki-points +30

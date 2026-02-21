@@ -12,7 +12,7 @@ lokiw -e git clone https://gitlab.com/atpd/progtech/bash-logs-large.git $TMP/lar
 
 lokiw -e "$destination/bash/logs/parse-logs.sh" -o down -l 50000 "$TMP/large"
 
-lines=$(wc -l < "$out")
+lines=$(loki-get-out | wc -l)
 loki-assert-eq 44069 "${lines}"
 
 
