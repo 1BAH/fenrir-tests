@@ -1,0 +1,14 @@
+
+scripts=(
+    "column"
+    "line-counter"
+    "scalar-product"
+    "stack"
+    "sym-diff"
+    "wrapper"
+)
+
+cfgs=()
+
+branch="term/bash"
+blocking=0

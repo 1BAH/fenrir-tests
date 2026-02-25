@@ -1,0 +1,201 @@
+#! /usr/bin/env loki
+
+lokiw pushd lines || {
+    loki-log fail "Cannot switch to 'lines' directory"
+    exit 7
+}
+
+function mkfile {
+    local name=$1
+    local lines=$2
+
+    yes line | head -n "$lines" > "$name"
+}
+
+function simple_env {
+    local env_dir=$(fenrir-tmp -d)
+    pushd "$env_dir" &> /dev/null
+
+    for i in {1..10}; do
+        mkfile "Class$i.java" $(( i * 11 ))
+    done
+
+    for i in {1..5}; do
+        mkfile "Class$i.kt" $(( i * 2 ))
+    done
+
+    for i in {1..21}; do
+        mkfile "Class$i.groovy" 5
+    done
+
+    popd  &> /dev/null
+    echo "$env_dir"
+}
+
+function tricky_env {
+    local env_dir=$(fenrir-tmp -d)
+    pushd "$env_dir" &> /dev/null
+
+    mkfile "filei.tar.gz" 5
+    mkfile "filei.tartargz" 5
+    mkfile "file i.tar.gz" 45
+    mkfile "file i.targz" 13
+
+    mkdir "$env_dir/tar .gz"
+    mkfile "$env_dir/tar .gz/.gz" 7
+    mkfile "$env_dir/tar .gz/not .tar .gz" 45
+    mkfile "$env_dir/tar .gz/.tar.gz" 33
+
+    popd  &> /dev/null
+    echo "$env_dir"
+}
+
+loki-set-log-prefix "LC: "
+
+script="line-counter.sh"
+
+if ! [ -x "$script" ]; then
+    loki-log fail "Fail <$script> does not exist or is not executable"
+    exit 1
+fi
+
+conf=$(fenrir-tmp)
+##############################################################################################
+loki-prog "Simple environment"
+
+loki-log info "Creating environment.."
+root=$(simple_env)
+
+loki-prog "Basic test"
+
+echo "java,kt" > "$conf"
+
+lokiw -e "./$script" "$root" -e "$conf"
+loki-assert-out 105
+loki-assert-err ""
+
+echo "groovy,hs" > "$conf"
+
+lokiw -e "./$script" "$root" -i "$conf"
+loki-assert-out 105
+loki-assert-err ""
+
+loki-gorp
+##############################################################################################
+loki-prog "No match"
+
+echo "java,kt,groovy" > "$conf"
+lokiw -e "./$script" "$root" --exclude "$conf"
+loki-assert-out 0
+loki-assert-err ""
+
+echo "cpp,rs,sh" > "$conf"
+
+lokiw -e "./$script" "$root" --include "$conf"
+loki-assert-out 0
+loki-assert-err ""
+
+loki-gorp
+##############################################################################################
+loki-prog "Non-comma separator"
+
+echo "cpp;kt;groovy" > "$conf"
+lokiw -e "./$script" "$root" -e "$conf"
+loki-assert-out 605
+loki-assert-err ""
+
+echo "java;closure;scala" > "$conf"
+
+lokiw -e "./$script" "$root" -i "$conf"
+loki-assert-out 605
+loki-assert-err ""
+
+loki-gorp
+##############################################################################################
+loki-prog "Multiline config"
+
+cat << CONF > "$conf"
+cpp|java
+cc|groovy
+js|ts
+CONF
+lokiw -e "./$script" "$root" --exclude "$conf"
+loki-assert-out 30
+loki-assert-err ""
+
+cat << CONF > "$conf"
+kt|kts
+cc|cu|hh|cuh
+js|ts
+CONF
+lokiw -e "./$script" "$root" --include "$conf"
+loki-assert-out 30
+loki-assert-err ""
+
+loki-gorp
+loki-gorp
+##############################################################################################
+loki-prog "Tricky environment"
+loki-log info "Creating environment.."
+root=$(tricky_env)
+
+loki-prog "Basic test"
+
+echo "gz;xz" > "$conf"
+lokiw -e "./$script" "$root" -i "$conf"
+loki-assert-out 128
+loki-assert-err ""
+
+loki-gorp
+##############################################################################################
+loki-prog "Strange extensions"
+
+echo "gz;tartargz;targz;not .tar .gz" > "$conf"
+lokiw -e "./$script" "$root" -e "$conf"
+loki-assert-out 7
+loki-assert-err ""
+
+loki-gorp
+##############################################################################################
+loki-prog "Double extension"
+
+echo "tar.gz" > "$conf"
+lokiw -e "./$script" "$root" -i "$conf"
+loki-assert-out 50
+loki-assert-err ""
+
+loki-gorp
+##############################################################################################
+loki-prog "Both flags"
+
+snd=$(fenrir-tmp)
+echo "tar.gz" > "$snd"
+echo "gz" > "$conf"
+
+lokiw -e "./$script" "$root" -i "$conf" -e "$snd"
+loki-assert-out 78
+loki-assert-err ""
+
+loki-gorp
+##############################################################################################
+loki-prog "The hehe"
+
+echo -n "tar.gz" > "$conf"
+
+lokiw -e "./$script" "$root" -i "$conf"
+loki-assert-out 50
+loki-assert-err ""
+
+echo -n "gz;xz" > "$conf"
+
+lokiw -e "./$script" "$root" -e "$conf"
+loki-assert-out 25
+loki-assert-err ""
+
+loki-gorp
+loki-gorp
+##############################################################################################
+
+loki-points +20
+
+lokiw -e popd

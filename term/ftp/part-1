@@ -1,0 +1,57 @@
+#! /usr/bin/env loki
+
+lokiw pushd part-1 || {
+    loki-log fail "Cannot switch to 'part-1' directory"
+    exit 7
+}
+
+loki-set-log-prefix "FTP-1: "
+
+image="garethflowers/ftp-server"
+filename="part-1.sh"
+
+if ! [ -x "$filename" ]; then
+    loki-log err "File '$filename' does not exist or is not executable!"
+    exit 8
+fi
+
+#################################################################################################
+
+function finalise {
+    docker stop "$cont" &> /dev/null
+    loki-log fail "Script exited with non-zero code: <$1>"
+    exit "$1"
+}
+
+loki-assert-cb "docker stop \$cont &> /dev/null"
+
+voldir=$(fenrir-tmp -d)
+mkdir -p "$voldir/java/kotlin"
+
+cont=$(docker run --rm -d \
+    -e "PUBLIC_IP=192.168.0.1" -e "FTP_PASS=123" -e "FTP_USER=user" \
+    -p "20-21:20-21/tcp" -p "40000-40009:40000-40009/tcp" \
+    --mount type=bind,src="$voldir",dst=/home/user \
+    "$image")
+# shellcheck disable=SC2181
+if (( $? != 0 )); then
+    loki-log err "Cannot start server"
+    exit 66
+fi
+
+value="Running from script: $RANDOM"
+
+echo "echo '$value'" > "$voldir/java/kotlin/groovy.sh"
+
+loki-log info "Server is running on 'localhost'"
+
+lokiw "./$filename" || {
+    finalise $?
+}
+
+loki-assert-eq "$value" "$(loki-get-out)"
+
+loki-points +50
+
+docker stop "$cont" &> /dev/null
+lokiw -e popd

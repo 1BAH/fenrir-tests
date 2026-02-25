@@ -1,0 +1,207 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "ST: "
+
+script="stackd.sh"
+
+lokiw pushd stack || {
+    loki-log fail "Cannot switch to 'stack' directory"
+    exit 7
+}
+
+if ! [ -x "$script" ]; then
+    loki-log fail "Fail <$script> does not exist or is not executable"
+    exit 1
+fi
+
+loki-prog "Setup the environment"
+
+function pushd {
+    loki-log fail "You've call 'pushd'"
+    exit 121
+}
+
+function popd {
+    loki-log fail "You've call 'popd'"
+    exit 122
+}
+
+function dirs {
+    loki-log fail "You've call 'dirs'"
+    exit 123
+}
+
+lokiw -e source "./$script"
+
+testdir=$(fenrir-tmp -d)
+
+mkdir -p "$testdir/a/b/c"
+mkdir "$testdir/b"
+touch "$testdir/a/b/c/d"
+
+loki-gorp
+##############################################################################################
+loki-prog "push-list-pop"
+
+cd "$testdir/a"
+
+lokiw -e stackd init
+loki-assert-out ""
+loki-assert-err ""
+loki-assert-eq "$testdir/a" "$PWD"
+
+lokiw -e stackd push "$testdir/a/b"
+loki-assert-out ""
+loki-assert-err ""
+loki-assert-eq "$testdir/a/b" "$PWD"
+
+lokiw -e stackd list
+loki-assert-out "$testdir/a/b $testdir/a"
+loki-assert-err ""
+loki-assert-eq "$testdir/a/b" "$PWD"
+
+lokiw -e stackd pop
+loki-assert-out "$testdir/a"
+loki-assert-err ""
+loki-assert-eq "$testdir/a" "$PWD"
+
+loki-gorp
+##############################################################################################
+loki-prog "Tricky push-pop"
+
+cd "$testdir/a"
+
+lokiw -e stackd init
+loki-assert-out ""
+loki-assert-err ""
+loki-assert-eq "$testdir/a" "$PWD"
+
+lokiw -e stackd push "$testdir/a/b"
+loki-assert-out ""
+loki-assert-err ""
+loki-assert-eq "$testdir/a/b" "$PWD"
+
+cd "$testdir/a/b/c"
+
+lokiw -e stackd push "$testdir"
+loki-assert-out ""
+loki-assert-err ""
+loki-assert-eq "$testdir" "$PWD"
+
+cd "$testdir/a/b/c"
+
+lokiw -e stackd list
+loki-assert-out "$testdir $testdir/a/b $testdir/a"
+loki-assert-err ""
+loki-assert-eq "$testdir/a/b/c" "$PWD"
+
+lokiw -e stackd pop
+loki-assert-out "$testdir/a/b"
+loki-assert-err ""
+loki-assert-eq "$testdir/a/b" "$PWD"
+
+cd "$testdir/a/b/c"
+
+lokiw -e stackd pop
+loki-assert-out "$testdir/a"
+loki-assert-err ""
+loki-assert-eq "$testdir/a" "$PWD"
+
+loki-gorp
+##############################################################################################
+loki-prog "Access empty"
+
+cd "$testdir/a"
+
+lokiw -e stackd init
+loki-assert-out ""
+loki-assert-err ""
+loki-assert-eq "$testdir/a" "$PWD"
+
+lokiw -e stackd list
+loki-assert-out "$testdir/a"
+loki-assert-err ""
+loki-assert-eq "$testdir/a" "$PWD"
+
+lokiw stackd pop && {
+    loki-log fail "Expected error"
+    exit 7
+}
+loki-assert-out ""
+loki-assert-nerr ""
+loki-assert-eq "$testdir/a" "$PWD"
+
+loki-gorp
+##############################################################################################
+loki-prog "Error handling"
+
+loki-prog "Invalid cmd"
+lokiw stackd popd
+loki-assert-eq 6 $?
+loki-assert-out ""
+loki-assert-nerr ""
+
+lokiw stackd pushd
+loki-assert-eq 6 $?
+loki-assert-out ""
+loki-assert-nerr ""
+loki-gorp
+
+loki-prog "Invalid push"
+lokiw stackd push
+loki-assert-eq 11 $?
+loki-assert-out ""
+loki-assert-nerr ""
+
+lokiw stackd push "$testdir/a/b/c/d"
+loki-assert-eq 12 $?
+loki-assert-out ""
+loki-assert-nerr ""
+
+lokiw stackd push "$testdir/a/b/c/e"
+loki-assert-eq 12 $?
+loki-assert-out ""
+loki-assert-nerr ""
+loki-gorp
+
+loki-prog "Invalid pop"
+lokiw stackd pop arg
+loki-assert-eq 21 $?
+loki-assert-out ""
+loki-assert-nerr ""
+
+lokiw -e stackd init
+lokiw stackd pop
+loki-assert-eq 22 $?
+loki-assert-out ""
+loki-assert-nerr ""
+
+lokiw -e stackd push "$testdir/b"
+lokiw -e stackd push "$testdir/a"
+rm -fr "$testdir/b"
+
+lokiw stackd pop
+loki-assert-eq 23 $?
+loki-assert-out ""
+loki-assert-nerr ""
+loki-gorp
+
+loki-prog "Invalid list"
+lokiw stackd list arg
+loki-assert-eq 31 $?
+loki-assert-out ""
+loki-assert-nerr ""
+loki-gorp
+
+loki-prog "Invalid init"
+lokiw stackd init arg
+loki-assert-eq 41 $?
+loki-assert-out ""
+loki-assert-nerr ""
+loki-gorp
+
+loki-gorp
+
+loki-points +25
+
+lokiw -e popd

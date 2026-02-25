@@ -1,0 +1,79 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "SP: "
+
+lokiw pushd scalar || {
+    loki-log fail "Cannot switch to 'scalar' directory"
+    exit 7
+}
+
+script="prod.sh"
+
+if ! [ -x "$script" ]; then
+    loki-log fail "Fail <$script> does not exist or is not executable"
+    exit 1
+fi
+
+loki-prog "Correct data"
+
+cat << IN | lokiw -e "./$script"
+1 1 1 1
+1 2 3 4
+IN
+loki-assert-out "10"
+loki-assert-err ""
+
+cat << IN | lokiw -e "./$script"
+1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+IN
+loki-assert-out "30"
+loki-assert-err ""
+
+loki-gorp
+
+loki-prog "Errors"
+loki-prog "Ecode 10"
+
+cat << IN | lokiw "./$script"
+1 1 1
+1 1 1 1 1
+IN
+loki-assert-eq 10 $? "Incorrect exit code"
+loki-assert-out ""
+loki-assert-nerr ""
+
+cat << IN | lokiw "./$script"
+1 1 1 1 1
+1 1 1
+IN
+loki-assert-eq 10 $? "Incorrect exit code"
+loki-assert-out ""
+loki-assert-nerr ""
+
+loki-gorp
+
+loki-prog "Ecode 11"
+
+cat << IN | lokiw "./$script"
+1 1 1 1 1
+1 1 1 a 1
+IN
+loki-assert-eq 11 $? "Incorrect exit code"
+loki-assert-out ""
+loki-assert-nerr ""
+
+cat << IN | lokiw "./$script"
+1 a 1 1 1
+1 1 1 1 1
+IN
+loki-assert-eq 11 $? "Incorrect exit code"
+loki-assert-out ""
+loki-assert-nerr ""
+
+loki-gorp
+loki-gorp
+
+loki-points +10
+
+lokiw -e popd

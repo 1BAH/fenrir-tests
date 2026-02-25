@@ -1,0 +1,125 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "WRP: "
+
+lokiw pushd wrapper || {
+    loki-log fail "Cannot switch to 'wrapper' directory"
+    exit 7
+}
+
+loki-prog "Setup the environment"
+
+export PATH="$PWD:$PATH"
+export LOG_FILE=$(fenrir-tmp)
+
+loki-gorp
+##############################################################################################
+loki-prog "Test 1"
+echo -n > "$LOG_FILE"
+
+lokiw -e ./test1
+loki-log info "Log file is: <$LOG_FILE>"
+
+loki-assert-eq 4 "$(wc -l "$LOG_FILE" | cut -d' ' -f1)"
+loki-assert-eq 1 "$(grep -c ERROR "$LOG_FILE")"
+loki-assert-eq 0 "$(grep -c WARN "$LOG_FILE")"
+loki-assert-eq 3 "$(grep -c DEBUG "$LOG_FILE")"
+
+while read -ra line; do
+    case "${line[0]}" in
+        ERROR|WARN|DEBUG)
+            true # do nothing
+        ;;
+        *)
+            loki-log fail "Invalid log format!"
+            exit 6
+        ;;
+    esac
+
+    loki-assert-eq "$(date +"%Y-%m-%d")" "${line[1]}"
+    loki-assert-regeq "[0-9]{2}:[0-9]{2}:[0-9]{2}" "${line[2]}"
+    loki-assert-neq "" "${line[3]}"
+    loki-assert-neq "" "${line[4]}" # Every command has its args
+done < "$LOG_FILE"
+
+loki-assert-out "total"
+loki-assert-err ""
+
+loki-gorp
+##############################################################################################
+loki-prog "Test 2"
+echo -n > "$LOG_FILE"
+
+lokiw -e ./test2
+
+loki-log info "Log file is: <$LOG_FILE>"
+
+loki-assert-eq 4 "$(wc -l "$LOG_FILE" | cut -d' ' -f1)"
+loki-assert-eq 2 "$(grep -c ERROR "$LOG_FILE")"
+loki-assert-eq 2 "$(grep -c DEBUG "$LOG_FILE")"
+
+while read -ra line; do
+    case "${line[0]}" in
+        ERROR|WARN|DEBUG)
+            true # do nothing
+        ;;
+        *)
+            loki-log fail "Invalid log format!"
+            exit 6
+        ;;
+    esac
+
+    loki-assert-eq "$(date +"%Y-%m-%d")" "${line[1]}"
+    loki-assert-regeq "[0-9]{2}:[0-9]{2}:[0-9]{2}" "${line[2]}"
+    loki-assert-neq "" "${line[3]}"
+done < "$LOG_FILE"
+
+loki-assert-out ""
+loki-assert-err ""
+
+
+loki-gorp
+##############################################################################################
+loki-prog "Test 3"
+echo -n > "$LOG_FILE"
+
+./test3 > "$OUT_FILE" 2> "$ERR_FILE" &
+RUNNER_PID=$!
+
+loki-log info "Log file is: <$LOG_FILE>"
+
+kill "$RUNNER_PID"
+
+wait "$RUNNER_PID"
+loki-assert-eq 5 $? "Invalid exit code"
+
+
+loki-assert-neq 3 "$(wc -l "$LOG_FILE" | cut -d' ' -f1)"
+loki-assert-eq 1 "$(grep -c ERROR "$LOG_FILE")"
+loki-assert-eq 1 "$(grep -c WARN "$LOG_FILE")"
+
+while read -ra line; do
+    case "${line[0]}" in
+        ERROR|WARN|DEBUG)
+            true # do nothing
+        ;;
+        *)
+            loki-log fail "Invalid log format!"
+            exit 6
+        ;;
+    esac
+
+    loki-assert-eq "$(date +"%Y-%m-%d")" "${line[1]}"
+    loki-assert-regeq "[0-9]{2}:[0-9]{2}:[0-9]{2}" "${line[2]}"
+    loki-assert-neq "" "${line[3]}"
+done < "$LOG_FILE"
+
+loki-assert-out "No no no, mr fish!"
+loki-assert-err ""
+
+loki-gorp
+##############################################################################################
+
+loki-points +15
+
+lokiw -e popd

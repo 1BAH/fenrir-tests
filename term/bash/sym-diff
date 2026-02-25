@@ -1,0 +1,61 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "SD: "
+
+lokiw pushd sym-diff || {
+    loki-log fail "Cannot switch to 'sym-diff' directory"
+    exit 7
+}
+
+script="sym-diff.sh"
+
+if ! [ -f "$script" ]; then
+    loki-log fail "Fail <$script> does not exist"
+    exit 1
+fi
+
+loki-prog "Loading file.."
+source "$script"
+loki-assert-eq 0 $?
+loki-gorp
+
+loki-prog "Test 1"
+ar=(1 2 3)
+ra=(4 5 6)
+
+val=()
+while read -r line; do val+=("$line"); done < <(sym-diff ar ra)
+loki-assert-eq "6 5 4 3 2 1" "${val[*]}"
+loki-gorp
+
+loki-prog "Test 2"
+ar=(1)
+ra=(1)
+
+
+val=()
+while read -r line; do val+=("$line"); done < <(sym-diff ar ra)
+loki-assert-eq "" "${val[*]}"
+loki-gorp
+
+loki-prog "Test 3"
+ar=(1 2)
+ra=(1 3)
+
+val=()
+while read -r line; do val+=("$line"); done < <(sym-diff ar ra)
+loki-assert-eq "3 2" "${val[*]}"
+loki-gorp
+
+loki-prog "Test 4"
+ar=(12 34 777 69)
+ra=(69 114 777 57)
+
+val=()
+while read -r line; do val+=("$line"); done < <(sym-diff ar ra)
+loki-assert-eq "114 57 34 12" "${val[*]}"
+loki-gorp
+
+loki-points +15
+
+lokiw -e popd

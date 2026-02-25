@@ -1,0 +1,12 @@
+
+pre=()
+
+main=(
+    "walk-inspections"
+    "column"
+    "line-counter"
+    "scalar-product"
+    "stack"
+    "sym-diff"
+    "wrapper"
+)

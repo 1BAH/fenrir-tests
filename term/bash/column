@@ -1,0 +1,168 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "CLM: "
+
+lokiw pushd column || {
+    loki-log fail "Cannot switch to 'column' directory"
+    exit 7
+}
+
+script="column.sh"
+
+input=$(fenrir-tmp)
+
+if ! [ -x "$script" ]; then
+    loki-log fail "Fail <$script> does not exist or is not executable"
+    exit 1
+fi
+
+loki-prog "Empty"
+
+echo -n | lokiw -e "./$script"
+loki-assert-out ""
+loki-assert-err ""
+
+loki-gorp
+
+loki-prog "Single value"
+
+lokiw -e "./$script" <<< 11
+loki-assert-out "11"
+loki-assert-err ""
+
+loki-gorp
+
+loki-prog "Single line"
+
+#lokiw -e "./$script" <<< '11 11'
+#loki-assert-eq "11  11" "$(loki-get-out)"
+#loki-assert-eq "" "$(loki-get-err)"
+
+lokiw -e -u "./$script <<< '1 11 121 11 1'"
+loki-assert-out "1  11  121  11  1"
+loki-assert-err ""
+
+loki-gorp
+
+loki-prog "Multi row"
+
+cat << IN > "$input"
+qwe
+qwe
+IN
+
+lokiw -e "./$script" < "$input"
+loki-assert-fout "$input"
+loki-assert-err ""
+
+
+cat << IN | lokiw -e "./$script"
+qwe q
+qwe qq
+IN
+
+loki-assert-fout <(cat << IN
+qwe  q
+qwe  qq
+IN
+)
+loki-assert-err ""
+
+
+cat << IN | lokiw -e "./$script"
+qwety q u
+qwe qq u
+IN
+
+loki-assert-fout <(cat << IN
+qwety  q   u
+qwe    qq  u
+IN
+)
+loki-assert-err ""
+
+loki-gorp
+
+loki-prog "Non default separators"
+
+lokiw -e "./$script" -s 8 <<< "123456789"
+loki-assert-out "1234567  9"
+loki-assert-err ""
+
+cat << IN |lokiw -e "./$script" -s 6
+567
+468
+IN
+loki-assert-fout <(cat << IN
+5  7
+4  8
+IN
+)
+loki-assert-err ""
+
+loki-gorp
+
+loki-prog "Errors"
+loki-prog "Ecode 1"
+
+lokiw "./$script" --s
+loki-assert-eq 1 $? "Incorrect exit code"
+loki-assert-out ""
+loki-assert-nerr ""
+
+lokiw "./$script" -s 8 8
+loki-assert-eq 1 $? "Incorrect exit code"
+loki-assert-out ""
+loki-assert-nerr ""
+
+loki-gorp
+
+loki-prog "Ecode 2"
+
+lokiw "./$script" -s
+loki-assert-eq 2 $? "Incorrect exit code"
+loki-assert-out ""
+loki-assert-nerr ""
+
+loki-gorp
+
+loki-prog "Ecode 3"
+
+cat << IN | lokiw "./$script"
+q 3 4
+q 3
+IN
+loki-assert-eq 3 $? "Incorrect exit code"
+loki-assert-out ""
+loki-assert-nerr ""
+
+cat << IN | lokiw "./$script"
+q 3 4
+q 3 4 5
+IN
+loki-assert-eq 3 $? "Incorrect exit code"
+loki-assert-out ""
+loki-assert-nerr ""
+
+cat << IN | lokiw "./$script" -s 6
+a6a6a
+a6a
+IN
+loki-assert-eq 3 $? "Incorrect exit code"
+loki-assert-out ""
+loki-assert-nerr ""
+
+cat << IN | lokiw "./$script" -s 6
+a6a6a
+a6a6a6a
+IN
+loki-assert-eq 3 $? "Incorrect exit code"
+loki-assert-out ""
+loki-assert-nerr ""
+
+loki-gorp
+loki-gorp
+
+loki-points +15
+
+lokiw -e popd
