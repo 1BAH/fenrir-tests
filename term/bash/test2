@@ -1,0 +1,6 @@
+#! wrapper.sh
+
+echo 3 4 5 6
+true
+sleep 2s
+echo 98

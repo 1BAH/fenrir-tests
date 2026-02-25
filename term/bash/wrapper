@@ -17,7 +17,10 @@ loki-gorp
 loki-prog "Test 1"
 echo -n > "$LOG_FILE"
 
-lokiw -e ./test1
+testfile="$(fenrir-task-path cfgs)/test1"
+chmod +x "$testfile"
+
+lokiw -e "$testfile"
 loki-log info "Log file is: <$LOG_FILE>"
 
 loki-assert-eq 4 "$(wc -l "$LOG_FILE" | cut -d' ' -f1)"
@@ -50,7 +53,10 @@ loki-gorp
 loki-prog "Test 2"
 echo -n > "$LOG_FILE"
 
-lokiw -e ./test2
+testfile="$(fenrir-task-path cfgs)/test2"
+chmod +x "$testfile"
+
+lokiw -e "$testfile"
 
 loki-log info "Log file is: <$LOG_FILE>"
 
@@ -83,7 +89,11 @@ loki-gorp
 loki-prog "Test 3"
 echo -n > "$LOG_FILE"
 
-./test3 > "$OUT_FILE" 2> "$ERR_FILE" &
+
+testfile="$(fenrir-task-path cfgs)/test3"
+chmod +x "$testfile"
+
+"$testfile" > "$OUT_FILE" 2> "$ERR_FILE" &
 RUNNER_PID=$!
 
 loki-log info "Log file is: <$LOG_FILE>"

@@ -8,7 +8,11 @@ scripts=(
     "wrapper"
 )
 
-cfgs=()
+cfgs=(
+    "test1"
+    "test2"
+    "test3"
+)
 
 branch="term/bash"
 blocking=0
