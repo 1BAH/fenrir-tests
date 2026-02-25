@@ -26,17 +26,13 @@ loki-gorp
 
 loki-prog "Single value"
 
-lokiw -e "./$script" <<< 11
+echo 11 | lokiw -e "./$script"
 loki-assert-out "11"
 loki-assert-err ""
 
 loki-gorp
 
 loki-prog "Single line"
-
-#lokiw -e "./$script" <<< '11 11'
-#loki-assert-eq "11  11" "$(loki-get-out)"
-#loki-assert-eq "" "$(loki-get-err)"
 
 lokiw -e -u "./$script <<< '1 11 121 11 1'"
 loki-assert-out "1  11  121  11  1"
@@ -164,5 +160,3 @@ loki-gorp
 loki-gorp
 
 loki-points +15
-
-lokiw -e popd
