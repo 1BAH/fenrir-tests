@@ -193,6 +193,14 @@ loki-assert-out 25
 loki-assert-err ""
 
 loki-gorp
+##############################################################################################
+loki-prog "No args"
+
+lokiw -e "./$script" "$root"
+loki-assert-out 153
+loki-assert-err ""
+
+loki-gorp
 loki-gorp
 ##############################################################################################
 
