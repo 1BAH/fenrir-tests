@@ -22,38 +22,38 @@ loki-gorp
 loki-prog "Validating gitignore"
 
 echo 1 > q.o
-lokiw -e -u "git status |& grep 'nothing to commit'"
+lokiw -e -u "git status >&2 | grep 'nothing to commit'"
 rm q.o
 
 echo 1 > o.o
-lokiw -e -u "! git status |& grep 'nothing to commit'"
+lokiw -e -u "! git status >&2 | grep 'nothing to commit'"
 rm o.o
 
 mkdir -p s/s/s/s
 
 echo 1 > s/o.o
-lokiw -e -u "git status |& grep 'nothing to commit'"
+lokiw -e -u "git status >&2 | grep 'nothing to commit'"
 rm s/o.o
 
 echo 1 > s/s/o.o
-lokiw -e -u "git status |& grep 'nothing to commit'"
+lokiw -e -u "git status >&2 | grep 'nothing to commit'"
 rm s/s/o.o
 
 echo 1 > s/s/s/o.o
-lokiw -e -u "git status |& grep 'nothing to commit'"
+lokiw -e -u "git status >&2 | grep 'nothing to commit'"
 rm s/s/s/o.o
 
 echo 1 > s/s/s/s/o.o
-lokiw -e -u "git status |& grep 'nothing to commit'"
+lokiw -e -u "git status >&2 | grep 'nothing to commit'"
 rm s/s/s/s/o.o
 
 echo 1 > bin
-lokiw -e -u "! git status |& grep 'nothing to commit'"
+lokiw -e -u "! git status >&2 | grep 'nothing to commit'"
 rm bin
 
 mkdir bin
 echo 1 > bin/a
-lokiw -e -u "git status |& grep 'nothing to commit'"
+lokiw -e -u "git status >&2 | grep 'nothing to commit'"
 rm bin/a
 
 loki-gorp
