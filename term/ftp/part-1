@@ -54,4 +54,3 @@ loki-assert-eq "$value" "$(loki-get-out)"
 loki-points +50
 
 docker stop "$cont" &> /dev/null
-lokiw -e popd

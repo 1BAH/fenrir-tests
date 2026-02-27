@@ -59,4 +59,3 @@ loki-assert-eq "$value" "$(cat "$voldir/sieben/ein/zwei.drei")"
 loki-points +50
 
 docker stop "$cont" &> /dev/null
-lokiw -e popd
