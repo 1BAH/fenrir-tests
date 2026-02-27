@@ -29,10 +29,13 @@ file=$(fenrir-tmp)
 voldir=$(fenrir-tmp -d)
 mkdir -p "$voldir/java/kotlin"
 
+export USER="tom"
+export PASSWORD="lizard"
+
 cont=$(docker run --rm -d \
-    -e "PUBLIC_IP=192.168.0.1" -e "FTP_PASS=123" -e "FTP_USER=user" \
+    -e "PUBLIC_IP=192.168.0.1" -e "FTP_PASS=$PASSWORD" -e "FTP_USER=$USER" \
     -p "20-21:20-21/tcp" -p "40000-40009:40000-40009/tcp" \
-    --mount type=bind,src="$voldir",dst=/home/user \
+    --mount type=bind,src="$voldir",dst=/home/$USER \
     "$image")
 # shellcheck disable=SC2181
 if (( $? != 0 )); then
