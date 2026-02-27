@@ -28,15 +28,12 @@ loki-assert-cb "docker stop \$cont &> /dev/null"
 voldir=$(fenrir-tmp -d)
 mkdir -p "$voldir/java/kotlin"
 
-ls -R /tmp
-
 export USER="tom"
 export PASSWORD="lizard"
 
 cont=$(docker run --rm -d \
     -e "PUBLIC_IP=192.168.0.1" -e "FTP_PASS=$PASSWORD" -e "FTP_USER=$USER" \
     -p "20-21:20-21/tcp" -p "40000-40009:40000-40009/tcp" \
-    --mount type=bind,src="$voldir",dst=/home/$USER \
     "$image")
 # shellcheck disable=SC2181
 if (( $? != 0 )); then
@@ -47,6 +44,7 @@ fi
 value="Running from script: $RANDOM"
 
 echo "echo '$value'" > "$voldir/java/kotlin/groovy.sh"
+lokiw -e docker cp "$voldir" "$cont:/home/$USER"
 
 loki-log info "Server is running on 'localhost'"
 
