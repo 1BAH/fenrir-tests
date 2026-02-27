@@ -46,7 +46,7 @@ value="Running from script: $RANDOM"
 echo "echo '$value'" > "$voldir/java/kotlin/groovy.sh"
 lokiw -e docker cp "$voldir" "$cont:/home/$USER"
 
-docker exec "$cont" ls "/home/$USER"
+docker exec "$cont" ls -R "/home/$USER"
 
 loki-log info "Server is running on 'localhost'"
 
