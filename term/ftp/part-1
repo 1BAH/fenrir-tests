@@ -28,6 +28,8 @@ loki-assert-cb "docker stop \$cont &> /dev/null"
 voldir=$(fenrir-tmp -d)
 mkdir -p "$voldir/java/kotlin"
 
+ls -R /tmp
+
 export USER="tom"
 export PASSWORD="lizard"
 
