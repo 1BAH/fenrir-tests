@@ -34,7 +34,8 @@ export PASSWORD="lizard"
 cont=$(docker run --rm -d \
     -e "PUBLIC_IP=192.168.0.1" -e "FTP_PASS=$PASSWORD" -e "FTP_USER=$USER" \
     -p "20-21:20-21/tcp" -p "40000-40009:40000-40009/tcp" \
-    "$image" 2> "$ERR_FILE")
+    --mount type=bind,src="$voldir",dst=/home/user \
+    "$image")
 # shellcheck disable=SC2181
 if (( $? != 0 )); then
     loki-log fail "Cannot start server"
@@ -44,9 +45,6 @@ fi
 value="Running from script: $RANDOM"
 
 echo "echo '$value'" > "$voldir/java/kotlin/groovy.sh"
-lokiw -e docker cp "$voldir/java" "$cont:/home/$USER"
-
-docker exec "$cont" ls -R "/home/$USER"
 
 loki-log info "Server is running on 'localhost'"
 
