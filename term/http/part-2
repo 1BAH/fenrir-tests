@@ -6,7 +6,7 @@ lokiw pushd part-2 || {
     exit 7
 }
 
-image="registry.gitlab.com/atpd/progtech/tech-tasks/containers/http:simple"
+image="registry.gitlab.com/atpd/progtech/tech-tasks/http:latest"
 filename="part-2.sh"
 
 if ! [ -x "$filename" ]; then

@@ -6,7 +6,7 @@ lokiw pushd part-4 || {
 }
 loki-set-log-prefix "HTTP-4: "
 
-image="registry.gitlab.com/atpd/progtech/tech-tasks/containers/http:simple"
+image="registry.gitlab.com/atpd/progtech/tech-tasks/http:latest"
 filename="part-4.sh"
 
 if ! [ -x "$filename" ]; then
