@@ -1,0 +1,110 @@
+#! /usr/bin/env loki
+
+lokiw pushd part-1 || {
+    loki-log fail "Cannot switch to 'part-1' directory"
+    exit 7
+}
+loki-set-log-prefix "HTTP-1: "
+
+image="registry.gitlab.com/atpd/progtech/tech-tasks/containers/http:simple"
+filename="part-1.sh"
+
+if ! [ -x "$filename" ]; then
+    loki-log err "File '$filename' does not exist or is not executable!"
+    exit 8
+fi
+
+#################################################################################################
+
+function finalise {
+    docker stop "$cont" &> /dev/null
+    loki-log fail "Script exited with non-zero code: <$1>"
+    exit "$1"
+}
+
+loki-assert-cb "docker stop \$cont &> /dev/null"
+
+cont=$(docker run --rm -d -P "$image")
+# shellcheck disable=SC2181
+if (( $? != 0 )); then
+    loki-log err "Cannot start server"
+    exit 66
+fi
+
+port=$(docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{(index $conf 0).HostPort}} {{end}}' "$cont" | tr -d ' ')
+
+host="http://localhost:$port"
+
+loki-log info "Server is running on '$host'"
+
+loki-prog "Correct executions.."
+
+# 200 code
+lokiw "./$filename" "$host/" || {
+    finalise $?
+}
+
+loki-assert-eq "SUCCESS(200)" "$(loki-get-out)"
+
+# 301 code
+lokiw "./$filename" "$host/r" || {
+    finalise $?
+}
+
+loki-assert-eq "REDIRECT(301)" "$(loki-get-out)"
+
+# 400 code
+lokiw "./$filename" "$host/i?hehe" || {
+    finalise $?
+}
+
+loki-assert-eq "CLIENT_ERROR(400)" "$(loki-get-out)"
+
+# 503 code
+lokiw "./$filename" "$host/e" || {
+    finalise $?
+}
+
+loki-assert-eq "SERVER_ERROR(503)" "$(loki-get-out)"
+
+loki-gorp
+
+loki-prog "Error handling.."
+
+lokiw "./$filename" "http::/localhost/" && {
+    docker stop "$cont" &> /dev/null
+    loki-log fail "Script exited with zero code"
+    exit 21
+}
+
+loki-assert-eq 77 "$?" "Invalid exit code"
+
+lokiw "./$filename" "http://localhost:$(( port + 10 ))/" && {
+    docker stop "$cont" &> /dev/null
+    loki-log fail "Script exited with zero code"
+    exit 21
+}
+
+loki-assert-eq 77 "$?" "Invalid exit code"
+
+lokiw "./$filename" "http://localhost:999999/" && {
+    docker stop "$cont" &> /dev/null
+    loki-log fail "Script exited with zero code"
+    exit 21
+}
+
+loki-assert-eq 77 "$?" "Invalid exit code"
+
+lokiw "./$filename" "$host/l" && {
+    docker stop "$cont" &> /dev/null
+    loki-log fail "Script exited with zero code"
+    exit 21
+}
+
+loki-assert-eq 88 "$?" "Invalid exit code"
+
+loki-gorp
+
+loki-points +20
+
+docker stop "$cont" &> /dev/null

@@ -1,0 +1,66 @@
+#! /usr/bin/env loki
+
+lokiw pushd part-4 || {
+    loki-log fail "Cannot switch to 'part-4' directory"
+    exit 7
+}
+loki-set-log-prefix "HTTP-4: "
+
+image="registry.gitlab.com/atpd/progtech/tech-tasks/containers/http:simple"
+filename="part-4.sh"
+
+if ! [ -x "$filename" ]; then
+    loki-log err "File '$filename' does not exist or is not executable!"
+    exit 8
+fi
+
+#################################################################################################
+
+function finalise {
+    docker stop "$cont" &> /dev/null
+    loki-log fail "Script exited with non-zero code: <$1>"
+    exit "$1"
+}
+
+loki-assert-cb "docker stop \$cont &> /dev/null"
+
+cont=$(docker run --rm -d -P "$image")
+# shellcheck disable=SC2181
+if (( $? != 0 )); then
+    loki-log err "Cannot start server"
+    exit 66
+fi
+
+port=$(docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{(index $conf 0).HostPort}} {{end}}' "$cont" | tr -d ' ')
+
+host="http://localhost:$port"
+
+loki-log info "Server is running on '$host'"
+
+tmpdir=$(fenrir-tmp -d)
+
+lokiw "./$filename" "$host/f" "$tmpdir" 55 7 || {
+    finalise $?
+}
+
+if ! [ -f "$tmpdir/answer.txt" ]; then
+    loki-log err "Cannot find the file"
+    finalise 8
+fi
+loki-assert-eq "UGA-BUGA" "$(cat "$tmpdir/answer.txt")"
+
+rm -fr "$tmpdir/answer.txt" &> /dev/null
+
+lokiw "./$filename" "$host/h" "$tmpdir" 55 7 || {
+    finalise $?
+}
+
+if ! [ -f "$tmpdir/answer.txt" ]; then
+    loki-log err "Cannot find the file"
+    finalise 8
+fi
+loki-assert-eq "UGA-BUGA" "$(cat "$tmpdir/answer.txt")"
+
+loki-points +20
+
+docker stop "$cont" &> /dev/null

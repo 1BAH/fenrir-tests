@@ -1,0 +1,117 @@
+#! /usr/bin/env loki
+
+lokiw pushd part-3 || {
+    loki-log fail "Cannot switch to 'part-3' directory"
+    exit 7
+}
+loki-set-log-prefix "HTTP-3: "
+
+image="registry.gitlab.com/atpd/progtech/tech-tasks/containers/http:simple"
+filename="part-3.sh"
+
+if ! [ -x "$filename" ]; then
+    loki-log err "File '$filename' does not exist or is not executable!"
+    exit 8
+fi
+
+#################################################################################################
+
+function finalise {
+    docker stop "$cont" &> /dev/null
+    loki-log fail "Script exited with non-zero code: <$1>"
+    exit "$1"
+}
+
+loki-assert-cb "docker stop \$cont &> /dev/null"
+
+cont=$(docker run --rm -d -P "$image")
+# shellcheck disable=SC2181
+if (( $? != 0 )); then
+    loki-log err "Cannot start server"
+    exit 66
+fi
+
+port=$(docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{(index $conf 0).HostPort}} {{end}}' "$cont" | tr -d ' ')
+
+host="http://localhost:$port"
+
+loki-log info "Server is running on '$host'"
+
+
+loki-prog "Local server.."
+
+# Normal test
+lokiw "./$filename" "$host/r" || {
+    finalise $?
+}
+
+if ! diff -q "$OUT_FILE" <(cat <<-IN
+$host/r
+$host/r1
+$host/sub-inner
+$host/inner
+IN
+); then
+    loki-log err "Invalid output"
+    loki-log err "Expected:"
+    cat <<-IN
+$host/r
+$host/r1
+$host/sub-inner
+$host/inner
+IN
+    loki-log err "Got:"
+    loki-get-out
+    finalise 5
+fi
+
+# Tricky test
+lokiw "./$filename" "$host/inner" || {
+    finalise $?
+}
+
+if ! diff -q "$OUT_FILE" <(cat <<-IN
+$host/inner
+IN
+); then
+    loki-log err "Invalid output"
+    loki-log err "Expected:"
+    cat <<-IN
+$host/inner
+IN
+    loki-log err "Got:"
+    loki-get-out
+    finalise 5
+fi
+
+loki-gorp
+
+loki-prog "Real internet.."
+
+lokiw "./$filename" "http://google.de/" || {
+    finalise $?
+}
+
+if ! diff -q "$OUT_FILE" <(cat <<-IN
+http://google.de/
+http://www.google.de/
+http://www.google.com/
+IN
+); then
+    loki-log err "Invalid output"
+    loki-log err "Expected:"
+    cat <<-IN
+http://google.de/
+http://www.google.de/
+http://www.google.com/
+IN
+    loki-log err "Got:"
+    loki-get-out
+    finalise 5
+fi
+
+loki-gorp
+
+loki-points +20
+
+docker stop "$cont" &> /dev/null

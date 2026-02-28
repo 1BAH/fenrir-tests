@@ -1,0 +1,10 @@
+
+pre=()
+
+main=(
+    "walk-inspections"
+    "part-1"
+    "part-2"
+    "part-3"
+    "part-4"
+)

@@ -1,0 +1,64 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "HTTP-2: "
+lokiw pushd part-2 || {
+    loki-log fail "Cannot switch to 'part-2' directory"
+    exit 7
+}
+
+image="registry.gitlab.com/atpd/progtech/tech-tasks/containers/http:simple"
+filename="part-2.sh"
+
+if ! [ -x "$filename" ]; then
+    loki-log err "File '$filename' does not exist or is not executable!"
+    exit 8
+fi
+
+#################################################################################################
+
+function finalise {
+    docker stop "$cont" &> /dev/null
+    loki-log fail "Script exited with non-zero code: <$1>"
+    exit "$1"
+}
+
+loki-assert-cb "docker stop \$cont &> /dev/null"
+
+cont=$(docker run --rm -d -P "$image")
+# shellcheck disable=SC2181
+if (( $? != 0 )); then
+    loki-log err "Cannot start server"
+    exit 66
+fi
+
+port=$(docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{(index $conf 0).HostPort}} {{end}}' "$cont" | tr -d ' ')
+
+host="http://localhost:$port"
+
+loki-log info "Server is running on '$host'"
+
+function tests {
+    loki-prog "$1 format"
+
+    lokiw "./$filename" -$2 "$host/d$2" 123 12 || {
+        finalise $?
+    }
+
+    loki-assert-eq "10" "$(loki-get-out)"
+
+    lokiw "./$filename" -$2 "$host/d$2" 55 7 || {
+        finalise $?
+    }
+
+    loki-assert-eq "7" "$(loki-get-out)"
+
+    loki-gorp
+}
+
+tests "XML" x
+tests "YAML" y
+tests "JSON" j
+
+loki-points +40
+
+docker stop "$cont" &> /dev/null
