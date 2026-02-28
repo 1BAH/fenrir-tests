@@ -34,7 +34,7 @@ export PASSWORD="lizard"
 cont=$(docker run --rm -d \
     -e "PUBLIC_IP=192.168.0.1" -e "FTP_PASS=$PASSWORD" -e "FTP_USER=$USER" \
     -p "20-21:20-21/tcp" -p "40000-40009:40000-40009/tcp" \
-    --mount type=bind,src="$voldir",dst=/home/user \
+    --mount type=bind,src="$voldir",dst=/home/$USER \
     "$image")
 # shellcheck disable=SC2181
 if (( $? != 0 )); then
