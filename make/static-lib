@@ -1,0 +1,17 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "SLL: "
+
+lokiw -e make gladiator
+
+if ! [ -f "lib/libgladiator.a" ]; then
+    loki-log fail "The 'gladiator' library was not created!"
+    exit 5
+fi
+
+lokiw file "lib/libgladiator.a"
+loki-assert-rout "ar archive"
+
+rm -fr bin build lib
+
+loki-points +30

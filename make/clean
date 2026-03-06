@@ -1,0 +1,12 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "CLN: "
+
+lokiw -e make clean
+
+if [ -d lib ] || [ -d bin ] || [ -d build ]; then
+    loki-fail "Clean stage is not working correctly"
+    exit 7
+fi
+
+loki-points +10

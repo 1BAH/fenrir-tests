@@ -1,0 +1,16 @@
+
+scripts=(
+    "binary"
+    "install"
+    "clean"
+    "shared-lib"
+    "static-lib"
+)
+
+cfgs=()
+
+image="registry.gitlab.com/atpd/progtech/tech-tasks/make/make:latest"
+branch="make"
+blocking=1
+inline=0
+inhost=0

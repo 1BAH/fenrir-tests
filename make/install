@@ -1,0 +1,24 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "INS: "
+
+loki-prog "Installing.."
+lokiw -e make
+echo "breach" | sudo -S make install
+loki-assert-eq 0 $?
+loki-gorp
+
+loki-prog "Testing the binary"
+lokiw -e colosseum
+loki-assert-rout "Panem et circenses!"
+loki-assert-rout "gladiator mortuus est!"
+loki-gorp
+
+loki-prog "Testing the library"
+lokiw -e g++ main.cpp -lludus -lgladiator -L lib -I c-lib/include -o bin/colo
+lokiw -e ./bin/colo
+loki-assert-rout "Panem et circenses!"
+loki-assert-rout "gladiator mortuus est!"
+loki-gorp
+
+loki-points +10

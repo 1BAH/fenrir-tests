@@ -1,0 +1,25 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "DLL: "
+
+lokiw -e make ludus
+
+if ! [ -f "lib/roman/libludus.so" ]; then
+    loki-log fail "The 'ludus' library (Roman) was not created!"
+    exit 5
+fi
+
+lokiw file "lib/roman/libludus.so"
+loki-assert-rout "shared object"
+
+if ! [ -f "lib/pompeian/libludus.so" ]; then
+    loki-log fail "The 'ludus' library (Pompeian) was not created!"
+    exit 5
+fi
+
+lokiw file "lib/pompeian/libludus.so"
+loki-assert-rout "shared object"
+
+rm -fr bin build lib
+
+loki-points +35

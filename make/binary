@@ -1,0 +1,56 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "BIN: "
+
+loki-prog "Final binary: Roman"
+
+lokiw -e make
+if ! [ -x "bin/colosseum" ]; then
+    loki-log fail "The binary was not created!"
+    exit 5
+fi
+
+LD_LIBRARY_PATH=lib/roman lokiw "./bin/colosseum" &> /dev/null
+loki-assert-neq 0 $?
+loki-assert-rerr "Colloseum is closed!"
+
+loki-gorp
+rm -fr bin build lib
+loki-prog "Final binary: Pompeian"
+
+lokiw -e make
+if ! [ -x "bin/colosseum" ]; then
+    loki-log fail "The binary was not created!"
+    exit 5
+fi
+
+loki-prog "LD_LIBRARY_PATH is not set"
+lokiw "./bin/colosseum" &> /dev/null
+loki-assert-neq 0 $?
+loki-gorp
+
+loki-prog "LD_LIBRARY_PATH is set"
+LD_LIBRARY_PATH=lib/pompeian lokiw "./bin/colosseum" &> /dev/null
+loki-assert-eq 0 $?
+loki-assert-rout "Panem et circenses!"
+loki-assert-rout "gladiator mortuus est!"
+loki-gorp
+
+loki-gorp
+rm -fr bin build lib
+loki-prog "Final binary: Optimisations"
+
+lokiw -e make MAGIC='"int i = 11; while (i++ > 0) {}"'
+if ! [ -x "bin/colosseum" ]; then
+    loki-log fail "The binary was not created!"
+    exit 5
+fi
+
+LD_LIBRARY_PATH=lib/pompeian lokiw timeout -s SIGTERM 5s "./bin/colosseum" &> /dev/null
+# We test in alpine: it has --preserve-status by default
+loki-assert-eq 77 $? "The command did not time out!"
+
+rm -fr bin build lib
+loki-gorp
+
+loki-points +15
