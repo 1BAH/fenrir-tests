@@ -4,7 +4,7 @@ loki-set-log-prefix "SSH-3: "
 
 image="registry.gitlab.com/atpd/progtech/tech-tasks/ssh/ssh:latest"
 
-lokiw -e pushd part-1
+lokiw -e pushd part-3
 
 if ! [ -f "config" ]; then
     loki-log err "Cannot find file <config>"

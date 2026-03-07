@@ -15,7 +15,7 @@ function verify_script {
 lokiw -e pushd part-1
 
 verify_script "setup.sh"
-verify_script "part-2.sh"
+verify_script "part-1.sh"
 
 #################################################################################################
 loki-log info "Starting test environment.."

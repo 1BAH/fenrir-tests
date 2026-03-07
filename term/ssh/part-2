@@ -12,7 +12,7 @@ function verify_script {
     fi
 }
 
-lokiw -e pushd part-1
+lokiw -e pushd part-2
 
 verify_script "setup.sh"
 verify_script "part-2.sh"
