@@ -1,0 +1,12 @@
+
+scripts=(
+    "part-1"
+    "part-2"
+    "part-3"
+)
+
+cfgs=()
+
+branch="term/ssh"
+blocking=0
+indocker=0

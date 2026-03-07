@@ -1,0 +1,156 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "SSH-3: "
+
+image="registry.gitlab.com/atpd/progtech/tech-tasks/ssh/ssh:latest"
+
+lokiw -e pushd part-1
+
+if ! [ -f "config" ]; then
+    loki-log err "Cannot find file <config>"
+    exit 13
+fi
+
+#################################################################################################
+loki-log info "Starting test environment.."
+
+function finalise {
+    docker stop "client" schweiz deutschland oesterreich &> /dev/null
+    docker network rm "$net" &> /dev/null
+    loki-log fail "Script exited with non-zero code: <$1>"
+    exit "$1"
+}
+
+loki-assert-cb "docker stop client schweiz deutschland oesterreich &> /dev/null && docker network rm $net &> /dev/null"
+
+keys=$(fenrir-tmp -d)
+
+net="${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}"
+lokiw -e docker network create "$net"
+
+for id in client deutschland oesterreich schweiz; do
+    # shellcheck disable=SC2046
+    cont=$(docker run --rm -d \
+        -e "LOKI_VERBOSE" \
+        --net "$net" \
+        --name "$id" \
+        "$image")
+    # shellcheck disable=SC2181
+    if (( $? != 0 )); then
+        loki-log err "Cannot start server"
+        exit 66
+    fi
+done
+
+declare -A data=(
+    [deutschland]="allemand"
+    [oesterreich]="autriche"
+    [schweiz]="suisse"
+)
+
+lokiw docker exec client mkdir /home/fikus/.ssh || {
+    finalise $?
+}
+
+for server in "${!data[@]}"; do
+    pays=${data["$server"]}
+
+    ssh-keygen -q -t ed25519 -N '' -f "${keys}/${pays}" <<< 'y'
+    lokiw docker cp "${keys}/${pays}" "client:/home/fikus/.ssh/${pays}" || {
+        finalise $?
+    }
+
+    lokiw docker exec "$server" mkdir /home/fikus/.ssh || {
+        finalise $?
+    }
+
+    lokiw docker exec "$server" bash -c "echo '$(< "$keys/${pays}.pub")' >> /home/fikus/.ssh/authorized_keys" || {
+        finalise $?
+    }
+
+    lokiw docker exec "$server" chmod 600 /home/fikus/.ssh/authorized_keys || {
+        finalise $?
+    }
+
+    lokiw docker exec "$server" chown -R fikus /home/fikus/.ssh || {
+        finalise $?
+    }
+done
+
+lokiw docker cp "config" "client:/home/fikus/.ssh/config" || {
+    finalise $?
+}
+
+lokiw docker exec client bash -c "chmod 600 /home/fikus/.ssh/*" || {
+    finalise $?
+}
+
+lokiw docker exec client chown -R fikus /home/fikus/.ssh || {
+    finalise $?
+}
+
+loki-log info "The environment is ready"
+
+#######################################################################################
+loki-prog "Testing the SSH connection.."
+
+function ping {
+    url=$1
+    lokiw docker exec -u fikus client ssh "fikus@$url" "echo Guten Tag!"
+}
+
+########
+loki-prog "Deutschland"
+
+ping "gitlab.de" || {
+    finalise $?
+}
+loki-assert-out "Guten Tag!"
+
+ping "www.google.de" || {
+    finalise $?
+}
+loki-assert-out "Guten Tag!"
+
+loki-gorp
+#####
+loki-prog "Oesterreich"
+
+ping "gitlab.at" || {
+    finalise $?
+}
+loki-assert-out "Guten Tag!"
+
+ping "www.google.at" || {
+    finalise $?
+}
+loki-assert-out "Guten Tag!"
+
+loki-gorp
+#####
+loki-prog "Schweiz"
+
+ping "gitlab.ch" || {
+    finalise $?
+}
+loki-assert-out "Guten Tag!"
+
+ping "www.google.ch" || {
+    finalise $?
+}
+loki-assert-out "Guten Tag!"
+
+loki-gorp
+########
+loki-prog "Frankreich"
+ping "gitlab.fr"
+loki-assert-neq 0 $?
+loki-gorp
+########
+
+loki-gorp
+
+loki-points +30
+
+docker stop schweiz deutschland oesterreich client &> /dev/null
+docker network rm "$net" &> /dev/null
