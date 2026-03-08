@@ -1,0 +1,10 @@
+
+scripts=(
+    "dpkg-systemd"
+)
+
+cfgs=()
+
+branch="term/dpkg-systemd"
+blocking=0
+indocker=0
