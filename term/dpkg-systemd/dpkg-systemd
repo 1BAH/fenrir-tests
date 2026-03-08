@@ -1,23 +1,20 @@
 #! /usr/bin/env loki
 
-loki-set-log-prefix "SSH-1: "
+loki-set-log-prefix "DSd: "
 
-image="registry.gitlab.com/atpd/progtech/tech-tasks/ssh/ssh:latest"
+if ! [ -d zhira-package ]; then
+    loki-log err "Cannot find directory <zhira-package>"
+    exit 5
+fi
 
-function verify_script {
-    local filename=$1
-    if ! [ -x "$filename" ]; then
-        loki-log err "File '$filename' does not exist or is not executable!"
-        exit 8
-    fi
+image="registry.gitlab.com/atpd/progtech/tech-tasks/dpkg-systemd/dpkg-systemd:latest"
+
+
+function run_server {
+    lokiw docker exec -u root server "$@"
 }
 
-lokiw -e pushd part-1
-
-verify_script "setup.sh"
-verify_script "part-1.sh"
-
-#################################################################################################
+##########################
 loki-log info "Starting test environment.."
 
 function finalise {
@@ -29,13 +26,11 @@ function finalise {
 
 loki-assert-cb "docker stop client server &> /dev/null && docker network rm $net &> /dev/null"
 
-voldir=$(fenrir-tmp -d)
-
 net="${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}"
 lokiw -e docker network create "$net"
 
 for id in client server; do
-    # shellcheck disable=SC2046
+    # shellcheck disable=SC2034
     cont=$(docker run --rm -d \
         -e "LOKI_VERBOSE" \
         --net "$net" \
@@ -48,81 +43,42 @@ for id in client server; do
     fi
 done
 
-msg="Velociraptor $RANDOM"
+lokiw docker cp . server:/home/fikus/ || finalise $?
 
-cat <<- SCRIPT > "$voldir/run.me"
-#! /bin/bash
+loki-log info "The environment is ready"
 
-echo ${msg} > \$(dirname "\$(realpath "\$0")")/t.rex
-SCRIPT
+loki-log info "Installing package.."
 
-lokiw docker cp "$voldir" server:/home/fikus/cacti || {
-    finalise $?
-}
+run_server make || finalise $?
+run_server dpkg -b zhira-package || finalise $?
+run_server apt install ./zhira-package.deb || finalise $?
 
-lokiw docker exec server chown -R fikus /home/fikus || {
-    finalise $?
-}
+loki-log info "The package is installed"
 
-loki-log info "Server and client have started"
-
-##################################################################################
-
-loki-prog "Setting up SSH connection.."
-
-lokiw docker cp "setup.sh" client:/home/fikus/ || {
-    finalise $?
-}
-
-lokiw docker exec client chown -R fikus /home/fikus || {
-    finalise $?
-}
-
-loki-log info "Running setup.sh.."
-
-lokiw docker exec -u fikus client ./setup.sh || {
-    finalise $?
-}
-
-loki-log info "Testing the connection.."
-
-lokiw docker exec -u fikus client ssh fikus@server "echo Hello World!" || {
-    finalise $?
-}
-
-loki-assert-out "Hello World!"
-
+loki-prog "Tests (running).."
+run_server curl server:23456 || finalise $?
+loki-assert-out "Got: <78> bytes"
+run_server curl server:23456 -d qwerty || finalise $?
+loki-assert-out "Got: <153> bytes"
+loki-gorp
+loki-prog "Tests (stopped).."
+run_server systemctl stop zhira
+run_server curl server:23456 -d qwerty && finalise $?
+loki-gorp
+loki-prog "Tests (restarted).."
+run_server systemctl start zhira
+run_server curl server:23456 || finalise $?
+loki-assert-out "Got: <78> bytes"
+run_server curl server:23456 -d qwerty || finalise $?
+loki-assert-out "Got: <153> bytes"
+loki-gorp
+loki-prog "Tests (copyrights).."
+run_server ls /usr/share/doc/zhira/copyright || finalise $?
+loki-gorp
+loki-prog "Tests (uninstall).."
+run_server apt purge zhira || finalise $?
+run_server curl server:23456 -d qwerty && finalise $?
+run_server ls /etc/systemd/system/zhira.service && finalise $?
 loki-gorp
 
-loki-prog "Verifying the main script.."
-
-lokiw docker cp "part-1.sh" client:/home/fikus/ || {
-    finalise $?
-}
-
-lokiw docker exec client chown -R fikus /home/fikus || {
-    finalise $?
-}
-
-loki-log info "Running part-1.sh.."
-
-lokiw docker exec -u fikus client ./part-1.sh || {
-    finalise $?
-}
-
-lokiw docker cp server:/home/fikus/cacti/t.rex "$voldir" || {
-    finalise $?
-}
-
-if ! [ -f "$voldir/t.rex" ]; then
-    loki-log err "Cannot find the file"
-    finalise 8
-fi
-loki-assert-eq "${msg}" "$(< "$voldir/t.rex")"
-
-loki-gorp
-
-loki-points +40
-
-docker stop server client &> /dev/null
-docker network rm "$net" &> /dev/null
+loki-points +25
