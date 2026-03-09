@@ -96,7 +96,7 @@ run_server curl server:23456 -d qwerty && finalise $?
 run_server ls /etc/systemd/system/zhira.service && finalise $?
 loki-gorp
 
-loki-points +25
+loki-points +100
 
 docker stop "client" "server" &> /dev/null
 docker network rm "$net" &> /dev/null
