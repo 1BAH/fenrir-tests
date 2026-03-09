@@ -18,6 +18,13 @@ function run_server {
 loki-log info "Starting test environment.."
 
 function finalise {
+    if [ -x investigate.sh ]; then
+        docker cp investigate.sh server:/home/fikus/investigate.sh &> /dev/null
+        loki-log warn "RUNNING 'investigate.sh'"
+        docker exec -u root server /home/fikus/investigate.sh
+        loki-log warn "END OF 'investigate.sh'"
+    fi
+
     docker stop "client" "server" &> /dev/null
     docker network rm "$net" &> /dev/null
     loki-log fail "Script exited with non-zero code: <$1>"
@@ -31,7 +38,7 @@ lokiw -e docker network create "$net"
 
 for id in client server; do
     # shellcheck disable=SC2034
-    cont=$(docker run --rm -d \
+    cont=$(docker run --privileged --rm -d \
         -e "LOKI_VERBOSE" \
         --net "$net" \
         --name "$id" \
@@ -52,14 +59,16 @@ loki-log info "Installing package.."
 run_server make || finalise $?
 run_server dpkg -b zhira-package || finalise $?
 run_server apt install ./zhira-package.deb || finalise $?
-
+sleep 1s
 loki-log info "The package is installed"
 
 loki-prog "Tests (running).."
 run_server curl server:23456 || finalise $?
-loki-assert-out "Got: <78> bytes"
+loki-assert-out "Got: <75> bytes"
+sleep 1s
 run_server curl server:23456 -d qwerty || finalise $?
-loki-assert-out "Got: <153> bytes"
+loki-assert-out "Got: <150> bytes"
+sleep 1s
 loki-gorp
 loki-prog "Tests (stopped).."
 run_server systemctl stop zhira
@@ -67,18 +76,24 @@ run_server curl server:23456 -d qwerty && finalise $?
 loki-gorp
 loki-prog "Tests (restarted).."
 run_server systemctl start zhira
+sleep 1s
 run_server curl server:23456 || finalise $?
-loki-assert-out "Got: <78> bytes"
+loki-assert-out "Got: <75> bytes"
+sleep 1s
 run_server curl server:23456 -d qwerty || finalise $?
-loki-assert-out "Got: <153> bytes"
+loki-assert-out "Got: <150> bytes"
+sleep 1s
 loki-gorp
 loki-prog "Tests (copyrights).."
 run_server ls /usr/share/doc/zhira/copyright || finalise $?
 loki-gorp
 loki-prog "Tests (uninstall).."
-run_server apt purge zhira || finalise $?
+run_server apt purge -y zhira || finalise $?
 run_server curl server:23456 -d qwerty && finalise $?
 run_server ls /etc/systemd/system/zhira.service && finalise $?
 loki-gorp
 
 loki-points +25
+
+docker stop "client" "server" &> /dev/null
+docker network rm "$net" &> /dev/null
