@@ -51,6 +51,7 @@ for id in client server; do
 done
 
 lokiw docker cp . server:/home/fikus/ || finalise $?
+lokiw docker exec server chmod 775 /home/fikus/zhira-package/DEBIAN || finalise $?
 
 loki-log info "The environment is ready"
 
