@@ -47,6 +47,7 @@ value="Running from script: $RANDOM"
 
 echo "$value" > "$file"
 
+sleep 3s
 loki-log info "Server is running on 'localhost'"
 
 lokiw "./$filename" "$file" || {

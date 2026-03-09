@@ -46,6 +46,7 @@ value="Running from script: $RANDOM"
 
 echo "echo '$value'" > "$voldir/java/kotlin/groovy.sh"
 
+sleep 3s
 loki-log info "Server is running on 'localhost'"
 
 lokiw "./$filename" || {
