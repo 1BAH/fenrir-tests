@@ -39,7 +39,6 @@ lokiw -e docker network create "$net"
 for id in client server; do
     # shellcheck disable=SC2034
     cont=$(docker run --privileged --rm -d \
-        --platform=linux/amd64 \
         -e "LOKI_VERBOSE" \
         --net "$net" \
         --name "$id" \
