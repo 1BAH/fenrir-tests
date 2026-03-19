@@ -76,7 +76,7 @@ lokiw docker cp "part-2.sh" client:/home/fikus/ || {
     finalise $?
 }
 
-lokiw docker exec client chown -R fikus /home/fikus || {
+lokiw docker exec -u root client chown -R fikus /home/fikus || {
     finalise $?
 }
 
