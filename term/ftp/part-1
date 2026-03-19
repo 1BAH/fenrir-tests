@@ -64,6 +64,9 @@ mkdir -p "$voldir/kotlin"
 value="Running from script: $RANDOM"
 echo "echo '$value'" > "$voldir/kotlin/groovy.sh"
 
+lokiw docker exec server mkdir -p "/home/$USER" || {
+    finalise $?
+}
 lokiw docker cp "$voldir" "server:/home/$USER/java" || {
     finalise $?
 }
