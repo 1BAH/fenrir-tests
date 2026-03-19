@@ -18,24 +18,38 @@ fi
 #################################################################################################
 
 function finalise {
-    docker stop "$cont" &> /dev/null
+    docker stop "client" "server" &> /dev/null
+    docker network rm "$net" &> /dev/null
     loki-log fail "Script exited with non-zero code: <$1>"
     exit "$1"
 }
 
-loki-assert-cb "docker stop \$cont &> /dev/null"
+loki-assert-cb "docker stop client server &> /dev/null && docker network rm $net &> /dev/null"
 
-file=$(fenrir-tmp)
-voldir=$(fenrir-tmp -d)
-mkdir -p "$voldir/java/kotlin"
-
+# Credentials
 export USER="tom"
 export PASSWORD="lizard"
 
+net="${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}"
+lokiw -e docker network create "$net"
+
+# Client
 cont=$(docker run --rm -d \
+    -e "LOKI_VERBOSE" -e "USER" -e "PASSWORD" \
+    --net "$net" \
+    --name "client" \
+    "registry.gitlab.com/atpd/progtech/tech-tasks/ftp:latest")
+# shellcheck disable=SC2181
+if (( $? != 0 )); then
+    loki-log err "Cannot start client"
+    exit 66
+fi
+
+# FTP server
+cont=$(docker run --rm -d \
+    --name server --net "$net" \
     -e "PUBLIC_IP=192.168.0.1" -e "FTP_PASS=$PASSWORD" -e "FTP_USER=$USER" \
     -p "20-21:20-21/tcp" -p "40000-40009:40000-40009/tcp" \
-    --mount type=bind,src="$voldir",dst=/home/$USER \
     "$image")
 # shellcheck disable=SC2181
 if (( $? != 0 )); then
@@ -43,23 +57,45 @@ if (( $? != 0 )); then
     exit 66
 fi
 
-value="Running from script: $RANDOM"
 
+file=$(fenrir-tmp)
+
+value="Running from script: $RANDOM"
 echo "$value" > "$file"
 
-sleep 3s
-loki-log info "Server is running on 'localhost'"
-
-lokiw "./$filename" "$file" || {
+lokiw docker cp "$file" "client:/home/fikus/ffile" || {
     finalise $?
 }
 
-if ! [ -f "$voldir/sieben/ein/zwei.drei" ]; then
-    loki-log err "Cannot find the file"
-    finalise 8
-fi
-loki-assert-eq "$value" "$(cat "$voldir/sieben/ein/zwei.drei")"
+sleep 1s
+loki-log info "Server is running on 'server'"
+
+loki-prog "Verifying the main script.."
+
+lokiw docker cp "part-2.sh" client:/home/fikus/ || {
+    finalise $?
+}
+
+lokiw docker exec client chown -R fikus /home/fikus || {
+    finalise $?
+}
+
+loki-log info "Running part-2.sh.."
+
+lokiw docker exec -u fikus client ./part-2.sh "/home/fikus/ffile" || {
+    finalise $?
+}
+
+lokiw docker exec server test -f "/home/$USER/sieben/ein/zwei.drei" || {
+    finalise $?
+}
+
+lokiw docker exec server cat "/home/$USER/sieben/ein/zwei.drei" || {
+    finalise $?
+}
+loki-assert-out "$value"
 
 loki-points +50
 
-docker stop "$cont" &> /dev/null
+docker stop "client" "server" &> /dev/null
+docker network rm "$net" &> /dev/null
