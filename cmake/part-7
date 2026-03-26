@@ -93,6 +93,8 @@ lokiw -e ./build/tests
 loki-assert-out "will VS demogorgon
 will has won!
 will VS mind_flayer
+will has won!
+will VS vecna
 will is dead!"
 
 loki-gorp
