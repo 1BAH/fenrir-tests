@@ -1,0 +1,40 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "P2: "
+
+lokiw -e pushd part-2
+
+rm -fr build
+rm -fr bin
+
+if lokiw g++ -c dependency.c -o try.o; then
+    loki-log fail "'dependency.c' cannot be cxx-compatible!"
+    rm -fr try.o
+    exit 1
+fi
+
+if ! lokiw cmake -B build; then
+    loki-log fail "CMake configuration & generation has failed!"
+    exit 1
+fi
+
+
+if ! lokiw cmake --build build; then
+    loki-log fail "CMake execution has failed!"
+    exit 1
+fi
+
+if ! [ -x bin/c-cross-cxx ]; then
+    loki-log err "File 'say-hi' was not found!"
+    exit 1
+fi
+
+if ! lokiw ./bin/c-cross-cxx 64; then
+    loki-log fail "Something went wrong when executing the binary!"
+    exit 1
+fi
+
+loki-assert-out "6"
+loki-assert-err ""
+
+loki-points +5

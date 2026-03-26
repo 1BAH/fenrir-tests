@@ -1,0 +1,79 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "P5: "
+
+lokiw -e pushd part-5
+
+libdir=$(fenrir-tmp -d)
+
+rm -fr build lib/build
+rm -fr bin   lib/bin
+
+lokiw -e pushd lib
+
+loki-prog "Building & installing library.."
+
+if ! lokiw cmake -B build; then
+    loki-log fail "CMake configuration & generation has failed!"
+    exit 1
+fi
+
+if ! lokiw cmake --build build; then
+    loki-log fail "CMake execution has failed!"
+    exit 1
+fi
+
+if ! lokiw cmake --install build --prefix "$libdir"; then
+    loki-log fail "CMake install has failed!"
+    exit 1
+fi
+
+loki-prog "Verifying the installation.."
+
+if ! [ -f "$libdir/include/logic.hxx" ]; then
+    loki-log err "The header was not correctly installed!"
+    exit 99
+fi
+
+if ! [ -f "$libdir/lib/liblogic.so" ]; then
+    loki-log err "The library was not correctly installed!"
+    exit 99
+fi
+
+loki-gorp
+loki-gorp
+
+lokiw -e popd
+
+loki-prog "Building the main project.."
+
+if lokiw cmake -B build; then
+    loki-log fail "Not 'LIBPATH' is provided: the build is expected to fail!"
+    exit 1
+fi
+
+if ! lokiw cmake -B build -DLIBPATH="$libdir"; then
+    loki-log fail "CMake configuration & generation has failed!"
+    exit 1
+fi
+
+if ! lokiw cmake --build build; then
+    loki-log fail "CMake execution has failed!"
+    exit 1
+fi
+
+loki-gorp
+loki-prog "Testing the build artifact.."
+
+if ! [ -f bin/logic ]; then
+    loki-log err "The binary was not found!"
+    exit 1
+fi
+
+lokiw -e ./bin/logic
+loki-assert-out ""
+loki-assert-err "c"
+
+loki-gorp
+
+loki-points +10

@@ -1,0 +1,93 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "P3: "
+
+lokiw -e pushd part-3
+
+function negative_tests {
+    for n in -1000 -1000000 -12 -21 -11 -5 -4 -3 -2 -1; do
+        echo "$n" | lokiw -e ./bin/fib
+        loki-assert-out "-1"
+        loki-assert-err ""
+    done
+}
+
+
+function positive_tests {
+    test_cases=(
+        [0]=1
+        [1]=1
+        [2]=2
+        [3]=3
+        [4]=5
+        [5]=8
+        [10]=89
+        [18]=4181
+        [30]=1346269
+    )
+
+
+    for n in "${!test_cases[@]}"; do
+        echo "$n" | lokiw -e ./bin/fib
+        loki-assert-out "${test_cases[$n]}"
+        loki-assert-err ""
+    done
+}
+
+rm -fr build
+rm -fr bin
+
+# Non-optimised
+if ! lokiw cmake -B build; then
+    loki-log fail "CMake configuration & generation has failed!"
+    exit 1
+fi
+
+if ! lokiw cmake --build build; then
+    loki-log fail "CMake execution has failed!"
+    exit 1
+fi
+
+loki-log info "Running negative_tests.."
+negative_tests
+
+loki-log info "Running positive_tests.."
+positive_tests
+
+loki-log info "Measuring performance.."
+time_spent=$(
+    { /usr/bin/time -f "%U" bash -c 'echo 40 | ./bin/fib' 2>&1 > /dev/null; } 2>&1
+)
+
+
+# Optimised
+rm -fr build
+rm -fr bin
+
+if ! lokiw cmake -B build -DOPTIMISED=ON; then
+    loki-log fail "CMake configuration & generation has failed!"
+    exit 1
+fi
+
+if ! lokiw cmake --build build; then
+    loki-log fail "CMake execution has failed!"
+    exit 1
+fi
+
+loki-log info "Running negative_tests.."
+negative_tests
+
+loki-log info "Running positive_tests.."
+positive_tests
+
+loki-log info "Measuring performance.."
+new_time_spent=$(
+    { /usr/bin/time -f "%U" bash -c 'echo 40 | ./bin/fib' 2>&1 > /dev/null; } 2>&1
+)
+
+if (( `bc -l <<< "$time_spent < $new_time_spent"` )); then
+    loki-log err "Loop implementation cannot be slower than the recursive one!"
+    exit 55
+fi
+
+loki-points +25

@@ -1,0 +1,130 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "P7: "
+
+lokiw -e pushd part-7
+
+install_dir=$(fenrir-tmp -d)
+backup=$(fenrir-tmp)
+
+loki-log info "Install dir is '${install_dir}'"
+loki-log info "CMakeLists.txt backup is '${backup}'"
+
+rm -fr build lib/build
+rm -fr bin   lib/bin
+
+####################################################################################
+lokiw -e pushd lib
+
+loki-prog "Building & installing library.."
+
+if ! lokiw cmake -B build; then
+    loki-log fail "CMake configuration & generation has failed!"
+    exit 1
+fi
+
+if ! lokiw cmake --build build; then
+    loki-log fail "CMake execution has failed!"
+    exit 1
+fi
+
+if ! lokiw cmake --install build --prefix "${install_dir}"; then
+    loki-log fail "CMake install has failed!"
+    exit 1
+fi
+
+loki-log "info" "Validating '${install_dir}'.."
+
+##
+# lib/libvecna_main.a
+# lib/libvecna.a
+# include/stranger_things.hh
+##
+if [ "$(find "${install_dir}" -maxdepth 2 -type f | wc -l)" -ne 3 ]; then
+    loki-log err "You have installed incorrectly!"
+    exit 2
+fi
+
+if [ "$(find "${install_dir}" -maxdepth 1 -type f | wc -l)" -ne 0 ]; then
+    loki-log err "You have installed incorrectly!"
+    exit 3
+fi
+
+##
+# lib
+# include
+##
+if [ "$(find "${install_dir}" -maxdepth 1 -mindepth 1 -type d | wc -l)" -ne 2 ]; then
+    loki-log err "You have installed incorrectly!"
+    exit 4
+fi
+
+if ! [ -d "${install_dir}/lib/cmake/vecna" ]; then
+    loki-log err "You have installed incorrectly!"
+    exit 5
+fi
+
+loki-gorp
+
+lokiw -e popd
+####################################################################################
+
+loki-prog "Testing.."
+
+loki-prog "Correct build"
+
+cp CMakeLists.txt "$backup"
+
+cat <<-CMAKELIST > CMakeLists.txt
+CMAKE_MINIMUM_REQUIRED(VERSION 3.11)
+
+PROJECT(part-7)
+
+FIND_PACKAGE(vecna 1.0.0 EXACT REQUIRED)
+
+ADD_EXECUTABLE(tests main.cpp)
+TARGET_LINK_LIBRARIES(tests PRIVATE vecna::vecna vecna::vecna_main)
+CMAKELIST
+
+lokiw -e cmake -B build -DCMAKE_PREFIX_PATH="${install_dir}"
+lokiw -e cmake --build build
+lokiw -e ./build/tests
+
+loki-assert-out "will VS demogorgon
+will has won!
+will VS mind_flayer
+will is dead!"
+
+loki-gorp
+
+loki-prog "Incorrect build"
+
+cat <<-CMAKELIST > CMakeLists.txt
+CMAKE_MINIMUM_REQUIRED(VERSION 3.11)
+
+PROJECT(part-7)
+
+FIND_PACKAGE(vecna 1.0.0 EXACT REQUIRED)
+
+ADD_EXECUTABLE(tests main.cpp)
+TARGET_LINK_LIBRARIES(tests PRIVATE vecna::vecna)
+CMAKELIST
+
+lokiw -e cmake -B build -DCMAKE_PREFIX_PATH="${install_dir}/cmake"
+lokiw -e ! cmake --build build
+
+error_msg='undefined reference to `main'"'"
+
+stderr=$(loki-get-err)
+stderr_without_answer=${stderr/"$error_msg"/}
+
+if [[ "$stderr" == "${stderr_without_answer}" ]]; then
+    loki-log fail "Build log is incorrect"
+    exit 7
+fi
+
+loki-gorp
+
+loki-gorp
+
+loki-points +30

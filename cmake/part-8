@@ -1,0 +1,32 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "P8: "
+
+lokiw -e pushd part-8
+
+rm -fr build
+rm -fr bin
+
+if ! [ -f CMakeLists.txt ]; then
+    loki-log err "No CMakeLists.txt is provided!"
+    exit 66
+fi
+
+if ! lokiw cmake -B build; then
+    loki-log fail "CMake configuration & generation has failed!"
+    exit 1
+fi
+
+if ! lokiw cmake --build build; then
+    loki-log fail "CMake execution has failed!"
+    exit 1
+fi
+
+if [ -d "build/_deps" ]; then
+    loki-log fail "You have not used FetchContent!"
+    exit 8
+fi
+
+lokiw -e ./build/examples
+
+loki-points +5

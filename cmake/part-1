@@ -1,0 +1,31 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "P1: "
+
+lokiw -e pushd part-1
+
+rm -fr build
+rm -fr bin
+
+if ! lokiw cmake -B build; then
+    loki-log fail "CMake configuration & generation has failed!"
+    exit 1
+fi
+
+
+if ! lokiw cmake --build build; then
+    loki-log fail "CMake execution has failed!"
+    exit 1
+fi
+
+if ! [ -f bin/say-hi ]; then
+    loki-log err "File 'say-hi' was not found!"
+    exit 1
+fi
+
+lokiw -e ./bin/say-hi
+
+loki-assert-out "Hello World!"
+loki-assert-err "pupupu"
+
+loki-points +5

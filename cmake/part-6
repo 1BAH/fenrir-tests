@@ -1,0 +1,66 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "P6: "
+
+lokiw -e pushd part-6
+
+rm -fr build lib/build
+rm -fr bin   lib/bin
+
+if ! [ -f CMakeLists.txt ]; then
+    loki-log err "No CMakeLists.txt is provided!"
+    exit 66
+fi
+
+line0=$'-- Checking that 0 is even\n-- Checking that 0 is even - Success\n-- PASSED >>= 0\n'
+line1=$'-- Checking that 80 is even\n-- Checking that 80 is even - Success\n-- PASSED >>= 1\n'
+line2=$'-- Checking that 89 is even\n-- Checking that 89 is even - Failed\n-- PASSED >>= 2\n'
+line3=$'-- Checking that 3 is even\n-- Checking that 3 is even - Failed\n-- PASSED >>= 3'
+
+CORRECT_OUT="$line0$line1$line2$line3"
+
+# GENERATION
+
+if ! lokiw cmake -B build; then
+    loki-log fail "Something went wrong.."
+    exit 1
+fi
+
+stdout=$(loki-get-out)
+stdout_without_answer=${stdout/"$CORRECT_OUT"/}
+
+if [[ "$stdout" != "${stdout_without_answer}" ]]; then
+    loki-log fail "Build log is incorrect"
+    exit 7
+fi
+
+# DEFAULT BUILD
+
+if ! lokiw cmake --build build; then
+    loki-log fail "Something went wrong.."
+    exit 1
+fi
+
+stdout=$(loki-get-out)
+
+if [ -n "$stdout" ]; then
+    loki-log fail "You should not execute any target by default!"
+    exit 8
+fi
+
+# BUILD TARGET run_all_tests
+
+if ! lokiw cmake --build build --target run_all_tests; then
+    loki-log fail "Something went wrong.."
+    exit 1
+fi
+
+stdout=$(loki-get-out)
+stdout_without_answer=${stdout/"$CORRECT_OUT"/}
+
+if [[ "$stdout" == "${stdout_without_answer}" ]]; then
+    loki-log fail "Build log is incorrect"
+    exit 8
+fi
+
+loki-points +10

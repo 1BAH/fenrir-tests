@@ -1,0 +1,43 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "P4: "
+
+lokiw -e pushd part-4
+
+rm -fr build
+rm -fr bin
+
+if ! lokiw cmake -B build; then
+    loki-log fail "CMake configuration & generation has failed!"
+    exit 1
+fi
+
+if ! lokiw cmake --build build; then
+    loki-log fail "CMake execution has failed!"
+    exit 1
+fi
+
+if ! [ -f build/entities/libanimals.a ]; then
+    loki-log err "You have not created 'libanimals.a'"
+    exit 1
+fi
+
+if ! [ -f build/lib/libmath.a ]; then
+    loki-log err "You have not created 'libmath.a'"
+    exit 1
+fi
+
+# Even
+
+echo 3 | lokiw -e ./bin/parity
+loki-assert-out "Now I'm lyin' on the cold hard ground ... AAAAAAAAAA"
+loki-assert-err ""
+
+# Odd
+
+echo 2 | lokiw -e ./bin/parity
+loki-assert-out ""
+loki-assert-err ""
+
+
+loki-points +10
