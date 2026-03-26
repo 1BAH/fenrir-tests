@@ -113,8 +113,8 @@ TARGET_LINK_LIBRARIES(tests PRIVATE vecna::vecna)
 CMAKELIST
 
 lokiw -e cmake -B build -DCMAKE_PREFIX_PATH="${install_dir}/cmake"
-lokiw -e ! cmake --build build
-
+lokiw cmake --build build
+loki-assert-neq 0 $?
 error_msg='undefined reference to `main'"'"
 
 stderr=$(loki-get-err)

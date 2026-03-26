@@ -22,11 +22,11 @@ if ! lokiw cmake --build build; then
     exit 1
 fi
 
-if [ -d "build/_deps" ]; then
+if ! [ -d "build/_deps" ]; then
     loki-log fail "You have not used FetchContent!"
     exit 8
 fi
 
-lokiw -e ./build/examples
+lokiw -e ./build/example
 
 loki-points +5

@@ -13,4 +13,4 @@ cfgs=()
 
 branch="cmake"
 blocking=0
-inline=0
+#inline=0
