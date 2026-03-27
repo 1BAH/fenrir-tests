@@ -2,6 +2,11 @@
 
 loki-set-log-prefix "P3: "
 
+if [[ $(uname -m) != "x86_64" ]]; then
+    loki-log warn "Current platform is <$(uname -m)>. Cannot run the test (expected <x86_64>)"
+    exit 1
+fi
+
 lokiw -e pushd part-3
 
 function negative_tests {
