@@ -11,6 +11,7 @@ scripts=(
 
 cfgs=()
 
+image="registry.gitlab.com/atpd/progtech/tech-tasks/cmake/cmake:latest"
 branch="cmake"
 blocking=0
 #inline=0
