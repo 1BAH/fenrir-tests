@@ -1,0 +1,24 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "P4: "
+
+lokiw -e rm -fr build
+
+loki-prog "Build project.."
+lokiw -e cmake -B build -DCMAKE_BUILD_TYPE=Debug
+lokiw -e cmake --build build --target gemini_cov
+loki-gorp
+
+loki-prog "Parsing results.."
+rate=$(cat build/part-4/gemini_cov.csv | grep 'solver.cc' | cut -d',' -f 4 | cut -d'.' -f 2)
+rate="${rate}00"
+rate=${rate:0:2}
+loki-log info "'solver.cc' branch coverage is <0.$rate>"
+
+if (( rate < 70 )); then
+    loki-log err "Line coverage must be >=0.70!"
+    exit 5
+fi
+
+loki-points +30
+loki-gorp

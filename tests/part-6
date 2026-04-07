@@ -1,0 +1,22 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "P6: "
+
+lokiw -e rm -fr build
+
+loki-prog "Build project.."
+lokiw -e cmake -B build -DCMAKE_BUILD_TYPE=Debug
+lokiw -e cmake --build build --target cyclocov
+loki-gorp
+
+loki-prog "Parse results.."
+rate=$(cat build/part-6/cyclocov.csv | grep 'src.cc' | cut -d',' -f 7)
+loki-log info "Your branch coverage is <$rate>"
+
+if ! [[ $rate == 1.0 ]]; then
+    loki-log err "Branch coverage must be 1.0!"
+    exit 5
+fi
+
+loki-gorp
+loki-points +15

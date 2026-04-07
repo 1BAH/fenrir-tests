@@ -1,0 +1,13 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "P1: "
+
+lokiw -e pushd part-1
+
+lokiw make clean
+lokiw make
+loki-assert-neq 0 $? "Tests must fail!"
+loki-assert-rout "rand_tests.cc:6: Failure"
+loki-assert-rout "Expected: \(7\) != \(service::get_number\(\)\), actual: 7 vs 7"
+
+loki-points +10

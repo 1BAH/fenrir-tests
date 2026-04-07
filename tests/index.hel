@@ -1,0 +1,15 @@
+scripts=(
+    "part-1"
+    "part-2"
+    "part-3"
+    "part-4"
+    "part-5"
+    "part-6"
+)
+
+cfgs=()
+
+image="registry.gitlab.com/atpd/progtech/tech-tasks/gtest/gtest:latest"
+branch="tests"
+blocking=0
+inline=0

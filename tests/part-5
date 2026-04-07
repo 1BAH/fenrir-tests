@@ -1,0 +1,29 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "P5: "
+
+lokiw -e rm -fr build
+
+loki-prog "Build project.."
+lokiw -e cmake -B build -DCMAKE_BUILD_TYPE=Debug
+lokiw -e cmake --build build --target type_tests
+lokiw -e cmake --build build --target pipeline_cov
+loki-gorp
+
+loki-set-log-prefix "P5-1: "
+loki-prog "Type assertions.."
+lokiw -e ./build/part-5/tests/type_tests
+loki-points +5
+loki-gorp
+
+loki-set-log-prefix "P5-2: "
+loki-prog "Tests.."
+rate=$(cat build/part-5/pipeline_cov.csv | grep 'pipeline.cc' | cut -d',' -f 4)
+loki-log info "'pipeline.cc' line coverage is <$rate>"
+
+if ! [[ $rate == 1.0 ]]; then
+    loki-log err "Line coverage must be 1.0!"
+    exit 5
+fi
+loki-points +10
+loki-gorp

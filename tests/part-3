@@ -1,0 +1,23 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "P3: "
+
+lokiw -e rm -fr build
+
+loki-prog "Build project.."
+lokiw -e cmake -B build -DCMAKE_BUILD_TYPE=Debug
+lokiw -e cmake --build build --target linal_test
+lokiw -e cmake --build build --target formatest
+loki-gorp
+
+loki-set-log-prefix "P3-1: "
+loki-prog "Formatting.."
+lokiw -e ./build/part-3/tests/formatest
+loki-points +5
+loki-gorp
+
+loki-set-log-prefix "P3-2: "
+loki-prog "Matcher.."
+lokiw -e ./build/part-3/tests/linal_test
+loki-points +10
+loki-gorp

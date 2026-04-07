@@ -1,0 +1,47 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "P2: "
+
+lokiw -e rm -fr build
+
+loki-prog "Build project.."
+lokiw -e cmake -B build -DCMAKE_BUILD_TYPE=Debug
+lokiw -e cmake --build build --target testiranje
+loki-gorp
+
+loki-prog "Parse results.."
+passed=1
+
+rate=$(cat build/part-2/testiranje.csv | grep 'izvjesce.cc' | cut -d',' -f 4)
+loki-log info "'izvjesce.cc' line coverage is <$rate>"
+
+if ! [[ $rate == 1.0 ]]; then
+    loki-log err "Line coverage must be 1.0!"
+    passed=0
+fi
+
+rate=$(cat build/part-2/testiranje.csv | grep 'tvornica.cc' | cut -d',' -f 4)
+loki-log info "'tvornica.cc' line coverage is <$rate>"
+
+if ! [[ $rate == 1.0 ]]; then
+    loki-log err "Line coverage must be 1.0!"
+    passed=0
+fi
+
+rate=$(cat build/part-2/testiranje.csv | grep 'tvornica.cc' | cut -d',' -f 7 | cut -d'.' -f 2)
+rate="${rate}00"
+rate=${rate:0:2}
+loki-log info "'tvornica.cc' branch coverage is <0.$rate>"
+
+if (( $rate < 68 )); then
+    loki-log err "Line coverage must be >=0.68!"
+    passed=0
+fi
+
+if (( passed == 0 )); then
+    exit 5
+fi
+
+loki-gorp
+
+loki-points +15
