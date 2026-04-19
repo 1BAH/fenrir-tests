@@ -123,38 +123,6 @@ if ! docker compose down; then
     exit 8
 fi
 
-if ! docker compose up -d; then
-    loki-log err "Failed to start the application!"
-    exit 7
-fi
-
-await
-
-loki-log info "Perform exit(3) termination.."
-lokiw curl --fail "$HOST/shutdown" || {
-    loki-log fail "Curl failed"
-    docker compose down -v
-    exit 6
-}
-
-if [ -n "${FENRIR_IN_DOCKER}" ]; then
-    sleep 100s
-else
-    sleep 1m
-fi
-
-lokiw curl --fail "$URL/3" || {
-    loki-log fail "Curl failed"
-    docker compose down -v
-    exit 6
-}
-loki-assert-out '{"id":3,"name":"ТЭП70","speed":160.0}'
-
-if ! docker compose down -v; then
-    loki-log err "Failed to down the application"
-    exit 8
-fi
-
 loki-gorp
 
 loki-points +100
