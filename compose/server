@@ -106,7 +106,11 @@ lokiw curl --fail -X POST "$HOST/actuator/shutdown" || {
     exit 6
 }
 
-sleep 10s
+if [ -n "${FENRIR_IN_DOCKER}" ]; then
+    sleep 20s
+else
+    sleep 10s
+fi
 
 statuses=$(docker compose ps --format "{{.Status}}")
 loki-assert-eq 1 "$(wc -l <<< "$statuses")" "Expected server to be dead"
@@ -133,7 +137,11 @@ lokiw curl --fail "$HOST/shutdown" || {
     exit 6
 }
 
-sleep 1m
+if [ -n "${FENRIR_IN_DOCKER}" ]; then
+    sleep 100s
+else
+    sleep 1m
+fi
 
 statuses=$(docker compose ps --format "{{.Status}}")
 loki-assert-eq 2 "$(wc -l <<< "$statuses")" "Expected only two services"
