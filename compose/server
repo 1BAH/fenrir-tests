@@ -1,0 +1,150 @@
+#! /usr/bin/env loki
+
+function await {
+    maxtime=30
+    while ! [ "healthy)" = "$(docker compose ps --format "{{.Status}}" | cut -f2 -d'(' | uniq)" ]; do
+        if (( maxtime == 0 )); then
+            return
+        fi
+
+        sleep 1s
+        (( maxtime-- ))
+    done
+}
+
+loki-set-log-prefix "SV: "
+loki-assert-cb "docker compose down -v"
+
+loki-prog "Starting the application.."
+if ! docker compose up -d; then
+    loki-log err "Failed to start the application!"
+    exit 7
+fi
+
+statuses=$(docker compose ps --format "{{.State}}")
+loki-assert-eq 2 "$(wc -l <<< "$statuses")" "Expected only two services"
+loki-assert-eq "running" "$(echo "$statuses" | uniq)" "Both services must be running"
+loki-gorp
+
+await
+
+##############################################################################
+
+loki-prog "Testing backend.."
+
+URL="http://localhost:12345/loco"
+
+lokiw curl --fail "$URL/1" || {
+    loki-log fail "Curl failed"
+    docker compose down -v
+    exit 6
+}
+loki-assert-out '{"id":1,"name":"ЧС4Т","speed":160.0}' "Migrations were missed"
+
+lokiw curl --fail "$URL/3" || {
+    loki-log fail "Curl failed"
+    docker compose down -v
+    exit 6
+}
+loki-assert-out 'null'
+
+lokiw -e curl -X POST "$URL" -H 'Content-Type: application/json' -d '{"name":"ТЭП70", "speed":160.0}'
+loki-assert-out '{"id":3,"name":"ТЭП70","speed":160.0}'
+
+lokiw curl --fail "$URL/3" || {
+    loki-log fail "Curl failed"
+    docker compose down -v
+    exit 6
+}
+loki-assert-out '{"id":3,"name":"ТЭП70","speed":160.0}'
+
+loki-gorp
+
+##############################################################################
+
+loki-prog "Test volumes"
+if ! docker compose down; then
+    loki-log err "Failed to down the application"
+    exit 8
+fi
+
+if ! docker compose up -d; then
+    loki-log err "Failed to start the application!"
+    exit 7
+fi
+
+await
+
+lokiw curl --fail "$URL/3" || {
+    loki-log fail "Curl failed"
+    docker compose down -v
+    exit 6
+}
+loki-assert-out '{"id":3,"name":"ТЭП70","speed":160.0}'
+
+loki-gorp
+
+##############################################################################
+
+loki-prog "Testing healthcheck"
+
+statuses=$(docker compose ps --format "{{.Status}}")
+loki-assert-eq 2 "$(wc -l <<< "$statuses")" "Expected only two services"
+loki-assert-eq "healthy)" "$(echo "$statuses" | cut -f2 -d"(" | uniq)" "Both services must be healthy"
+loki-gorp
+
+loki-log info "Perform exit(0) termination.."
+lokiw curl --fail -X POST "http://localhost:12345/actuator/shutdown" || {
+    loki-log fail "Curl failed"
+    docker compose down -v
+    exit 6
+}
+
+sleep 10s
+
+statuses=$(docker compose ps --format "{{.Status}}")
+loki-assert-eq 1 "$(wc -l <<< "$statuses")" "Expected server to be dead"
+loki-assert-eq "healthy)" "$(echo "$statuses" | cut -f2 -d"(")"
+
+loki-log info "Reload application.."
+
+if ! docker compose down; then
+    loki-log err "Failed to down the application"
+    exit 8
+fi
+
+if ! docker compose up -d; then
+    loki-log err "Failed to start the application!"
+    exit 7
+fi
+
+await
+
+loki-log info "Perform exit(3) termination.."
+lokiw curl --fail "http://localhost:12345/shutdown" || {
+    loki-log fail "Curl failed"
+    docker compose down -v
+    exit 6
+}
+
+sleep 1m
+
+statuses=$(docker compose ps --format "{{.Status}}")
+loki-assert-eq 2 "$(wc -l <<< "$statuses")" "Expected only two services"
+loki-assert-eq "healthy)" "$(echo "$statuses" | cut -f2 -d"(" | uniq)"
+
+lokiw curl --fail "$URL/3" || {
+    loki-log fail "Curl failed"
+    docker compose down -v
+    exit 6
+}
+loki-assert-out '{"id":3,"name":"ТЭП70","speed":160.0}'
+
+if ! docker compose down -v; then
+    loki-log err "Failed to down the application"
+    exit 8
+fi
+
+loki-gorp
+
+loki-points +100

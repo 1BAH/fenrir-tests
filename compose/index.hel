@@ -1,0 +1,11 @@
+
+scripts=(
+    "server"
+)
+
+cfgs=()
+
+branch="compose"
+blocking=1
+inline=0
+indocker=0

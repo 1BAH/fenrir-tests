@@ -1,0 +1,7 @@
+
+pre=()
+
+main=(
+    "walk-inspections"
+    "server"
+)
