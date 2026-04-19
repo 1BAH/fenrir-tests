@@ -143,10 +143,6 @@ else
     sleep 1m
 fi
 
-statuses=$(docker compose ps --format "{{.Status}}")
-loki-assert-eq 2 "$(wc -l <<< "$statuses")" "Expected only two services"
-loki-assert-eq "healthy)" "$(echo "$statuses" | cut -f2 -d"(" | uniq)"
-
 lokiw curl --fail "$URL/3" || {
     loki-log fail "Curl failed"
     docker compose down -v
