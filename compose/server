@@ -33,10 +33,12 @@ await
 loki-prog "Testing backend.."
 
 if [ -n "${FENRIR_IN_DOCKER}" ]; then
-    URL="http://localhost:12345/loco"
+    HOST="http://docker:12345"
 else
-    URL="http://docker:12345/loco"
+    HOST="http://localhost:12345"
 fi
+
+URL="$HOST/loco"
 
 lokiw curl --fail "$URL/1" || {
     loki-log fail "Curl failed"
@@ -98,7 +100,7 @@ loki-assert-eq "healthy)" "$(echo "$statuses" | cut -f2 -d"(" | uniq)" "Both ser
 loki-gorp
 
 loki-log info "Perform exit(0) termination.."
-lokiw curl --fail -X POST "http://docker:12345/actuator/shutdown" || {
+lokiw curl --fail -X POST "$HOST/actuator/shutdown" || {
     loki-log fail "Curl failed"
     docker compose down -v
     exit 6
@@ -125,7 +127,7 @@ fi
 await
 
 loki-log info "Perform exit(3) termination.."
-lokiw curl --fail "http://docker:12345/shutdown" || {
+lokiw curl --fail "$HOST/shutdown" || {
     loki-log fail "Curl failed"
     docker compose down -v
     exit 6
