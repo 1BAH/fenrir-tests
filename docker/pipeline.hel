@@ -1,0 +1,10 @@
+
+pre=()
+
+main=(
+    "walk-inspections"
+    "runconf"
+    "gpine"
+    "ping-pong"
+    "standalone"
+)

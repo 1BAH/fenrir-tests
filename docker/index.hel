@@ -1,0 +1,14 @@
+
+scripts=(
+    "runconf"
+    "gpine"
+    "ping-pong"
+    "standalone"
+)
+
+cfgs=()
+
+branch="docker"
+blocking=0
+inhost=0
+indocker=0

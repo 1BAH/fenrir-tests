@@ -1,0 +1,85 @@
+#! /usr/bin/env loki
+
+function contains {
+    str=$1
+    pattern=$2
+
+    [[ $str == *${pattern}* ]]
+}
+
+function has_cmd {
+    read -ra cmd <<< "$1"
+    ! [[ ${cmd[${#cmd[@]} - 1]} == "runconf" ]]
+}
+
+loki-set-log-prefix "RC: "
+
+lokiw -e runconf
+
+loki-prog "Build image"
+docker build -t runconf . || {
+    loki-log fail "Failed to build"
+    exit 56
+}
+loki-gorp
+
+loki-prog "Load properties"
+source solution.properties
+
+loki-prog "Validate fst"
+if ! contains "$fst" "--rm" || contains "$fst" "--entrypoint" || has_cmd "$fst"; then
+    loki-log err "Invalid fst"
+    exit 1
+fi
+loki-gorp
+
+loki-prog "Validate snd"
+if ! contains "$snd" "--rm" || contains "$snd" "--entrypoint"; then
+    loki-log err "Invalid snd"
+    exit 1
+fi
+loki-gorp
+
+loki-prog "Validate trd"
+if ! contains "$trd" "--rm" || has_cmd "$trd"; then
+    loki-log err "Invalid trd"
+    exit 1
+fi
+loki-gorp
+
+loki-prog "Validate frt"
+if ! contains "$frt" "--rm"; then
+    loki-log err "Invalid trd"
+    exit 1
+fi
+loki-gorp
+
+function wc {
+    return 100
+}
+
+loki-gorp
+
+loki-prog "Tests.."
+loki-prog 1st
+lokiw -e -u $fst
+loki-assert-out "IN: correct"
+loki-gorp
+
+loki-prog 2nd
+lokiw -e -u $snd
+loki-assert-out "IN: nfa ast"
+loki-gorp
+
+loki-prog 3rd
+lokiw -e -u $trd
+loki-assert-out ""
+loki-gorp
+
+loki-prog 4th
+lokiw -e -u $frt
+loki-assert-out "12"
+loki-gorp
+loki-gorp
+
+loki-points +10

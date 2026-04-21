@@ -1,0 +1,125 @@
+#! /usr/bin/env loki
+
+function contains {
+    str=$1
+    pattern=$2
+
+    [[ $str == *${pattern}* ]]
+}
+
+loki-set-log-prefix "PP: "
+
+lokiw -e pushd ping-pong
+
+if ! [ -x "mkenv.sh" ]; then
+    loki-log err "Cannot find 'mkenv.sh'"
+    exit 9
+fi
+if ! [ -x "rmenv.sh" ]; then
+    loki-log err "Cannot find 'rmenv.sh'"
+    exit 10
+fi
+
+loki-assert-cb "./rmenv.sh"
+
+loki-prog "Start the environment"
+./mkenv.sh || {
+    loki-log fail "Failed to build"
+    exit 56
+}
+
+if (( $(docker inspect -f '{{.Size}}' front) > 3900000 )); then
+    loki-log err "Image 'front' is too heavy"
+    ./rmenv.sh
+    exit 6
+fi
+
+if (( $(docker inspect -f '{{.Size}}' back) > 3500000 )); then
+    loki-log err "Image 'back' is too heavy"
+    ./rmenv.sh
+    exit 6
+fi
+
+if ! contains "$(docker network ls --format '{{ .Name }}')" korea; then
+    loki-log err "You haven't started the network"
+    exit 5
+fi
+
+if ! contains "$(docker volume ls --format '{{ .Name }}')" hanja; then
+    loki-log err "You haven't started the volume"
+    exit 5
+fi
+
+if ! contains "$(docker container ls -a --format '{{ .Names }}')" south ||
+   ! contains "$(docker container ls -a --format '{{ .Names }}')" north; then
+    loki-log err "You haven't started the containers"
+    exit 5
+fi
+
+loki-gorp
+
+sleep 2s
+
+loki-prog "Running the tests"
+
+if [ -n "${FENRIR_IN_DOCKER}" ]; then
+    HOST="http://docker:9999"
+else
+    HOST="http://localhost:9999"
+fi
+HOST="$HOST/ping"
+
+loki-log info "Test the connection"
+curl --fail -s "$HOST" > "${OUT_FILE}"
+loki-assert-out "(0)"
+
+curl --fail -s "$HOST" > "${OUT_FILE}"
+loki-assert-out "(1)"
+
+curl --fail -s "$HOST" > "${OUT_FILE}"
+loki-assert-out "(2)"
+
+loki-log info "Killing the containers.."
+docker kill north south &> /dev/null
+docker rm north south &> /dev/null
+
+loki-log info "Recreating the containers.."
+./mkenv.sh &> /dev/null
+
+sleep 2s
+
+loki-log info "Test the connection"
+curl --fail -s "$HOST" > "${OUT_FILE}"
+loki-assert-out "(3)"
+
+curl --fail -s "$HOST" > "${OUT_FILE}"
+loki-assert-out "(4)"
+
+curl --fail -s "$HOST" > "${OUT_FILE}"
+loki-assert-out "(5)"
+loki-gorp
+
+loki-prog "Destruct the environment"
+./rmenv.sh || {
+    loki-log fail "Failed to build"
+    exit 56
+}
+loki-gorp
+
+if contains "$(docker network ls --format '{{ .Name }}')" korea; then
+    loki-log err "You haven't removed the network"
+    exit 5
+fi
+
+if contains "$(docker volume ls --format '{{ .Name }}')" hanja; then
+    loki-log err "You haven't removed the volume"
+    exit 5
+fi
+
+if contains "$(docker container ls -a --format '{{ .Names }}')" south ||
+   contains "$(docker container ls -a --format '{{ .Names }}')" north; then
+    loki-log err "You haven't removed the containers"
+    exit 5
+fi
+
+loki-points +30

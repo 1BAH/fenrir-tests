@@ -1,0 +1,49 @@
+#! /usr/bin/env loki
+
+function contains {
+    str=$1
+    pattern=$2
+
+    [[ $str == *${pattern}* ]]
+}
+
+loki-set-log-prefix "STD: "
+
+loki-prog "Check platforms"
+
+image="registry.gitlab.com/atpd/progtech/2026-spring"
+image="${image}/$(basename "$PWD")"
+
+loki-log info "Image: '${image}'"
+
+manifest=$(docker manifest inspect "$image")
+loki-assert-eq 0 $?
+
+if ! contains "$manifest" "amd64"; then
+    loki-log err "Your image does not support amd64 platform"
+    exit 3
+fi
+
+if ! contains "$manifest" "arm64"; then
+    loki-log err "Your image does not support arm64 platform"
+    exit 3
+fi
+
+if ! contains "$manifest" "ppc64le"; then
+    loki-log err "Your image does not support ppc64le platform"
+    exit 3
+fi
+
+loki-gorp
+
+loki-prog "Verifying the image.."
+lokiw -e docker run --rm "$image" 11
+loki-assert-out "11 44"
+loki-gorp
+
+if (( $(docker inspect -f '{{.Size}}' "$image") > 500000 )); then
+    loki-log err "The image is too heavy!"
+    exit 7
+fi
+
+loki-points +30

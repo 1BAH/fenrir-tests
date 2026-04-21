@@ -1,0 +1,33 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "GP: "
+
+lokiw -e pushd gpine
+
+loki-prog "Build image"
+docker build -t gpine . || {
+    loki-log fail "Failed to build"
+    exit 56
+}
+loki-gorp
+
+loki-prog "Validate image"
+size=$(docker inspect -f "{{.Size}}" gpine)
+if (( 6500000 < size )); then
+    loki-log fail "The image is to heavy!"
+    exit 57
+fi
+
+lokiw -e docker run --rm gpine -c 'var q 123 && var a 432 && sum $q $a'
+loki-assert-out "555"
+loki-assert-err ""
+
+docker run --rm gpine -c 'cd /usr/local/bin && ls'  > "$OUT_FILE" 2> "$ERR_FILE" || {
+    loki-log fail "Error"
+    exit 58
+}
+loki-assert-out "cat"
+loki-assert-err ""
+loki-gorp
+
+loki-points +30
