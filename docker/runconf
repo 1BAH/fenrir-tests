@@ -14,7 +14,7 @@ function has_cmd {
 
 loki-set-log-prefix "RC: "
 
-lokiw -e runconf
+lokiw -e pushd runconf
 
 loki-prog "Build image"
 docker build -t runconf . || {

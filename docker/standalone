@@ -12,6 +12,7 @@ loki-set-log-prefix "STD: "
 loki-prog "Check platforms"
 
 image="registry.gitlab.com/atpd/progtech/2026-spring"
+cd ..
 image="${image}/$(basename "$PWD")"
 
 loki-log info "Image: '${image}'"
