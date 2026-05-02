@@ -1,6 +1,6 @@
 #! /usr/bin/env loki
 
-loki-set-log-prefix "SI: "
+loki-set-log-prefix "SD: "
 
 if [ -n "${FENRIR_IN_DOCKER}" ]; then
     HOST="http://docker"
