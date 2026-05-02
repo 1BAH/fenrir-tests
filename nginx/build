@@ -1,0 +1,21 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "BD: "
+
+docker build -t nginx-server . || {
+    loki-log fail "Failed to build"
+    loki-points -1000
+    exit 56
+}
+
+loki-prog "Starting the server.."
+docker run -d --rm --name nginx-cont -p 5689:5689 -p 5623:5623 -p 5271:5271 nginx-server || {
+    loki-log fail "Failed to start"
+    loki-points -1000
+    loki-log warn "The following tests results are to be omitted!"
+    exit 57
+}
+
+sleep 2s
+
+loki-gorp

@@ -1,0 +1,12 @@
+
+pre=()
+
+main=(
+    "walk-inspections"
+    "build"
+    "registry"
+    "static-index"
+    "static-dates"
+    "proxy"
+    "finalise"
+)

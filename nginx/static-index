@@ -1,0 +1,27 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "SI: "
+
+if [ -n "${FENRIR_IN_DOCKER}" ]; then
+    HOST="http://docker"
+else
+    HOST="http://localhost"
+fi
+HOST="$HOST:5623"
+
+loki-prog "Test the static hosting"
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}" "$HOST/wschod")
+loki-assert-eq "404" "$index"
+
+index=$(curl -sL --fail "$HOST/wschod/qwerty")
+loki-assert-regeq '.*<div id="param-path">qwerty</div>.*' "$index"
+
+index=$(curl -sL --fail "$HOST/wschod/ty/er345/io-56o")
+loki-assert-regeq '.*<div id="param-path">qwerty</div>.*' "$index"
+
+index=$(curl -sL --fail "$HOST/wschod/ja-znaju-čto-vy-čitaete-testy")
+loki-assert-regeq '.*<div id="param-path">qwerty</div>.*' "$index"
+
+loki-gorp
+
+loki-points +20

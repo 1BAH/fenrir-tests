@@ -1,0 +1,103 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "SI: "
+
+if [ -n "${FENRIR_IN_DOCKER}" ]; then
+    HOST="http://docker"
+else
+    HOST="http://localhost"
+fi
+HOST="$HOST:5623"
+
+loki-prog "Nieprawidłowe ścieżki"
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}" "$HOST/zachod")
+loki-assert-eq "403" "$index"
+
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}" "$HOST/zachod/qwe")
+loki-assert-eq "403" "$index"
+
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}" "$HOST/zachod/ty/er345/io-56o")
+loki-assert-eq "403" "$index"
+
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}" "$HOST/zachod/ja-znaju-čto-vy-čitaete-testy")
+loki-assert-eq "403" "$index"
+
+loki-gorp "Testy zaliczone"
+
+loki-prog "Prawidłowe daty"
+correct=$(cat << IN
+203
+application/json
+IN
+)
+
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}\n%{content_type}\n" "$HOST/zachod/01-01-0000")
+loki-assert-eq "$correct" "$index"
+loki-assert-out '{"message": "Witam!"}'
+
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}\n%{content_type}\n" "$HOST/zachod/30-04-1632")
+loki-assert-eq "$correct" "$index"
+loki-assert-out '{"message": "Witam!"}'
+
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}\n%{content_type}\n" "$HOST/zachod/20-01-1651")
+loki-assert-eq "$correct" "$index"
+loki-assert-out '{"message": "Witam!"}'
+
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}\n%{content_type}\n" "$HOST/zachod/03-05-1768")
+loki-assert-eq "$correct" "$index"
+loki-assert-out '{"message": "Witam!"}'
+
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}\n%{content_type}\n" "$HOST/zachod/09-06-1807")
+loki-assert-eq "$correct" "$index"
+loki-assert-out '{"message": "Witam!"}'
+
+loki-gorp "Testy zaliczone"
+
+loki-prog "Nieprawidłowe daty"
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}" "$HOST/zachod/00-01-1000")
+loki-assert-eq "403" "$index"
+
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}" "$HOST/zachod/01-00-1000")
+loki-assert-eq "403" "$index"
+
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}" "$HOST/zachod/32-01-1000")
+loki-assert-eq "403" "$index"
+
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}" "$HOST/zachod/30-02-1000")
+loki-assert-eq "403" "$index"
+
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}" "$HOST/zachod/01-13-1000")
+loki-assert-eq "403" "$index"
+loki-gorp "Testy zaliczone"
+
+loki-prog "Luty"
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}" "$HOST/zachod/29-02-2200")
+loki-assert-eq "403" "$index"
+
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}" "$HOST/zachod/29-02-1100")
+loki-assert-eq "403" "$index"
+
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}" "$HOST/zachod/29-02-2025")
+loki-assert-eq "403" "$index"
+
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}" "$HOST/zachod/29-02-2026")
+loki-assert-eq "403" "$index"
+
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}\n%{content_type}\n" "$HOST/zachod/29-02-2024")
+loki-assert-eq "$correct" "$index"
+loki-assert-out '{"message": "Witam!"}'
+
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}\n%{content_type}\n" "$HOST/zachod/29-02-2000")
+loki-assert-eq "$correct" "$index"
+loki-assert-out '{"message": "Witam!"}'
+
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}\n%{content_type}\n" "$HOST/zachod/29-02-0000")
+loki-assert-eq "$correct" "$index"
+loki-assert-out '{"message": "Witam!"}'
+
+index=$(curl -sL -o "${OUT_FILE}" -w "%{http_code}\n%{content_type}\n" "$HOST/zachod/29-02-3600")
+loki-assert-eq "$correct" "$index"
+loki-assert-out '{"message": "Witam!"}'
+loki-gorp "Testy zaliczone"
+
+loki-points +50

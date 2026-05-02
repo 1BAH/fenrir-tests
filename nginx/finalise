@@ -1,0 +1,14 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "FN: "
+
+loki-prog "Stopping the server.."
+lokiw docker stop nginx-cont
+loki-gorp
+
+pts=$(< "${SCORE_FILE}")
+
+if (( pts < 0 )); then
+    pts=${pts:1}
+    loki-points "+${pts}"
+fi

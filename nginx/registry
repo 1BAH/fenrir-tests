@@ -1,0 +1,67 @@
+#! /usr/bin/env loki
+
+function contains {
+    str=$1
+    pattern=$2
+
+    [[ $str == *${pattern}* ]]
+}
+
+loki-set-log-prefix "RS: "
+
+if [ -n "${FENRIR_IN_DOCKER}" ]; then
+    HOST="http://docker"
+else
+    HOST="http://localhost"
+fi
+HOST="$HOST:5689"
+
+loki-prog "Test the root index"
+index=$(curl --fail -s "$HOST")
+lokiw echo "${index}"
+
+for idx in "" 1 2 3; do
+    if ! contains "${index}" '<a href="up'${idx}'/">up'${idx}'/</a>'; then
+        loki-log fail "Invalid config"
+        exit 10
+    fi
+done
+loki-gorp
+
+loki-prog "Test the <up> routes"
+for idx in 1 2 3; do
+    index=$(curl --fail -sL "$HOST/up${idx}")
+    lokiw echo "${index}"
+
+    if ! contains "${index}" "<h1>Header: up${idx}</h1>"; then
+        loki-log fail "Invalid config ($idx)"
+        exit $(( 20 + idx ))
+    fi
+done
+loki-gorp
+
+loki-prog "Test the <up> index"
+index=$(curl --fail -sL "$HOST/up")
+lokiw echo "${index}"
+
+for idx in 1 2 3; do
+    if ! contains "${index}" '<a href="sub'${idx}'/">sub'${idx}'/</a>'; then
+        loki-log fail "Invalid config"
+        exit $(( 30 + idx ))
+    fi
+done
+loki-gorp
+
+loki-prog "Test the <sub> routes"
+for idx in 1 2 3; do
+    index=$(curl --fail -sL "$HOST/up/sub${idx}")
+    lokiw echo "${index}"
+
+    if ! contains "${index}" "<h1>Header: sub${idx}</h1>"; then
+        loki-log fail "Invalid config"
+        exit $(( 40 + idx ))
+    fi
+done
+loki-gorp
+
+loki-points +20

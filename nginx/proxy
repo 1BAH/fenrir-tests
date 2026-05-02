@@ -1,0 +1,19 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "PX: "
+
+if [ -n "${FENRIR_IN_DOCKER}" ]; then
+    HOST="http://docker"
+else
+    HOST="http://localhost"
+fi
+HOST="$HOST:5271"
+
+loki-prog "Test the proxy"
+index=$(curl --fail -sL -o "${OUT_FILE}" -w "%{url_effective}" "$HOST/door/")
+
+loki-assert-eq "$HOST/door/" "$index"
+loki-assert-rout ".*google.*"
+loki-gorp
+
+loki-points +10

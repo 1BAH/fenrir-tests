@@ -1,0 +1,15 @@
+
+scripts=(
+    "build"
+    "finalise"
+    "registry"
+    "static-index"
+    "static-dates"
+    "proxy"
+)
+
+cfgs=()
+
+branch="nginx"
+blocking=0
+indocker=0
