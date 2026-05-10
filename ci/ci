@@ -1,0 +1,124 @@
+#! /usr/bin/env loki
+
+token=$(< ../project.tkn)
+
+url=$(grep 'submodule "ci"' -A 2 ../.gitmodules | tail -n 1 | grep -oE 'https://.*git' )
+loki-log info "Project URL: <$url>"
+url=${url##*gitlab.com/}
+url=${url%%.git}
+loki-log info "Project parsed namespace: <$url>"
+
+function query() {
+    if ! curl --fail -X GET -H "PRIVATE-TOKEN: ${token}"  -o "${OUT_FILE}" --stderr "${ERR_FILE}" "https://gitlab.com/api/v4/projects/${1}"; then
+        loki-log fail "Cannot access the repo"
+        exit 7
+    fi
+
+    if [ -n "$2" ]; then
+        jq -r $2 "${OUT_FILE}"
+    else
+        jq . "${OUT_FILE}"
+    fi
+}
+
+root_html=$(cat << HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hello</title>
+</head>
+    <body>
+        <div>Hello</div>
+    </body>
+</html>
+HTML
+)
+
+nonroot_html=$(cat << HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Buona giornata</title>
+</head>
+    <body>
+        <div>Buona giornata</div>
+    </body>
+</html>
+HTML
+)
+
+generator_man='<meta name="generator" content="Asciidoctor'
+
+id=$(query "${url//'/'/%2F}" ".id")
+loki-log info "Project ID: <$id>"
+
+pip_id=$(query "${id}/pipelines?per_page=1"  ".[0].id")
+loki-log info "Last pipeline ID: <$pip_id>"
+
+status=$(query "${id}/pipelines?per_page=1" .[0].status)
+loki-assert-eq "success" "$status" "The pipeline has failed"
+
+loki-prog "Validating jobs.."
+
+job_cnt=0
+for job_id in $(query "${id}/pipelines/${pip_id}/jobs" .[].id); do
+    (( job_cnt++ ))
+
+    job=$(query "${id}/jobs/${job_id}")
+    job_name=$(jq -r .name <<< "$job")
+    loki-prog "Now: <$job_name>"
+
+    loki-assert-eq "success" "$(jq -r .status <<< "$job")" "The job has failed"
+
+    case "$job_name" in
+        "gen-docs")
+            loki-assert-eq "docs" "$(jq -r .stage <<< "$job")" "Invalid stage"
+
+            site_url="https://${url%%/*}.gitlab.io/${url#*/}"
+            loki-log info "Project site: <$site_url>"
+
+            loki-assert-eq    "${root_html}"         "$(curl -sL "${site_url}")"
+            loki-assert-eq    "${nonroot_html}"      "$(curl -sL "${site_url}/no-antora")"
+            loki-assert-regeq ".*${generator_man}.*" "$(curl -sL "${site_url}/man")"
+
+            real_url=$(curl -sL "${site_url}/antora" | grep -oP "(?<=url=)[^>]+")
+            loki-assert-neq "" "${real_url}"
+            loki-points +40
+        ;;
+        "gen-man")
+            loki-assert-eq "docs" "$(jq -r .stage <<< "$job")" "Invalid stage"
+
+            artifacts=$(query "${id}/jobs/${job_id}/artifacts/tree?path=gen-emoji")
+            loki-assert-eq 1 "$(jq '. | length' <<< "$artifacts")" "Invalid artifacts structure"
+            loki-assert-eq "file"       "$(jq -r '.[0].type' <<< "$artifacts")" "Invalid artifacts structure"
+            loki-assert-eq "000644"     "$(jq -r  '.[0].mode' <<< "$artifacts")" "Invalid artifacts structure"
+            loki-assert-eq "genemoji.1" "$(jq -r '.[0].name' <<< "$artifacts")" "Invalid artifacts structure"
+
+            loki-points +30
+        ;;
+        "gen-image")
+            loki-assert-eq "docker" "$(jq -r .stage <<< "$job")" "Invalid stage"
+
+            lokiw -e docker login "registry.gitlab.com/${url,,}" -u 'project_token_user' -p "${token}"
+            docker pull "registry.gitlab.com/${url,,}/hello" || {
+                exit $?
+            }
+            lokiw -e docker run --rm "registry.gitlab.com/${url,,}/hello"
+            loki-assert-out "Hello!"
+
+            loki-points +30
+        ;;
+        "tests")
+            loki-assert-eq "test" "$(jq -r .stage <<< "$job")" "Invalid stage"
+        ;;
+        *)
+            loki-log fail "Unknown job: <$job_name>"
+            exit 67
+        ;;
+    esac
+    loki-gorp
+done
+loki-assert-eq 4 "$job_cnt" "Missing jobs.."
+loki-gorp

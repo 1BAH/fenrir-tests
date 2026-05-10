@@ -3,5 +3,5 @@ pre=()
 
 main=(
     #"walk-inspections"
-    "mock"
+    "ci"
 )
