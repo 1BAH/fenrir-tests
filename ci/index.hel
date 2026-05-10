@@ -1,0 +1,9 @@
+
+scripts=(
+    "mock"
+)
+
+cfgs=()
+
+branch="ci"
+blocking=0

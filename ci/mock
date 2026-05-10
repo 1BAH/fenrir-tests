@@ -1,0 +1,3 @@
+#! /usr/bin/env loki
+
+ls -R
