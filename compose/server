@@ -22,7 +22,7 @@ if ! docker compose up -d; then
 fi
 
 statuses=$(docker compose ps --format "{{.State}}")
-loki-assert-eq 2 "$(wc -l <<< "$statuses")" "Expected only two services"
+loki-assert-eq 2 "$(echo "$statuses" | wc -l | tr -d "$IFS")" "Expected only two services"
 loki-assert-eq "running" "$(echo "$statuses" | uniq)" "Both services must be running"
 loki-gorp
 
@@ -95,7 +95,7 @@ loki-gorp
 loki-prog "Testing healthcheck"
 
 statuses=$(docker compose ps --format "{{.Status}}")
-loki-assert-eq 2 "$(wc -l <<< "$statuses")" "Expected only two services"
+loki-assert-eq 2 "$(echo "$statuses" | wc -l | tr -d "$IFS")" "Expected only two services"
 loki-assert-eq "healthy)" "$(echo "$statuses" | cut -f2 -d"(" | uniq)" "Both services must be healthy"
 loki-gorp
 
@@ -113,7 +113,7 @@ else
 fi
 
 statuses=$(docker compose ps --format "{{.Status}}")
-loki-assert-eq 1 "$(wc -l <<< "$statuses")" "Expected server to be dead"
+loki-assert-eq 1 "$(echo "$statuses" | wc -l | tr -d "$IFS")" "Expected server to be dead"
 loki-assert-eq "healthy)" "$(echo "$statuses" | cut -f2 -d"(")"
 
 loki-log info "Reload application.."
