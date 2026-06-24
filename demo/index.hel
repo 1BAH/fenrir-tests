@@ -1,0 +1,15 @@
+
+scripts=(
+    "script"
+    "script.enter"
+    ".enter"
+    ".exit"
+    "env.up"
+    "env.down"
+)
+
+cfgs=()
+
+image="registry.gitlab.com/atpd/progtech/tech-tasks/dpkg-systemd/dpkg-systemd:latest"
+branch="demo"
+blocking=0

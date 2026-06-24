@@ -1,0 +1,5 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "S: "
+
+loki-log "HI"
