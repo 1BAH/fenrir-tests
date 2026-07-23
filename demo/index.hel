@@ -10,6 +10,6 @@ scripts=(
 
 cfgs=()
 
-image="registry.gitlab.com/atpd/progtech/tech-tasks/dpkg-systemd/dpkg-systemd:latest"
+image="registry.gitlab.com/ygdrasil/progtech/tech-tasks/dpkg-systemd/dpkg-systemd:latest"
 branch="demo"
 blocking=0

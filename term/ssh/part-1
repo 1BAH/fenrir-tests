@@ -2,7 +2,7 @@
 
 loki-set-log-prefix "SSH-1: "
 
-image="registry.gitlab.com/atpd/progtech/tech-tasks/ssh/ssh:latest"
+image="registry.gitlab.com/ygdrasil/progtech/tech-tasks/ssh/ssh:latest"
 
 function verify_script {
     local filename=$1

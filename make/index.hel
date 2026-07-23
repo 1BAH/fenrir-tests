@@ -9,7 +9,7 @@ scripts=(
 
 cfgs=()
 
-image="registry.gitlab.com/atpd/progtech/tech-tasks/make/make:latest"
+image="registry.gitlab.com/ygdrasil/progtech/tech-tasks/make/make:latest"
 branch="make"
 blocking=1
 inline=0

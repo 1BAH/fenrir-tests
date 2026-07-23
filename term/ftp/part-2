@@ -38,7 +38,7 @@ cont=$(docker run --rm -d \
     -e "LOKI_VERBOSE" -e "USER" -e "PASSWORD" \
     --net "$net" \
     --name "client" \
-    "registry.gitlab.com/atpd/progtech/tech-tasks/ftp:latest")
+    "registry.gitlab.com/ygdrasil/progtech/tech-tasks/ftp:latest")
 # shellcheck disable=SC2181
 if (( $? != 0 )); then
     loki-log err "Cannot start client"

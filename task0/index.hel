@@ -6,6 +6,6 @@ scripts=(
 
 cfgs=()
 
-image="registry.gitlab.com/atpd/progtech/tech-tasks/task-zero/task-zero:latest"
+image="registry.gitlab.com/ygdrasil/progtech/tech-tasks/task-zero/task-zero:latest"
 branch="task0"
 blocking=1

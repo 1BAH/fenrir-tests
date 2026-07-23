@@ -2,7 +2,7 @@
 
 loki-set-log-prefix "SSH-3: "
 
-image="registry.gitlab.com/atpd/progtech/tech-tasks/ssh/ssh:latest"
+image="registry.gitlab.com/ygdrasil/progtech/tech-tasks/ssh/ssh:latest"
 
 lokiw -e pushd part-3
 
