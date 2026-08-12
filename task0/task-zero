@@ -5,9 +5,14 @@ loki-set-log-prefix "TZ: "
 
 loki-log info "Validating task0"
 
-if ! [ -x "run.sh" ]; then
-    loki-log err "File 'run.sh' does not exist or is not executable"
+if ! [ -f "run.sh" ]; then
+    loki-log err "File 'run.sh' does not exist"
     exit 5
+fi
+
+if ! [ -x "run.sh" ]; then
+    loki-log err "File 'run.sh' is not executable"
+    exit 6
 fi
 
 lokiw -e -u "./run.sh | shasum -a 256 | cut -f1 -d' '"
