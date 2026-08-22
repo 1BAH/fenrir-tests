@@ -1,0 +1,32 @@
+#! /usr/bin/env bash
+
+loki-set-log-prefix "PA-bf: "
+
+loki-prog "Detecting language.."
+
+if ! grep -q '// TODO' PngGen.java; then
+    loki-log info "Found: <java>"
+    build_cmd=(javac PngGen.java Tests.java)
+    run_cmd=(java Tests)
+    cp "$(fenrir-task-path cfgs)/Tests.java" .
+    files_to_remove=(Tests.java Tests.class PngGen*.class out*.png)
+elif ! grep -q '// TODO' png_gen.cc; then
+    loki-log info "Found: <C++>"
+    build_cmd=(g++ png_gen.cc tests.cc -lz -o tests)
+    run_cmd=(./tests)
+    cp "$(fenrir-task-path cfgs)/tests.cc" .
+    files_to_remove=(Tests.java tests.cc tests out*.png)
+else
+    loki-log err "Could not detect the language"
+    exit 7
+fi
+
+loki-gorp
+
+loki-prog "Compiling.."
+lokiw -e "${build_cmd[@]}"
+loki-gorp
+
+loki-prog "Executing.."
+lokiw -e "${run_cmd[@]}"
+loki-gorp

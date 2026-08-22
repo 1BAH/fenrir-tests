@@ -1,0 +1,31 @@
+#! /usr/bin/env bash
+
+loki-set-log-prefix "PG-bf: "
+
+DIGITS_DIR=$(fenrir-task-path cfgs)
+export DIGITS_DIR
+
+loki-prog "Detecting language.."
+
+if [ -f NumPng.java ]; then
+    loki-log info "Found: <java>"
+    build_cmd=(javac *.java)
+    run_cmd="java NumPng.java"
+    files_to_remove=(*.class digit.png)
+elif [ -f num_png.cc ]; then
+    loki-log info "Found: <C++>"
+    build_cmd=(g++ *.cc -lz -o gen)
+    run_cmd="./gen"
+    files_to_remove=(gen digit.png)
+else
+    loki-log err "Could not detect the language"
+    exit 7
+fi
+
+loki-gorp
+
+export run_cmd
+
+loki-prog "Compiling.."
+lokiw -e "${build_cmd[@]}"
+loki-gorp

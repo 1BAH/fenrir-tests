@@ -1,0 +1,32 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "PG: "
+
+shas=(
+    [0]="758972f99a90c961c1d7c500cad0044188e1425fac7de726e126ea21196c2784"
+    [1]="c1033b2b97f6fc3b13b839dd1a898b46ed3131e31a6717562b59cbe46bad9a2c"
+    [2]="ea878eeb6ce20f7b7f5396b1f2afefd58bde0a609ef0e30b169a223226ca9af8"
+    [3]="9ef0bce6162250a01cde3649b5e8daa427bbdbfda5ba0ef87d206f78bd2e0571"
+    [4]="bdca2c96ffa4deda10552e60e01a11ce26bd4d16f4c0dc92e479fb6e14278ed6"
+    [5]="132cd0047c72c585758fb3dc84de6316812657f17a4655377036dbcf5e4758bb"
+    [6]="b879c1dba140b2fe97449d5be7a0266ee75a5f6b842dc18b9f94b74cebb02f81"
+    [7]="2777dd4bdb54980e4d0562440f0e4f5ddafb7ead3658ad923c5a85a2d1d0499a"
+    [8]="9210d5381b12a33b4c23d7a0160ed72ab8cf371484a2839293976686d692e235"
+    [9]="0a599ad179891888fe67076d8bfb8184e6a1d8d9369dbad39f2188530d68c843"
+)
+
+
+for digit in {0..9}; do
+    loki-prog "Now checking <$digit>.."
+
+    # shellcheck disable=SC2154
+    # shellcheck disable=SC2086
+    lokiw -e ${run_cmd} ${digit}
+    real=$(cat digit.png | shasum -a 256 | cut -f1 -d' ')
+
+    loki-assert-eq "${shas[$digit]}" "${real}" "You have generated a wrong picture"
+
+    loki-gorp
+done
+
+loki-points +4

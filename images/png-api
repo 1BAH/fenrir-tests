@@ -1,0 +1,19 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "PA: "
+
+out1_sha="786365bc733821403de3772daf539a826bf16ea19c26f33055c460a9ba57003c"
+out2_sha="8c2d5e1fb415204f34f16956bb31832baadad2dbc34a94424e9e185f258a6255"
+
+out1_real=$(cat out1.png | shasum -a 256 | cut -f1 -d' ')
+out2_real=$(cat out2.png | shasum -a 256 | cut -f1 -d' ')
+
+loki-prog "3x3 green square"
+loki-assert-eq "${out1_sha}" "${out1_real}" "You have generated a wrong picture"
+loki-gorp
+
+loki-prog "3x3 green square with black cross"
+loki-assert-eq "${out2_sha}" "${out2_real}" "You have generated a wrong picture"
+loki-gorp
+
+loki-points +8

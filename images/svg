@@ -1,0 +1,27 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "SVG: "
+
+if ! [ -f "graph.svg" ]; then
+    loki-log err "File <graph.svg> was not found!"
+    exit 2
+fi
+
+loki-prog "Rasterising the image.."
+resvg "graph.svg" "pic.png" || {
+    loki-log fault "Unexpected error. Submit an issue!!!"
+    exit 99
+}
+
+loki-log info "The result is <$PWD/pic.png>"
+loki-gorp
+
+diff -q "$(fenrir-task-path cfgs)/pic.png" "pic.png" &> /dev/null || {
+    loki-log err "The picture differs from the expected one: <$(fenrir-task-path cfgs)/pic.png>"
+    loki-log err "You can use $(loki-wrap "${ULINE}" "https://www.diffchecker.com/image-compare/") to compare PNGs"
+    exit 3
+}
+
+rm -f pic.png
+
+loki-points +8
