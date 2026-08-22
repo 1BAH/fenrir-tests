@@ -1,0 +1,18 @@
+
+scripts=(
+    "alias"
+    "autocomplete"
+    "envs"
+    "global.init"
+    ".enter"
+)
+
+cfgs=(
+)
+
+image="ghcr.io/devtools-course/task-setup-sh:latest"
+branch="shell-setup"
+blocking=0
+
+inhost=0
+inline=0

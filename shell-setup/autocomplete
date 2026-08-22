@@ -1,0 +1,124 @@
+#! /usr/bin/env loki
+
+
+function test_complete {
+    result=$(echo "${COMPREPLY[*]}" | tr ' ' $'\n' | sort | tr $'\n' ' ')
+    loki-assert-eq "$1" "${result:0:-1}"
+}
+
+loki-set-log-prefix "AC: "
+
+testdir=$(fenrir-tmp -d)
+touch "${testdir}/1"
+touch "${testdir}/2"
+mkdir -p "${testdir}/3"
+mkdir -p "${testdir}/4"
+
+
+# Mock interactive shell startup..
+loki-prog "Initialising autocomplete session.."
+
+if [ -n "$(ls -1 /etc/bash_completion.d/)" ]; then
+    for file in /etc/bash_completion.d/*; do
+        source "$file" &> /dev/null
+    done
+fi
+
+if [ -f ~/.bash_completion ]; then
+    source ~/.bash_completion &> /dev/null
+fi
+
+loki-gorp
+
+if ! type _cow &> /dev/null; then
+    loki-log err "Autocomplete function was not found!"
+    exit 22
+fi
+
+loki-prog "Testing subcommands.."
+
+COMP_WORDS=(cow)
+COMPREPLY=()
+COMP_CWORD=1
+_cow
+test_complete "eat run say sleep"
+
+COMP_WORDS=(cow s)
+COMPREPLY=()
+COMP_CWORD=1
+_cow
+test_complete "say sleep"
+
+loki-gorp
+loki-prog "Testing 'sleep'.."
+
+COMP_WORDS=(cow sleep 3 )
+COMPREPLY=()
+COMP_CWORD=3
+_cow
+test_complete ""
+
+COMP_WORDS=(cow sleep)
+COMPREPLY=()
+COMP_CWORD=2
+_cow
+test_complete ""
+
+loki-gorp
+loki-prog "Testing 'eat'.."
+
+COMP_WORDS=(cow eat "${testdir}/")
+COMPREPLY=()
+COMP_CWORD=2
+_cow
+test_complete "${testdir}/1 ${testdir}/2 ${testdir}/3 ${testdir}/4"
+
+COMP_WORDS=(cow eat "${testdir}/")
+COMPREPLY=()
+COMP_CWORD=3
+_cow
+test_complete ""
+
+loki-gorp
+
+loki-prog "Testing 'say'.."
+
+COMP_WORDS=(cow say)
+COMPREPLY=()
+COMP_CWORD=2
+_cow
+test_complete "bye hi"
+
+COMP_WORDS=(cow say -)
+COMPREPLY=()
+COMP_CWORD=2
+_cow
+test_complete "--aggressive -a"
+
+COMP_WORDS=(cow say bye)
+COMPREPLY=()
+COMP_CWORD=3
+_cow
+test_complete ""
+
+COMP_WORDS=(cow say hi)
+COMPREPLY=()
+COMP_CWORD=3
+_cow
+test_complete ""
+
+COMP_WORDS=(cow say -a)
+COMPREPLY=()
+COMP_CWORD=3
+_cow
+test_complete "bye hi"
+
+COMP_WORDS=(cow say --aggressive)
+COMPREPLY=()
+COMP_CWORD=3
+_cow
+test_complete "bye hi"
+
+loki-gorp
+
+loki-points +5

@@ -1,0 +1,9 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "ENV: "
+
+lokiw -e cow
+
+loki-assert-out "MEOW"
+
+loki-points +5

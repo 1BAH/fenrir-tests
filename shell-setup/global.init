@@ -1,0 +1,15 @@
+#! /usr/bin/env bash
+
+loki-set-log-prefix "Global enter: "
+
+loki-prog "Running installer.."
+
+# Fenrir env up PWD is solution
+cd ~/solution/shell-setup || exit 7
+
+./setup.shell || {
+    loki-log err "Failed to install"
+    exit 56
+}
+
+loki-gorp

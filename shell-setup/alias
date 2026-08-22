@@ -1,0 +1,33 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "AL: "
+
+shopt -s expand_aliases
+
+if [ -d "/tmp/trash/" ] && [ -n "$(ls -1A /tmp/trash/)" ]; then
+    loki-log err "The trash dir is not empty!"
+    exit 4
+fi
+
+testf=$(fenrir-tmp)
+num=$RANDOM
+echo $num > "$testf"
+
+rm "$testf" || {
+    loki-log err "Failed to run 'rm'"
+    exit 9
+}
+
+if [ -f "$testf" ]; then
+    loki-log err "The file exists after 'rm' was invoked!"
+    exit 5
+fi
+
+if ! [ -f "/tmp/trash/${testf##*/}" ]; then
+    loki-log err "The file was not found in the trash!"
+    exit 6
+fi
+
+loki-assert-eq "$num" "$(< "/tmp/trash/${testf##*/}")" "Incorrect content!"
+
+loki-points +5
