@@ -1,0 +1,8 @@
+#! /usr/bin/env loki
+
+if ! type column &> /dev/null; then
+    loki-log err "Command <column> was not found"
+    exit 9
+fi
+
+loki-points +10

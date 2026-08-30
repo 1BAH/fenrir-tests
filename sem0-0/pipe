@@ -1,0 +1,44 @@
+#! /usr/bin/env loki
+
+if ! [ -p "pipe.in" ]; then
+    loki-log err "Cannot find <pipe.in> file"
+    exit 9
+fi
+
+if ! [ -p "pipe.out" ]; then
+    loki-log err "Cannot find <pipe.out> file"
+    exit 9
+fi
+
+function finalise {
+    kill -9 $read_pid &> /dev/null
+    kill -9 $write_pid &> /dev/null
+    loki-log err "$1"
+    exit 4
+}
+
+
+function read_pipe {
+    read -r data < pipe.in
+    loki-assert-eq "Hello" "${data}" "Pipe contains invalid data"
+}
+
+function write_pipe {
+    echo 42 > pipe.out
+}
+
+read_pipe &
+read_pid=$!
+
+write_pipe &
+write_pid=$!
+
+waitpid -t 1 $read_pid
+if (( 0 != $? )); then finalise "Failed to read from pipe.in"; fi
+
+if kill -0 $write_pid &> /dev/null; then
+    waitpid -t 1 $write_pid
+    if (( 0 != $? )); then finalise "Failed to write to pipe.out"; fi
+fi
+
+loki-points +10

@@ -1,0 +1,15 @@
+
+scripts=(
+    "file"
+    "dir"
+    "link"
+    "symlink"
+    "pipe"
+)
+
+cfgs=()
+
+branch="sem0-0"
+blocking=0
+inhost=0
+indocker=0

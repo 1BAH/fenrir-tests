@@ -1,0 +1,13 @@
+#! /usr/bin/env loki
+
+if ! [ -f "reg.link" ]; then
+    loki-log err "Cannot find <reg.link> file"
+    exit 9
+fi
+
+if ! [ "reg.reg" -ef "reg.link" ]; then
+    loki-log err "File <reg.link> is not a hard link!"
+    exit 9
+fi
+
+loki-points +10

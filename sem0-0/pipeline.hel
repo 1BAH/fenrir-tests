@@ -1,0 +1,10 @@
+
+pre=()
+
+main=(
+    "file"
+    "dir"
+    "link"
+    "symlink"
+    "pipe"
+)

@@ -1,0 +1,10 @@
+#! /usr/bin/env loki
+
+if ! [ -L "reg.slink" ]; then
+    loki-log err "Cannot find <reg.slink> file"
+    exit 9
+fi
+
+loki-assert-eq "reg.reg" "$(readlink reg.slink)" "Invalid symlink"
+
+loki-points +10

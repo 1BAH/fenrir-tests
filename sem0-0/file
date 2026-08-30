@@ -1,0 +1,8 @@
+#! /usr/bin/env loki
+
+if ! [ -f "reg.reg" ]; then
+    loki-log err "Cannot find <reg.reg> file"
+    exit 9
+fi
+
+loki-points +10

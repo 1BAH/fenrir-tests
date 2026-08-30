@@ -1,0 +1,14 @@
+
+scripts=(
+    "env.up"
+    "env.down"
+    "file"
+    "package"
+)
+
+cfgs=()
+
+branch="sem0-1"
+blocking=0
+inhost=0
+inline=0

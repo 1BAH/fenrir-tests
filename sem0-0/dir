@@ -1,0 +1,8 @@
+#! /usr/bin/env loki
+
+if ! [ -d "dir" ]; then
+    loki-log err "Cannot find <dir> file"
+    exit 9
+fi
+
+loki-points +10
