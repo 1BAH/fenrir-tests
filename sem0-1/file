@@ -5,16 +5,13 @@ if ! [ -f "/tmp/sub/ex.txt" ]; then
     exit 9
 fi
 
-tfile=$(fenrir-tmp)
-
-cat <<- CONTENT > "$tfile"
+loki-assert-feq <(cat <<- CONTENT
 1
 2
 3
 4
 5
 CONTENT
-
-loki-assert-fout "$tfile" "/tmp/sub/ex.txt"
+) "/tmp/sub/ex.txt"
 
 loki-points +10
