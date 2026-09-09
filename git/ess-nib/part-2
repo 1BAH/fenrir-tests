@@ -33,11 +33,11 @@ loki-log info "Validating files content.."
 fenrir-change-branch "4"
 
 lokiw -e ./script.kts
-loki-assert-eq 'Meow!' "$(loki-get-out)" "File 'scripts.kts' is broken"
+loki-assert-out 'Meow!' "File 'scripts.kts' is broken"
 
 fenrir-change-branch "3"
 
 lokiw -e ./script.kts
-loki-assert-neq 'Meow!' "$(loki-get-out)" "File 'scripts.kts' is broken"
+loki-assert-out 'Meow!' "File 'scripts.kts' is broken"
 
-loki-points +10
+loki-points +8

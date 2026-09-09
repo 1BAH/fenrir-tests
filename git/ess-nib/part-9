@@ -19,12 +19,8 @@ fi
 
 loki-log info "Executing script.."
 
-lokiw -e ./win.sh
+lokiw -e ./win.
+loki-assert-out "HI"
+loki-assert-err ""
 
-if [ "$(loki-get-out)" != "HI" ] &&
-   [ -n "$(loki-get-err)" ]; then
-    loki-log fail "Something went wrong.."
-    exit 1
-fi
-
-loki-points +10
+loki-points +8

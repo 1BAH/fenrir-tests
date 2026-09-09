@@ -20,8 +20,6 @@ fi
 loki-log info "Verifying link.."
 
 lokiw -e readlink moduleB/deps
+loki-assert-out "../moduleA/deps"
 
-
-loki-assert-eq "../moduleA/deps" "$(loki-get-out)"
-
-loki-points +10
+loki-points +8

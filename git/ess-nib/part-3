@@ -47,4 +47,4 @@ fi
 
 git merge --abort
 
-loki-points +10
+loki-points +8

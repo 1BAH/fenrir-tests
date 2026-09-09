@@ -50,7 +50,7 @@ if [ "$(echo "$content" | wc -w)" -eq 3 ] && \
    [ "$(echo "$content" | sed '3p;d')" = "C" ]; then
 
     lokiw git show 1:2.b || {
-        loki-points +10
+        loki-points +8
         exit 0
     }
 fi

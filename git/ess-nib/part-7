@@ -24,6 +24,6 @@ loki-assert-eq 'snus@mumij.troll' "$(get-info '%ae' "12")" "Invalid author"
 loki-assert-eq '2012-12-12T12:12:12+01:00' "$(get-info '%aI' "12")" "Invalid date"
 
 lokiw -e ./script.bash
-loki-assert-eq '0_0' "$(loki-get-out)" "Invalid file"
+loki-assert-out '0_0' "Invalid file"
 
-loki-points +10
+loki-points +8

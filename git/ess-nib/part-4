@@ -24,7 +24,7 @@ fi
 if [ "$(commit-name "9")"   = "99" ] && \
    [ "$(commit-name "9~1")" = "99" ] && \
    [ "$(commit-name "9~2")" = "77" ]; then
-        loki-points +10
+        loki-points +8
 else
     loki-log err "Incorrect commit messages"
     exit 1

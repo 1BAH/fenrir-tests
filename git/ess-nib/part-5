@@ -34,4 +34,4 @@ loki-assert-eq "$(echo "$content" | sed '1p;d' | cut -f7 -d' ')" "A"
 loki-assert-eq "$(echo "$content" | sed '2p;d' | cut -f7 -d' ')" "C"
 loki-assert-eq "$(echo "$content" | sed '3p;d' | cut -f7 -d' ')" "D"
 
-loki-points +10
+loki-points +8
