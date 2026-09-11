@@ -1,0 +1,26 @@
+#! /usr/bin/env loki
+
+# define functions
+
+function commit-hash {
+    git show -s --format="%h" "$1"
+}
+export -f commit-hash
+
+function commit-name {
+    git show -s --format="%s" "$1"
+}
+export -f commit-name
+
+function get-info {
+    git show -s --format="$1" "$2"
+}
+export -f get-info
+
+function change-branch {
+    if ! lokiw git switch "$1"; then
+        loki-log fail "Cannot check out to '$1'"
+        exit 1
+    fi
+}
+export -f change-branch

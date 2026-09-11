@@ -4,7 +4,7 @@ loki-set-log-prefix "P10: "
 
 loki-log info "Validating commits tree.."
 
-if ! fenrir-change-branch "15"; then
+if ! change-branch "15"; then
     loki-log err "Terminating.."
     exit 1
 fi
@@ -19,7 +19,7 @@ fi
 
 loki-log info "Executing script.."
 
-lokiw -e ./win.
+lokiw -e ./win.sh
 loki-assert-out "HI"
 loki-assert-err ""
 

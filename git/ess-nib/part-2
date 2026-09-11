@@ -2,15 +2,10 @@
 
 loki-set-log-prefix "P2: "
 
-function commit-hash {
-    git show -s --format="%h" "$1"
-}
-
-
 loki-log info "Validating commits tree.."
 
-if ! fenrir-change-branch "4" || \
-   ! fenrir-change-branch "3"; then
+if ! change-branch "4" || \
+   ! change-branch "3"; then
         loki-log err "Terminating.."
         exit 1
 fi
@@ -30,14 +25,19 @@ loki-assert-regeq "^$(commit-hash "4~1")*$" "edafdd8" "Too many commits on branc
 
 loki-log info "Validating files content.."
 
-fenrir-change-branch "4"
+change-branch "4"
 
 lokiw -e ./script.kts
 loki-assert-out 'Meow!' "File 'scripts.kts' is broken"
 
-fenrir-change-branch "3"
+change-branch "3"
 
 lokiw -e ./script.kts
-loki-assert-out 'Meow!' "File 'scripts.kts' is broken"
+loki-assert-out "$(cat <<- EOF
+Quack!
+Meow?
+...
+EOF
+)" "File 'scripts.kts' is broken"
 
 loki-points +8

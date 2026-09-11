@@ -2,19 +2,10 @@
 
 loki-set-log-prefix "P8: "
 
-function commit-hash {
-    git show -s --format="%h" "$1"
-}
-
-function commit-name {
-    git show -s --format="%s" "$1"
-}
-
-
 loki-log info "Validating commits tree.."
 
-if ! fenrir-change-branch "13" || \
-   ! fenrir-change-branch "14"; then
+if ! change-branch "13" || \
+   ! change-branch "14"; then
         loki-log err "Terminating.."
         exit 1
 fi

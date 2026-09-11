@@ -4,12 +4,12 @@ loki-set-log-prefix "P3: "
 
 loki-log info "Validating commits tree.."
 
-if ! fenrir-change-branch "6"; then
+if ! change-branch "6"; then
     loki-log err "Terminating.."
     exit 1
 fi
 
-if ! fenrir-change-branch "5"; then
+if ! change-branch "5"; then
     loki-log err "Terminating.."
     exit 1
 fi
