@@ -2,7 +2,7 @@
 
 loki-set-log-prefix "SM: "
 
-if ! fenrir-change-branch "submodules"; then
+if ! change-branch "submodules"; then
     loki-log err "Terminating.."
     exit 1
 fi
@@ -18,6 +18,35 @@ koshej_meta=$(curl --url "https://gitlab.com/api/v4/projects/${koshej_namespace}
 lokiw -e -u "echo '$koshej_meta' | grep -q forked_from_project"
 lokiw -e -u "echo '$koshej_meta' | grep -oE '\"namespace\":\\{[^{}]*\\}' | head -n 1 | grep -q '\"kind\":\"user\"'"
 lokiw -e -u "echo '$koshej_meta' | grep -q '\"name\":\"koshej\"'"
+
+loki-gorp
+
+loki-prog "Adding special submodule"
+
+sub1=$(fenrir-tmp -d)
+sub2=$(fenrir-tmp -d)
+
+lokiw -e pushd "$sub1"
+lokiw -e git init
+echo 'echo 1' > a.sh
+lokiw -e git add .
+lokiw -e git commit -m 1
+lokiw -e popd
+
+lokiw -e pushd "$sub2"
+lokiw -e git init
+lokiw -e git submodule add "$sub1" "ui"
+lokiw -e git commit -m 1
+lokiw -e popd
+
+lokiw -e git submodule add "$sub2" "jk"
+lokiw -e git commit -m 1
+
+lokiw -e pushd "$sub1"
+echo 'echo 2' > a.sh
+lokiw -e git add .
+lokiw -e git commit -m 2
+lokiw -e popd
 
 loki-gorp
 
@@ -40,10 +69,16 @@ if ! [ -x "oak/hare/duck/egg.sh" ]; then
 fi
 
 lokiw -e ./oak/hare/duck/egg.sh
-
-loki-assert-eq "Er ist tot!" "$(loki-get-out)"
-loki-assert-eq "%" "%$(loki-get-err)"
+loki-assert-out "Er ist tot!"
+loki-assert-err ""
 
 loki-gorp
 
-loki-points +20
+loki-prog "Special submodule magic.."
+
+lokiw -e bash jk/ui/a.sh
+loki-assert-out "2"
+loki-assert-err ""
+loki-gorp
+
+loki-points +10

@@ -2,11 +2,7 @@
 
 loki-set-log-prefix "RB: "
 
-function get-info {
-    git show -s --format="$1" "$2"
-}
-
-if ! fenrir-change-branch "rebase"; then
+if ! change-branch "rebase"; then
     loki-log err "Terminating.."
     exit 1
 fi
@@ -86,4 +82,4 @@ loki-assert-eq "100644" "$(git ls-tree rebase~4 script.sh | cut -f1 -d' ')"
 
 loki-gorp
 
-loki-points +20
+loki-points +10

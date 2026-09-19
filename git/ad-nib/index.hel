@@ -1,4 +1,6 @@
 scripts=(
+	".enter"
+	"global.init"
     "rebase"
     "hooks"
     "lfs"
@@ -12,4 +14,4 @@ branch="git/ad-nib"
 blocking=0
 inline=0
 inhost=0
-image="registry.gitlab.com/ygdrasil/progtech/tech-tasks/git-ad/git-ad:latest"
+image="ghcr.io/devtools-course/task-git-ad:latest"

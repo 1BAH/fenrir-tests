@@ -3,7 +3,7 @@
 
 loki-set-log-prefix "IGN: "
 
-if ! fenrir-change-branch "ignore"; then
+if ! change-branch "ignore"; then
     loki-log err "Terminating.."
     exit 1
 fi
@@ -14,7 +14,7 @@ loki-prog "Validating bundle usage"
 loki-assert-regeq "^$(git show -s --format="%h" ignore~1)*$" "64bcbce"
 
 lokiw -e ./sh.sh
-loki-assert-eq "123" "$(loki-get-out)"
+loki-assert-out "123"
 
 loki-gorp
 
@@ -66,4 +66,4 @@ rm bin/a
 
 loki-gorp
 
-loki-points +20
+loki-points +10
