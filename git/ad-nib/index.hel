@@ -13,5 +13,4 @@ cfgs=()
 branch="git/ad-nib"
 blocking=0
 inline=0
-inhost=0
 image="ghcr.io/devtools-course/task-git-ad:latest"

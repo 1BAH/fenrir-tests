@@ -1,7 +1,4 @@
 
-pre=(
-)
-
 main=(
     "rebase"
     "hooks"
