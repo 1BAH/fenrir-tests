@@ -14,5 +14,5 @@ cfgs=(
     "test3"
 )
 
-branch="term/bash"
+branch="bash"
 blocking=0

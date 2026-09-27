@@ -1,6 +1,4 @@
 
-pre=()
-
 main=(
     "walk-inspections"
     "column"
