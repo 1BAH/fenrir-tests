@@ -1,10 +1,10 @@
 
 main=(
     "walk-inspections"
-    "column"
-    "line-counter"
     "scalar-product"
     "stack"
+    "column"
     "sym-diff"
     "wrapper"
+    "line-counter"
 )
