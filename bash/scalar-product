@@ -2,11 +2,6 @@
 
 loki-set-log-prefix "SP: "
 
-lokiw pushd scalar || {
-    loki-log fail "Cannot switch to 'scalar' directory"
-    exit 7
-}
-
 script="prod.sh"
 
 if ! [ -x "$script" ]; then
@@ -74,5 +69,5 @@ loki-assert-nerr ""
 loki-gorp
 loki-gorp
 
-loki-points +10
+loki-points +5
 

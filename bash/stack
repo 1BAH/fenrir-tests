@@ -4,11 +4,6 @@ loki-set-log-prefix "ST: "
 
 script="stackd.sh"
 
-lokiw pushd stack || {
-    loki-log fail "Cannot switch to 'stack' directory"
-    exit 7
-}
-
 if ! [ -x "$script" ]; then
     loki-log fail "Fail <$script> does not exist or is not executable"
     exit 1
@@ -202,5 +197,5 @@ loki-gorp
 
 loki-gorp
 
-loki-points +15
+loki-points +10
 

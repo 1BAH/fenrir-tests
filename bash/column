@@ -2,11 +2,6 @@
 
 loki-set-log-prefix "CLM: "
 
-lokiw pushd column || {
-    loki-log fail "Cannot switch to 'column' directory"
-    exit 7
-}
-
 script="column.sh"
 
 input=$(fenrir-tmp)

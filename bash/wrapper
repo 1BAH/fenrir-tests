@@ -2,11 +2,6 @@
 
 loki-set-log-prefix "WRP: "
 
-lokiw pushd wrapper || {
-    loki-log fail "Cannot switch to 'wrapper' directory"
-    exit 7
-}
-
 loki-prog "Setup the environment"
 
 export PATH="$PWD:$PATH"

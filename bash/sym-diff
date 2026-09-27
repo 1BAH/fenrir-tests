@@ -2,11 +2,6 @@
 
 loki-set-log-prefix "SD: "
 
-lokiw pushd sym-diff || {
-    loki-log fail "Cannot switch to 'sym-diff' directory"
-    exit 7
-}
-
 script="sym-diff.sh"
 
 if ! [ -f "$script" ]; then

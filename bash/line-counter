@@ -1,10 +1,5 @@
 #! /usr/bin/env loki
 
-lokiw pushd lines || {
-    loki-log fail "Cannot switch to 'lines' directory"
-    exit 7
-}
-
 function mkfile {
     local name=$1
     local lines=$2
@@ -204,5 +199,5 @@ loki-gorp
 loki-gorp
 ##############################################################################################
 
-loki-points +20
+loki-points +30
 
