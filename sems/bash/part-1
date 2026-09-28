@@ -1,0 +1,26 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "SB-1: "
+
+filename="part-1.sh"
+
+if ! [ -x "$filename" ]; then
+    loki-log err "File '$filename' does not exist or is not executable!"
+    exit 8
+fi
+
+#################################################################################################
+
+lokiw -e ./"$filename" <<< 0
+loki-assert-out "1"
+
+lokiw -e ./"$filename" <<< 1
+loki-assert-out "1"
+
+lokiw -e ./"$filename" <<< 2
+loki-assert-out "2"
+
+lokiw -e ./"$filename" 5
+loki-assert-out "120"
+
+loki-points +10

@@ -1,0 +1,50 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "SB-3: "
+
+filename="part-3.sh"
+
+if ! [ -x "$filename" ]; then
+    loki-log err "File '$filename' does not exist or is not executable!"
+    exit 8
+fi
+
+#################################################################################################
+
+empty=$(fenrir-tmp)
+
+lokiw -e ./"$filename" "$empty"
+loki-assert-out "0"
+
+f1=$(fenrir-tmp)
+cat <<- EOF > "$f1"
+1,2,3,4,5,6
+1,2,3,4,5,6
+1,2,3,4,5,6
+1,2,3,4,5,6
+1,2,3,4,5,6
+EOF
+
+lokiw -e ./"$filename" "$f1"
+loki-assert-out "30"
+
+f1=$(fenrir-tmp)
+cat <<- EOF > "$f2"
+1,2,3,4,5,6
+
+1,2,3,4,5
+
+1,2,3,4
+
+1,2,3
+
+1,2
+
+1
+EOF
+
+lokiw -e ./"$filename" "$f2"
+loki-assert-out "21"
+
+
+loki-points +10
