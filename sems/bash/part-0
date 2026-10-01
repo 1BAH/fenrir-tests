@@ -26,4 +26,7 @@ loki-assert-out "tbz2"
 lokiw -e ./"$filename" ".gitignore"
 loki-assert-out ""
 
+lokiw -e ./"$filename" ".prettierrc.json"
+loki-assert-out "json"
+
 loki-points +10
