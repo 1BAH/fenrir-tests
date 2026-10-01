@@ -28,7 +28,7 @@ EOF
 lokiw -e ./"$filename" "$f1"
 loki-assert-out "30"
 
-f1=$(fenrir-tmp)
+f2=$(fenrir-tmp)
 cat <<- EOF > "$f2"
 1,2,3,4,5,6
 

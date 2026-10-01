@@ -11,16 +11,16 @@ fi
 
 #################################################################################################
 
-lokiw -e ./"$filename" <<< 0
+lokiw -e -u "echo 0 | ./$filename"
 loki-assert-out "1"
 
-lokiw -e ./"$filename" <<< 1
+lokiw -e -u "echo 1 | ./$filename"
 loki-assert-out "1"
 
-lokiw -e ./"$filename" <<< 2
+lokiw -e -u "echo 2 | ./$filename"
 loki-assert-out "2"
 
-lokiw -e ./"$filename" 5
+lokiw -e -u "echo 5 | ./$filename"
 loki-assert-out "120"
 
 loki-points +10
