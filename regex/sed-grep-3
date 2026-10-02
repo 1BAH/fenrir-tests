@@ -1,0 +1,21 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "SG3: "
+
+if ! [ -x "sed-grep.sh" ]; then
+    loki-log err "File 'sed-grep.sh' does not exist or is not executable"
+    exit 5
+fi
+
+source "sed-grep.sh"
+loki-assert-eq 0 "$?" "Unexpected error when sourcing your code"
+
+
+eval "$JSONS_LOAD"
+
+for json in "${jsons[@]}"; do
+    # shellcheck disable=SC2086
+    loki-assert-eq $name "$(get_name "$json")"
+done
+
+loki-points +9

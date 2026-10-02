@@ -1,0 +1,26 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "G1: "
+
+shopt -s globstar
+loki-log info "Option <globstar> is enabled"
+
+if ! [ -f "answer.properties" ]; then
+    loki-log err "File 'answer.properties' does not exist"
+    exit 5
+fi
+
+loki-assert-eq 3 "$(wc -l answer.properties | cut -d' ' -f1)" "Expected 3 lines in the file"
+
+glob=$(
+source "answer.properties"
+echo "$task1"
+)
+loki-assert-eq 0 "$?" "Error when reading the values (glob=<$glob>)"
+
+
+no_spaces "${root_dir}/${glob}"
+soundness "${root_dir}/${glob}"
+completeness "${root_dir}/${glob}" "${task1_exp}"
+
+loki-points +3

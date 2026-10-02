@@ -1,0 +1,9 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "SL1: "
+
+loki-prog "Executing.."
+lokiw -e -u "${run_cmd}"
+loki-gorp
+
+loki-points +3

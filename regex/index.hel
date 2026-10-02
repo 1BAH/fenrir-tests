@@ -1,0 +1,27 @@
+
+scripts=(
+    "global.init"
+    "globs-1"
+    "globs-2"
+    "globs-3"
+    "sed-grep-1"
+    "sed-grep-2"
+    "stdlib-1"
+    "stdlib-2"
+    "stdlib-1.enter"
+    "stdlib-2.enter"
+    "stdlib-1.exit"
+    "stdlib-2.exit"
+)
+
+cfgs=(
+	"data.log"
+	"Logs.java"
+	"logs.cc"
+	"Numbers.java"
+	"numbers.cc"
+)
+
+image="ghcr.io/devtools-course/task-regex:latest"
+branch="regex"
+blocking=0

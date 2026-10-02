@@ -1,0 +1,10 @@
+main=(
+    "walk-inspections"
+    "globs-1"
+    "globs-2"
+    "globs-3"
+    "sed-grep-1"
+    "sed-grep-2"
+    "stdlib-1"
+    "stdlib-2"
+)

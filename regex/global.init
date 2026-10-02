@@ -1,0 +1,253 @@
+#! /usr/bin/env loki
+
+function no_spaces {
+    loki-assert-regneq ".*[[:space:]].*" "$1" "Glob cannot contain spaces!"
+}
+export -f no_spaces
+
+function soundness {
+    lokiw -e -u "cat $1 | uniq"
+    loki-assert-out "a" "Found invalid files"
+}
+export -f soundness
+
+function completeness {
+    lokiw -e -u "cat $1 | wc -l | tr -d \"$IFS\""
+    loki-assert-out "$2" "Some files were missed"
+}
+export -f completeness
+
+function gen_random {
+    echo $(( (RANDOM % ($2 - $1 + 1)) + $1 ))
+}
+export -f gen_random
+
+function gen_logdir {
+    local path=$1
+    local fuel=$2
+    local var=$3
+
+    declare -n good_cnt=$var
+    mkdir -p "$path"
+
+    if (( RANDOM % 2 == 0 )) && (( fuel > 0 )); then
+        gen_logdir "$path/qwe" "$((fuel - 1))" "${var%_rec}_rec"
+    fi
+
+    if (( RANDOM % 4 == 0 )) && (( fuel > 0 )); then
+        gen_logdir "$path/yui" "$((fuel - 1))" "${var%_rec}_rec"
+    fi
+
+    good=$(gen_random 2 6)
+    bad=$(gen_random 2 6)
+
+    i=1
+    for file in $(shuf -i 0-11000000 -n "$((good + bad))"); do
+        if (( i <= good )); then
+            echo a > "$path/$file.txt"
+            (( i++ ))
+        else
+            echo b > "$path/$file.tt"
+        fi
+    done
+
+    (( good_cnt += good ))
+}
+export -f gen_logdir
+
+function gen_ip {
+    echo "$(gen_random 1 255).$(gen_random 1 255).$(gen_random 1 255).$(gen_random 1 255)"
+}
+export -f gen_ip
+
+loki-prog "Creating test data.."
+
+root_dir=$(fenrir-tmp -d)
+TEST_DATA=$(fenrir-tmp)
+export root_dir
+export TEST_DATA
+
+task1_subdirs_num=$(gen_random 3 7)
+
+mapfile -t task1_subdirs < <(shuf -i 0-11000000 -n "$task1_subdirs_num")
+
+task1_exp=0
+task1_exp_rec=0
+
+task2_exp=0
+task2_exp_rec=0
+
+task3_exp=0
+task3_exp_rec=0
+task3_sink=0
+
+loki-trace pause
+
+loki-prog "Generating glob-1.."
+for subdir in "${task1_subdirs[@]}"; do
+    gen_logdir "${root_dir}/logs-2026-${subdir}" 1 task1_exp
+done
+loki-gorp
+
+loki-prog "Generating glob-2.."
+gen_logdir "${root_dir}/logs-2025" 4 task2_exp
+loki-gorp
+
+loki-prog "Generating glob-3.."
+gen_logdir "${root_dir}/data/B13-601" 1 task3_exp
+gen_logdir "${root_dir}/data/B13-602" 1 task3_exp
+gen_logdir "${root_dir}/data/B13-611" 1 task3_exp
+gen_logdir "${root_dir}/data/B13-615" 1 task3_exp
+gen_logdir "${root_dir}/data/B13-621" 1 task3_sink
+gen_logdir "${root_dir}/data/B10-601" 1 task3_sink
+gen_logdir "${root_dir}/data/B03-605" 1 task3_sink
+loki-gorp
+
+loki-prog "Generating sed-grep-1/2.."
+ips=()
+classes=()
+while read -r line; do
+	if (( RANDOM % 4 == 0)); then
+		ip=$(gen_ip)
+		prefix=${line%[*}
+
+		if (( ${#prefix} == 20 )); then
+			class=$(echo "${line}" | cut -d' ' -f5)
+			level=$(echo "${line}" | cut -d' ' -f4)
+
+			case "$level" in
+				INFO)
+					classes+=("$class")
+					ips+=("$ip")
+				;;
+				DEBUG|WARN|ERROR|FATAL)
+					ips+=("$ip")
+				;;
+			esac
+		fi
+		echo "${line}" | sed "s|Message|\"GET $ip HTTP/2.0\" 200 $RANDOM|" >> "${TEST_DATA}"
+	else
+		echo "${line}" >> "${TEST_DATA}"
+	fi
+done < "$(fenrir-task-path cfgs regex)/data.log"
+
+# shellcheck disable=SC2155
+export IPS_LOAD=$(declare -p ips)
+# shellcheck disable=SC2155
+export CLASSES_LOAD=$(declare -p classes)
+
+loki-gorp
+
+loki-prog "Generating sed-grep-3.."
+
+# shellcheck disable=SC2089
+name="\"$RANDOM\""
+# shellcheck disable=SC2090
+export name
+jsons=()
+
+json='{"name":"qwerty","repo":{"name":"qwert","owner":{"name":'"$name"',"id":3},"id":56,"nam":[{"name":"er"},{"name":"po"}]}}'
+jsons+=("$json")
+
+json='{"name":"qwerty","repo"  :{"name": "qwert","owner":{"name"
+:'"$name"',"id":3},"id":56,"nam":[{"name":"er"},{"name":"po"}]}}'
+jsons+=("$json")
+
+json='{
+  "name": "qwerty",
+  "repo": {
+    "name": "qwert",
+    "owner": {
+      "name": '"$name"',
+      "id": 3
+    },
+    "id": 56,
+    "nam": [
+      {
+        "name": "er"
+      },
+      {
+        "name": "po"
+      }
+    ]
+  }
+}'
+jsons+=("$json")
+
+
+json='{"repo":{"owner":{"name":'"$name"',"id":3},"name":"qwert","id":56,"nam":[{"name":"er"},{"name":"po"}]},"name":"qwerty"}'
+jsons+=("$json")
+
+json='{"repo":  {"owner"
+: {"name":        '"$name"',"id":3   },"name":"qwert","id":56,"nam":[{"name":"er"},{"name":"po"}]
+},"name":"qwerty"}'
+jsons+=("$json")
+
+json='{
+  "repo": {
+    "owner": {
+      "name": '"$name"',
+      "id": 3
+    },
+    "name": "qwert",
+    "id": 56,
+    "nam": [
+      {
+        "name": "er"
+      },
+      {
+        "name": "po"
+      }
+    ]
+  },
+  "name": "qwerty"
+}'
+jsons+=("$json")
+
+json='{"repo":{"id":56,"name":"qwert","nam":[{"name":"er"},{"name":"po"}],"owner":{"name":'"$name"',"id":3}},"name":"qwerty"}'
+jsons+=("$json")
+
+json='{"repo"
+:
+{"id":56,"name"  :"qwert","nam":[{"name":"er"},{"name":"po"}],"owner"   :{"id":3   ,"name" :'"$name"'}},"name":"qwerty"}'
+jsons+=("$json")
+
+json='{
+  "repo": {
+    "id": 56,
+    "name": "qwert",
+    "nam": [
+      {
+        "name": "er"
+      },
+      {
+        "name": "po"
+      }
+    ],
+    "owner": {
+      "name": '"$name"',
+      "id": 3
+    }
+  },
+  "name": "qwerty"
+}'
+jsons+=("$json")
+
+export JSONS_LOAD=$(declare -p jsons)
+
+loki-gorp
+
+loki-trace resume
+
+loki-log info "Test data is in <${root_dir}>"
+
+export task1_exp
+export task1_exp_rec
+export task2_exp
+export task2_exp_rec
+export task3_exp
+export task3_exp_rec
+export task3_sink
+
+loki-gorp
+

@@ -1,0 +1,28 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "SL1-bf: "
+
+loki-prog "Detecting language.."
+
+if [ "$(wc -l Regex.java | cut -d' ' -f1)" -gt "13" ]; then
+    loki-log info "Found: <java>"
+    build_cmd=(javac Regex.java Logs.java)
+    run_cmd=(java Logs)
+    cp "$(fenrir-task-path cfgs)/Logs.java" .
+    files_to_remove=(Logs.java *.class)
+elif [ "$(wc -l regex.cc | cut -d' ' -f1)" -gt "12" ]; then
+    loki-log info "Found: <C++>"
+    build_cmd=(g++ regex.cc logs.cc -o tests)
+    run_cmd=(./tests)
+    cp "$(fenrir-task-path cfgs)/logs.cc" .
+    files_to_remove=(logs.cc tests)
+else
+    loki-log err "Could not detect the language"
+    exit 7
+fi
+
+loki-gorp
+
+loki-prog "Compiling.."
+lokiw -e "${build_cmd[@]}"
+loki-gorp

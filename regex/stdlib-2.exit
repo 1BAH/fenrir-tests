@@ -1,0 +1,6 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "SL2-af: "
+
+# shellcheck disable=SC2068,SC2154
+rm -f ${files_to_remove[@]} # Contains glob

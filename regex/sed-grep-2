@@ -1,0 +1,22 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "SG2: "
+
+if ! [ -x "sed-grep.sh" ]; then
+    loki-log err "File 'sed-grep.sh' does not exist or is not executable"
+    exit 5
+fi
+
+source "sed-grep.sh"
+loki-assert-eq 0 "$?" "Unexpected error when sourcing your code"
+
+mapfile -t res < <(get_class)
+eval "$CLASSES_LOAD"
+
+loki-assert-eq "${#classes[@]}" "${#res[@]}" "Invalid number of values"
+
+for (( i = 0; i < ${#classes[@]}; ++i )); do
+	loki-assert-eq "${res[i]}" "${classes[i]}"
+done
+
+loki-points +2
