@@ -149,16 +149,16 @@ loki-gorp
 loki-prog "Generating sed-grep-3.."
 
 # shellcheck disable=SC2089
-name="\"$RANDOM\""
+jname="\"$RANDOM\""
 # shellcheck disable=SC2090
-export name
+export jname
 jsons=()
 
-json='{"name":"qwerty","repo":{"name":"qwert","owner":{"name":'"$name"',"id":3},"id":56,"nam":[{"name":"er"},{"name":"po"}]}}'
+json='{"name":"qwerty","repo":{"name":"qwert","owner":{"name":'"$jname"',"id":3},"id":56,"nam":[{"name":"er"},{"name":"po"}]}}'
 jsons+=("$json")
 
 json='{"name":"qwerty","repo"  :{"name": "qwert","owner":{"name"
-:'"$name"',"id":3},"id":56,"nam":[{"name":"er"},{"name":"po"}]}}'
+:'"$jname"',"id":3},"id":56,"nam":[{"name":"er"},{"name":"po"}]}}'
 jsons+=("$json")
 
 json='{
@@ -166,7 +166,7 @@ json='{
   "repo": {
     "name": "qwert",
     "owner": {
-      "name": '"$name"',
+      "name": '"$jname"',
       "id": 3
     },
     "id": 56,
@@ -183,18 +183,18 @@ json='{
 jsons+=("$json")
 
 
-json='{"repo":{"owner":{"name":'"$name"',"id":3},"name":"qwert","id":56,"nam":[{"name":"er"},{"name":"po"}]},"name":"qwerty"}'
+json='{"repo":{"owner":{"name":'"$jname"',"id":3},"name":"qwert","id":56,"nam":[{"name":"er"},{"name":"po"}]},"name":"qwerty"}'
 jsons+=("$json")
 
 json='{"repo":  {"owner"
-: {"name":        '"$name"',"id":3   },"name":"qwert","id":56,"nam":[{"name":"er"},{"name":"po"}]
+: {"name":        '"$jname"',"id":3   },"name":"qwert","id":56,"nam":[{"name":"er"},{"name":"po"}]
 },"name":"qwerty"}'
 jsons+=("$json")
 
 json='{
   "repo": {
     "owner": {
-      "name": '"$name"',
+      "name": '"$jname"',
       "id": 3
     },
     "name": "qwert",
@@ -212,12 +212,12 @@ json='{
 }'
 jsons+=("$json")
 
-json='{"repo":{"id":56,"name":"qwert","nam":[{"name":"er"},{"name":"po"}],"owner":{"name":'"$name"',"id":3}},"name":"qwerty"}'
+json='{"repo":{"id":56,"name":"qwert","nam":[{"name":"er"},{"name":"po"}],"owner":{"name":'"$jname"',"id":3}},"name":"qwerty"}'
 jsons+=("$json")
 
 json='{"repo"
 :
-{"id":56,"name"  :"qwert","nam":[{"name":"er"},{"name":"po"}],"owner"   :{"id":3   ,"name" :'"$name"'}},"name":"qwerty"}'
+{"id":56,"name"  :"qwert","nam":[{"name":"er"},{"name":"po"}],"owner"   :{"id":3   ,"name" :'"$jname"'}},"name":"qwerty"}'
 jsons+=("$json")
 
 json='{
@@ -233,7 +233,7 @@ json='{
       }
     ],
     "owner": {
-      "name": '"$name"',
+      "name": '"$jname"',
       "id": 3
     }
   },

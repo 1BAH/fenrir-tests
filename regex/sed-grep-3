@@ -15,7 +15,7 @@ eval "$JSONS_LOAD"
 
 for json in "${jsons[@]}"; do
     # shellcheck disable=SC2086
-    loki-assert-eq $name "$(get_name "$json")"
+    loki-assert-eq $jname "$(get_name "$json")"
 done
 
 loki-points +9
