@@ -14,8 +14,7 @@ loki-assert-eq 0 "$?" "Unexpected error when sourcing your code"
 eval "$JSONS_LOAD"
 
 for json in "${jsons[@]}"; do
-    # shellcheck disable=SC2086
-    loki-assert-eq $jname "\"$(get_name "$json")\""
+    loki-assert-eq "$jname" "\"$(get_name "$json")\""
 done
 
 loki-points +9
