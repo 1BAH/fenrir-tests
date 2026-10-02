@@ -15,7 +15,7 @@ elif ! grep -q '// TODO' png_gen.cc; then
     build_cmd=(g++ png_gen.cc tests.cc -lz -o tests)
     run_cmd=(./tests)
     cp "$(fenrir-task-path cfgs)/tests.cc" .
-    files_to_remove=(Tests.java tests.cc tests out*.png)
+    files_to_remove=(tests.cc tests out*.png)
 else
     loki-log err "Could not detect the language"
     exit 7
