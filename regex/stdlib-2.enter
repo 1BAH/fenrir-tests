@@ -15,7 +15,7 @@ elif [ -f regex.cc ] && [ "$(wc -l regex.cc | cut -d' ' -f1)" -gt "12" ]; then
     build_cmd=(g++ -std=c++23 regex.cc numbers.cc -o tests)
     run_cmd=(./tests)
     cp "$(fenrir-task-path cfgs)/numbers.cc" .
-    files_to_remove=(logs.cc tests)
+    files_to_remove=(numbers.cc tests)
 else
     loki-log err "Could not detect the language"
     exit 7
