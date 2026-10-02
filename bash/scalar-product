@@ -59,8 +59,8 @@ loki-assert-out ""
 loki-assert-nerr ""
 
 cat << IN | lokiw "./$script"
-1 a 1 1 1
-1 1 1 1 1
+1 1a 1 1 1
+1 1 1 1 a1
 IN
 loki-assert-eq 11 $? "Incorrect exit code"
 loki-assert-out ""
