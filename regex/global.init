@@ -87,10 +87,12 @@ loki-prog "Generating glob-1.."
 for subdir in "${task1_subdirs[@]}"; do
     gen_logdir "${root_dir}/logs-2026-${subdir}" 1 task1_exp
 done
+loki-log info "Test data is in <${root_dir}>"
 loki-gorp
 
 loki-prog "Generating glob-2.."
 gen_logdir "${root_dir}/logs-2025" 4 task2_exp
+loki-log info "Test data is in <${root_dir}>"
 loki-gorp
 
 loki-prog "Generating glob-3.."
@@ -101,12 +103,21 @@ gen_logdir "${root_dir}/data/B13-615" 1 task3_exp
 gen_logdir "${root_dir}/data/B13-621" 1 task3_sink
 gen_logdir "${root_dir}/data/B10-601" 1 task3_sink
 gen_logdir "${root_dir}/data/B03-605" 1 task3_sink
+loki-log info "Test data is in <${root_dir}>"
 loki-gorp
 
 loki-prog "Generating sed-grep-1/2.."
 ips=()
 classes=()
 while read -r line; do
+	if (( ${#prefix} == 20 )); then
+		class=$(echo "${line}" | cut -d' ' -f5)
+		level=$(echo "${line}" | cut -d' ' -f4)
+		if [ "$level" = "INFO" ]; then
+			classes+=("$class")
+		fi
+	fi
+
 	if (( RANDOM % 4 == 0)); then
 		ip=$(gen_ip)
 		prefix=${line%[*}
@@ -116,11 +127,7 @@ while read -r line; do
 			level=$(echo "${line}" | cut -d' ' -f4)
 
 			case "$level" in
-				INFO)
-					classes+=("$class")
-					ips+=("$ip")
-				;;
-				DEBUG|WARN|ERROR|FATAL)
+				INFO|DEBUG|WARN|ERROR|FATAL)
 					ips+=("$ip")
 				;;
 			esac
@@ -130,6 +137,7 @@ while read -r line; do
 		echo "${line}" >> "${TEST_DATA}"
 	fi
 done < "$(fenrir-task-path cfgs regex)/data.log"
+loki-log info "Test data is in <${TEST_DATA}>"
 
 # shellcheck disable=SC2155
 export IPS_LOAD=$(declare -p ips)
@@ -238,8 +246,6 @@ export JSONS_LOAD=$(declare -p jsons)
 loki-gorp
 
 loki-trace resume
-
-loki-log info "Test data is in <${root_dir}>"
 
 export task1_exp
 export task1_exp_rec

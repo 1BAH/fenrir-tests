@@ -1,5 +1,6 @@
 2026-0419 15:05:15 [thread-4545] WARN com.example.Main - Message
 2026-04-22 15:05:15 [thread-4545] ERROR com.example.Main - Message
+2026-04-22 15:05:15 [thread-4545] ERR com.example.Main - "GET 222.240.113.166 HTTP/2.0" 200 3030
 2026-04-22 15:05:15 [thread-4545] ERROR com.example.Main - Message
 2026-04-22 15:05:15 [thread-4545] ERRR com.example.Main - Message
 2026-0-10 15:05:15 [thread-4545] DEBUG com.example.Main - Message
