@@ -10,3 +10,4 @@ scripts=(
 cfgs=()
 
 branch="sems/bash"
+blocking=0
