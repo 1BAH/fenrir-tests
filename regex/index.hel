@@ -6,6 +6,7 @@ scripts=(
     "globs-3"
     "sed-grep-1"
     "sed-grep-2"
+    "sed-grep-3"
     "stdlib-1"
     "stdlib-2"
     "stdlib-1.enter"
