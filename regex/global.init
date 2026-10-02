@@ -110,6 +110,7 @@ loki-prog "Generating sed-grep-1/2.."
 ips=()
 classes=()
 while read -r line; do
+	prefix=${line%[*}
 	if (( ${#prefix} == 20 )); then
 		class=$(echo "${line}" | cut -d' ' -f5)
 		level=$(echo "${line}" | cut -d' ' -f4)
@@ -120,7 +121,6 @@ while read -r line; do
 
 	if (( RANDOM % 4 == 0)); then
 		ip=$(gen_ip)
-		prefix=${line%[*}
 
 		if (( ${#prefix} == 20 )); then
 			class=$(echo "${line}" | cut -d' ' -f5)
