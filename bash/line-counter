@@ -8,6 +8,7 @@ function mkfile {
 }
 
 function simple_env {
+	loki-trace pause
     local env_dir=$(fenrir-tmp -d)
     pushd "$env_dir" &> /dev/null
 
@@ -25,9 +26,11 @@ function simple_env {
 
     popd  &> /dev/null
     echo "$env_dir"
+    loki-trace resume
 }
 
 function tricky_env {
+	loki-trace pause
     local env_dir=$(fenrir-tmp -d)
     pushd "$env_dir" &> /dev/null
 
@@ -43,6 +46,7 @@ function tricky_env {
 
     popd  &> /dev/null
     echo "$env_dir"
+    loki-trace resume
 }
 
 loki-set-log-prefix "LC: "
