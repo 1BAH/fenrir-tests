@@ -31,10 +31,10 @@ EOF
 )"
 
 tricky_ext=$(fenrir-tmp -d)
-touch "${plain}/1.tar.gz"
-touch "${plain}/2.tar.bz2"
-touch "${plain}/1.gz.tar"
-touch "${plain}/2.tar.gz"
+touch "${tricky_ext}/1.tar.gz"
+touch "${tricky_ext}/2.tar.bz2"
+touch "${tricky_ext}/1.gz.tar"
+touch "${tricky_ext}/2.tar.gz"
 
 lokiw -e ./"$filename" "$tricky_ext"
 loki-assert-out "$(cat <<- EOF
@@ -46,10 +46,10 @@ EOF
 
 
 tricky_names=$(fenrir-tmp -d)
-touch "${plain}/the hehe.o"
-touch "${plain}/a.a"
-touch "${plain}/.aoaoaoaoa"
-touch "${plain}/аоаоаоаоаа.meow"
+touch "${tricky_names}/the hehe.o"
+touch "${tricky_names}/a.a"
+touch "${tricky_names}/aoaoaoaoa"
+touch "${tricky_names}/аоаоаоаоаа.meow"
 
 lokiw -e ./"$filename" "$tricky_names"
 loki-assert-out "$(cat <<- EOF
