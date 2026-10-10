@@ -1,0 +1,3 @@
+#! /usr/bin/env loki
+
+export DT_HOST="http://server:1111"

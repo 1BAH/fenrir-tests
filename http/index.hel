@@ -1,5 +1,6 @@
 
 scripts=(
+	".enter"
 	"env.up"
 	"env.down"
     "part-1"
