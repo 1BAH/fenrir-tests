@@ -12,4 +12,3 @@ cfgs=()
 
 branch="http"
 blocking=0
-indocker=0
