@@ -10,7 +10,7 @@ if ! [ -f "answer.properties" ]; then
     exit 5
 fi
 
-loki-assert-eq 3 "$(wc -l answer.properties | cut -d' ' -f1)" "Expected 3 lines in the file"
+loki-assert-eq 3 "$(wc -l answer.properties | sed -E 's|(\S)\s+(\S)|\1 \2|g' | sed -E 's|^\s+(\S)|\1|' | sed -E 's|(\S)\s+|\1|' | cut -d' ' -f1)" "Expected 3 lines in the file"
 
 glob=$(
 source "answer.properties"
