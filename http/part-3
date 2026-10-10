@@ -48,4 +48,4 @@ loki-assert-fout "$out"
 
 loki-gorp
 
-loki-points +20
+loki-points +5

@@ -27,4 +27,4 @@ tests "XML" x
 tests "YAML" y
 tests "JSON" j
 
-loki-points +40
+loki-points +10

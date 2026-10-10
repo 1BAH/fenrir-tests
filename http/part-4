@@ -31,4 +31,4 @@ if ! [ -f "$tmpdir/answer.txt" ]; then
 fi
 loki-assert-eq "UGA-BUGA" "$(cat "$tmpdir/answer.txt")"
 
-loki-points +20
+loki-points +5
