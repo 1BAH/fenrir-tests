@@ -1,0 +1,30 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "HTTP-2: "
+
+filename="part-2.sh"
+
+if ! [ -x "$filename" ]; then
+    loki-log err "File '$filename' does not exist or is not executable!"
+    exit 8
+fi
+
+#################################################################################################
+
+function tests {
+    loki-prog "$1 format"
+
+    lokiw -e "./$filename" "-$2" "${DT_HOST}/d$2" 123 12
+    loki-assert-out "10"
+
+    lokiw "./$filename" "-$2" "${DT_HOST}/d$2" 55 7
+    loki-assert-out "7"
+
+    loki-gorp
+}
+
+tests "XML" x
+tests "YAML" y
+tests "JSON" j
+
+loki-points +40

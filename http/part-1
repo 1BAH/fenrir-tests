@@ -1,0 +1,47 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "HTTP-1: "
+
+filename="part-1.sh"
+
+if ! [ -x "$filename" ]; then
+    loki-log err "File '$filename' does not exist or is not executable!"
+    exit 8
+fi
+
+#################################################################################################
+
+loki-prog "Correct executions.."
+
+# 200 code
+lokiw -e "./$filename" "${DT_HOST}/"
+loki-assert-out "SUCCESS(200)"
+
+# 301 code
+lokiw -e "./$filename" "${DT_HOST}/r"
+loki-assert-out "REDIRECT(301)"
+
+# 400 code
+lokiw -e "./$filename" "${DT_HOST}/i?hehe"
+loki-assert-out "CLIENT_ERROR(400)"
+
+# 503 code
+lokiw -e "./$filename" "${DT_HOST}/e"
+loki-assert-out "SERVER_ERROR(503)"
+
+loki-gorp
+
+loki-prog "Error handling.."
+
+lokiw "./$filename" "http::/localhost/"
+loki-assert-eq 77 "$?" "Invalid exit code"
+
+lokiw "./$filename" "http://localhost:999999/"
+loki-assert-eq 77 "$?" "Invalid exit code"
+
+lokiw "./$filename" "${DT_HOST}/l"
+loki-assert-eq 88 "$?" "Invalid exit code"
+
+loki-gorp
+
+loki-points +20

@@ -1,0 +1,51 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "HTTP-3: "
+
+filename="part-3.sh"
+
+if ! [ -x "$filename" ]; then
+    loki-log err "File '$filename' does not exist or is not executable!"
+    exit 8
+fi
+
+#################################################################################################
+out=$(fenrir-tmp)
+
+loki-prog "Local server.."
+
+# Normal test
+lokiw -e "./$filename" "${DT_HOST}/r"
+cat <<-IN > "$out"
+${DT_HOST}/r
+${DT_HOST}/r1
+${DT_HOST}/sub-inner
+${DT_HOST}/inner
+IN
+
+loki-assert-fout "$out"
+
+# Tricky test
+lokiw -e "./$filename" "${DT_HOST}/inner"
+cat <<-IN > "$out"
+${DT_HOST}/inner
+IN
+
+loki-assert-fout "$out"
+
+loki-gorp
+
+loki-prog "Real internet.."
+
+lokiw -e "./$filename" "http://google.de/"
+cat <<-IN > "$out"
+http://google.de/
+http://www.google.de/
+http://www.google.com/
+IN
+
+loki-assert-fout "$out"
+
+loki-gorp
+
+loki-points +20

@@ -1,5 +1,7 @@
 
 scripts=(
+	"env.up"
+	"env.down"
     "part-1"
     "part-2"
     "part-3"
@@ -8,6 +10,6 @@ scripts=(
 
 cfgs=()
 
-branch="term/http"
+branch="http"
 blocking=0
 indocker=0

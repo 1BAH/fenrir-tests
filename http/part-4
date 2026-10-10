@@ -1,0 +1,34 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "HTTP-4: "
+
+filename="part-4.sh"
+
+if ! [ -x "$filename" ]; then
+    loki-log err "File '$filename' does not exist or is not executable!"
+    exit 8
+fi
+
+#################################################################################################
+
+tmpdir=$(fenrir-tmp -d)
+
+lokiw -e "./$filename" "${DT_HOST}/f" "$tmpdir" 55 7
+
+if ! [ -f "$tmpdir/answer.txt" ]; then
+    loki-log err "Cannot find the file"
+    finalise 8
+fi
+loki-assert-eq "UGA-BUGA" "$(cat "$tmpdir/answer.txt")"
+
+rm -fr "$tmpdir/answer.txt" &> /dev/null
+
+lokiw -e "./$filename" "$host/h" "$tmpdir" 55 7
+
+if ! [ -f "$tmpdir/answer.txt" ]; then
+    loki-log err "Cannot find the file"
+    finalise 8
+fi
+loki-assert-eq "UGA-BUGA" "$(cat "$tmpdir/answer.txt")"
+
+loki-points +20
