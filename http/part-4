@@ -23,7 +23,7 @@ loki-assert-eq "UGA-BUGA" "$(cat "$tmpdir/answer.txt")"
 
 rm -fr "$tmpdir/answer.txt" &> /dev/null
 
-lokiw -e "./$filename" "$host/h" "$tmpdir" 55 7
+lokiw -e "./$filename" "${DT_HOST}/h" "$tmpdir" 55 7
 
 if ! [ -f "$tmpdir/answer.txt" ]; then
     loki-log err "Cannot find the file"
