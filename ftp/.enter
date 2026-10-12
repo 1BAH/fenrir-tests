@@ -1,0 +1,4 @@
+#! /usr/bin/env loki
+
+export USER="tom"
+export PASSWORD="lizard"

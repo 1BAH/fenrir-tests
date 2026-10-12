@@ -1,0 +1,16 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "FTP-2: "
+
+filename="part-2.sh"
+if ! [ -x "$filename" ]; then
+    loki-log err "File '$filename' does not exist or is not executable!"
+    exit 8
+fi
+
+#################################################################################################
+
+loki-log info "Running part-2.sh.."
+
+lokiw -e ./part-2.sh "/tmp/test.correct"
+touch /tmp/run.succ
