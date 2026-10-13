@@ -12,5 +12,12 @@ fi
 
 loki-log info "Running part-2.sh.."
 
-lokiw -e ./part-2.sh "/tmp/test.correct"
-touch /tmp/run.succ
+lokiw -e ./part-2.sh "/tmp/fenrir-shared/java/kotlin/groovy.sh"
+
+if ! [ -f "/tmp/fenrir-shared/sieben/ein/zwei.drei" ]; then
+	loki-log fail "File was not uploaded"
+fi
+
+loki-assert-feq "/tmp/fenrir-shared/java/kotlin/groovy.sh" "/tmp/fenrir-shared/sieben/ein/zwei.drei"
+
+loki-points +5
