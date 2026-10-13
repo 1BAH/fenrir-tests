@@ -11,6 +11,6 @@ fi
 #################################################################################################
 
 lokiw -e ./part-1.sh
-loki-assert-out "$(cat /tmp/fenrir-shared/java/kotlin/groovy.sh)"
+loki-assert-out "$(bash /tmp/fenrir-shared/java/kotlin/groovy.sh)"
 
 loki-points +5
