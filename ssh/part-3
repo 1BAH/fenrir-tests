@@ -20,7 +20,7 @@ loki-prog "Testing the SSH connection.."
 
 function ping {
     url=$1
-    lokiw -e ssh "fikus@$url" "echo Guten Tag!"
+    lokiw -e ssh -vvv "fikus@$url" "echo Guten Tag!"
     loki-assert-out "Guten Tag!"
 }
 
