@@ -11,6 +11,7 @@ fi
 loki-prog "Installing config.."
 
 cp "config" "/home/fikus/.ssh/config"
+chmod 600 "/home/fikus/.ssh/config"
 
 loki-gorp
 
