@@ -11,7 +11,7 @@ cfgs=(
 	"w.tar.gz"
 	"w.tar.xz"
 	"w.tar.bz2"
-	"w.tar.zat"
+	"w.tar.zst"
 	"srapp.tar.gz"
 	"spec.tar.gz"
 )
