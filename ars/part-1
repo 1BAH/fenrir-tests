@@ -1,0 +1,77 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "ARS-1: "
+
+filename="part-1.sh"
+if ! [ -x "$filename" ]; then
+	loki-log err "File '$filename' does not exist or is not executable!"
+	exit 8
+fi
+
+##################################################################################
+
+loki-prog "Creating test data.."
+
+ar_dir=$(fenrir-tmp -d)
+cmp_dir=$(fenrir-tmp -d)
+out_dir=$(fenrir-tmp -d)
+
+touch "${ar_dir}/1" "${ar_dir}/2" "${ar_dir}/3" "${ar_dir}/4"
+mkdir -p "${ar_dir}/a/b/c"
+touch "${ar_dir}/a/1" "${ar_dir}/a/b/2" "${ar_dir}/a/b/c/3" "${ar_dir}/a/b/c/4"
+
+cat <<- EOF > "${cmp_dir}/1.in"
+V
+A
+N
+E
+S
+S
+A
+EOF
+
+echo "mars" > "${cmp_dir}/2.in"
+
+mkdir "${cmp_dir}/sub.d"
+echo "sram" > "${cmp_dir}/sub.d/.3.d"
+
+loki-gorp
+
+loki-prog "Testing archivation.."
+
+lokiw -e "./${filename}" -a "${out_dir}/o.tar" "${ar_dir}"
+loki-assert-eq 12 "$(tar tf "${out_dir}/o.tar" | wc -l)"
+
+lokiw -e "./${filename}" -a "${out_dir}/oo.tar" "${ar_dir}"/{1..4}
+loki-assert-eq 4 "$(tar tf "${out_dir}/oo.tar" | wc -l)"
+
+loki-gorp
+
+loki-prog "Testing compression.."
+
+lokiw -e "./${filename}" -z "${out_dir}" "${cmp_dir}/sub.d/.3.d"
+lokiw -e test -f "${out_dir}/.3.d.gz"
+loki-assert-feq "${cmp_dir}/sub.d/.3.d" <(gzip --decompress --stdout "${out_dir}/.3.d.gz")
+
+lokiw -e "./${filename}" -z "${out_dir}" "${cmp_dir}"/*.in
+lokiw -e test -f "${out_dir}/1.in.gz"
+lokiw -e test -f "${out_dir}/2.in.gz"
+loki-assert-feq "${cmp_dir}/1.in" <(gzip --decompress --stdout "${out_dir}/1.in.gz")
+loki-assert-feq "${cmp_dir}/2.in" <(gzip --decompress --stdout "${out_dir}/2.in.gz")
+
+loki-gorp
+
+loki-prog "Testing error handling.."
+
+lokiw "./${filename}"
+loki-assert-eq 11 $?
+
+lokiw "./${filename}" -a
+loki-assert-eq 11 $?
+
+lokiw "./${filename}" -z
+loki-assert-eq 11 $?
+
+loki-gorp
+
+loki-points +5

@@ -1,0 +1,148 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "ARS-3: "
+
+filename="part-3.sh"
+if ! [ -x "$filename" ]; then
+	loki-log err "File '$filename' does not exist or is not executable!"
+	exit 8
+fi
+
+##################################################################################
+
+loki-prog "Creating test data.."
+
+ar_dir=$(fenrir-tmp -d)
+ars=$(fenrir-tmp -d)
+
+touch "${ar_dir}/1.txt" "${ar_dir}/2.txt"
+tar cf "${ars}/a" "${ar_dir}"
+cp "$(fenrir-task-path cfgs)/e.tar.gz" "${ars}/e"
+
+loki-gorp
+
+loki-prog "Installing 'L' command"
+bin_dir=$(fenrir-tmp -d)
+ln -s "${PWD}/${filename}" "${bin_dir}/L"
+export PATH="${bin_dir}:${PATH}"
+
+lokiw -e type L
+loki-gorp
+
+loki-prog "Emptiness"
+
+lokiw L -e "${ars}/e" J
+loki-assert-eq 0 "$?"
+loki-assert-out ""
+loki-assert-err ""
+
+lokiw L -e "${ars}/a" J
+loki-assert-neq 0 "$?"
+loki-assert-out ""
+loki-assert-err ""
+
+loki-gorp
+
+loki-prog "Size"
+
+lokiw L "${ars}/e" -sz 0 J
+loki-assert-eq 0 "$?"
+loki-assert-out ""
+loki-assert-err ""
+
+lokiw L "${ars}/e" -sz 1 J
+loki-assert-neq 0 "$?"
+loki-assert-out ""
+loki-assert-err ""
+
+lokiw L "${ars}/a" -sz 3 J
+loki-assert-eq 0 "$?"
+loki-assert-out ""
+loki-assert-err ""
+
+lokiw L "${ars}/e" -sz 2 J
+loki-assert-neq 0 "$?"
+loki-assert-out ""
+loki-assert-err ""
+
+loki-gorp
+
+loki-prog "Contains"
+
+lokiw L "${ars}/e" -has 1.txt J
+loki-assert-neq 0 "$?"
+loki-assert-out ""
+loki-assert-err ""
+
+lokiw L "${ars}/a" -has 1 J
+loki-assert-neq 0 "$?"
+loki-assert-out ""
+loki-assert-err ""
+
+lokiw L "${ars}/a" -has txt J
+loki-assert-neq 0 "$?"
+loki-assert-out ""
+loki-assert-err ""
+
+lokiw L "${ars}/a" -has 1.txt J
+loki-assert-eq 0 "$?"
+loki-assert-out ""
+loki-assert-err ""
+
+lokiw L "${ars}/a" -has 2.txt J
+loki-assert-eq 0 "$?"
+loki-assert-out ""
+loki-assert-err ""
+
+loki-gorp
+
+loki-prog "Testing error handling.."
+
+lokiw L "${ars}/a" -sz 2.txt J
+loki-assert-eq 35 $?
+
+lokiw L /roko -sz 4 J
+loki-assert-eq 34 $?
+
+lokiw L /roko -has 4 J
+loki-assert-eq 34 $?
+
+lokiw L -e /roko J
+loki-assert-eq 34 $?
+
+lokiw L
+loki-assert-eq 33 $?
+
+lokiw L -e
+loki-assert-eq 33 $?
+
+lokiw L -e a
+loki-assert-eq 33 $?
+
+lokiw L a -sz
+loki-assert-eq 33 $?
+
+lokiw L a -s
+loki-assert-eq 33 $?
+
+lokiw L a -has
+loki-assert-eq 33 $?
+
+lokiw L a -sz 4
+loki-assert-eq 33 $?
+
+lokiw L a -has 4
+loki-assert-eq 33 $?
+
+lokiw L a -sz 4 J j j
+loki-assert-eq 33 $?
+
+lokiw L a -has 4 j
+loki-assert-eq 33 $?
+
+lokiw L -e 4.tar.gzJ
+loki-assert-eq 33 $?
+
+loki-gorp
+
+loki-points +10

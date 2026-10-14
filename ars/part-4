@@ -1,0 +1,35 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "ARS-4: "
+
+filename="part-4.sh"
+if ! [ -x "$filename" ]; then
+	loki-log err "File '$filename' does not exist or is not executable!"
+	exit 8
+fi
+
+##################################################################################
+
+loki-prog "Non-existing path.."
+
+(
+source "./${filename}" "/roko" &> /dev/null
+)
+loki-assert-eq 44 "$?"
+
+loki-gorp
+
+loki-prog "Correct data.."
+
+source "./${filename}" "$(fenrir-task-path cfgs)/srapp.tar.gz"
+loki-assert-eq 0 "$?"
+
+lokiw -e jakov
+loki-assert-out "END: 4"
+
+lokiw -e nix
+loki-assert-out "END: 2"
+
+loki-gorp
+
+loki-points +5

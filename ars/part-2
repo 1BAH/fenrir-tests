@@ -1,0 +1,87 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "ARS-2: "
+
+filename="part-2.sh"
+if ! [ -x "$filename" ]; then
+	loki-log err "File '$filename' does not exist or is not executable!"
+	exit 8
+fi
+
+##################################################################################
+
+loki-prog "Creating test data.."
+
+out_dir=$(fenrir-tmp -d)
+
+cp "$(fenrir-task-path cfgs)/w.tar.gz" "${out_dir}/"
+cp "$(fenrir-task-path cfgs)/w.tar.gz" "${out_dir}/ww.tar.xz"
+cp "$(fenrir-task-path cfgs)/w.tar.gz" "${out_dir}/www1"
+
+cp "$(fenrir-task-path cfgs)/w.tar.xz" "${out_dir}/"
+cp "$(fenrir-task-path cfgs)/w.tar.xz" "${out_dir}/ww.tar.bz2"
+cp "$(fenrir-task-path cfgs)/w.tar.xz" "${out_dir}/www2"
+
+cp "$(fenrir-task-path cfgs)/w.tar.bz2" "${out_dir}/"
+cp "$(fenrir-task-path cfgs)/w.tar.bz2" "${out_dir}/ww.tar.zst"
+cp "$(fenrir-task-path cfgs)/w.tar.bz2" "${out_dir}/www3"
+
+cp "$(fenrir-task-path cfgs)/w.tar.zst" "${out_dir}/"
+cp "$(fenrir-task-path cfgs)/w.tar.zst" "${out_dir}/ww.tar.gz"
+cp "$(fenrir-task-path cfgs)/w.tar.zst" "${out_dir}/www4"
+
+loki-gorp
+
+loki-prog "gz"
+
+lokiw -e "./${filename}" "${out_dir}/w.tar.gz"
+loki-assert-out gz
+
+lokiw -e "./${filename}" "${out_dir}/ww.tar.xz"
+loki-assert-out gz
+
+lokiw -e "./${filename}" "${out_dir}/www1"
+loki-assert-out gz
+
+loki-gorp
+
+loki-prog "xz"
+
+lokiw -e "./${filename}" "${out_dir}/w.tar.xz"
+loki-assert-out xz
+
+lokiw -e "./${filename}" "${out_dir}/ww.tar.bz2"
+loki-assert-out xz
+
+lokiw -e "./${filename}" "${out_dir}/www2"
+loki-assert-out xz
+
+loki-gorp
+
+loki-prog "bz2"
+
+lokiw -e "./${filename}" "${out_dir}/w.tar.bz2"
+loki-assert-out bz2
+
+lokiw -e "./${filename}" "${out_dir}/ww.tar.zst"
+loki-assert-out bz2
+
+lokiw -e "./${filename}" "${out_dir}/www3"
+loki-assert-out bz2
+
+loki-gorp
+
+loki-prog "zst"
+
+lokiw -e "./${filename}" "${out_dir}/w.tar.zst"
+loki-assert-out zst
+
+lokiw -e "./${filename}" "${out_dir}/ww.tar.gz"
+loki-assert-out zst
+
+lokiw -e "./${filename}" "${out_dir}/www4"
+loki-assert-out zst
+
+loki-gorp
+
+loki-points +5
