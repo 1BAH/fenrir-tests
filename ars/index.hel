@@ -8,6 +8,7 @@ scripts=(
 )
 
 cfgs=(
+	"e.tar.gz"
 	"w.tar.gz"
 	"w.tar.xz"
 	"w.tar.bz2"
