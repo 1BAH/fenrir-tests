@@ -1,0 +1,10 @@
+#! /usr/bin/env loki
+
+loki-log info "Setting up.."
+
+rm -f ~/.ssh/id_ed25519* ~/.ssh/config
+
+loki-log info "Initialise client.."
+
+mkdir ~/from
+cp -r /tmp/fenrir-shared/from ~/from/emails.d

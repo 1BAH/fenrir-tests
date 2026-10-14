@@ -7,6 +7,8 @@ scripts=(
 
 cfgs=()
 
-branch="term/ssh"
+image="ghcr.io/devtools-course/task-ssh-client:latest"
+branch="ssh"
 blocking=0
-indocker=0
+inhost=0
+inline=0

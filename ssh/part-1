@@ -1,0 +1,40 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "SSH-1: "
+
+function verify_script {
+    local filename=$1
+    if ! [ -x "$filename" ]; then
+        loki-log err "File '$filename' does not exist or is not executable!"
+        exit 8
+    fi
+}
+
+verify_script "setup.sh"
+verify_script "part-1.sh"
+
+##################################################################################
+
+loki-log info "Running setup.sh.."
+
+lokiw -e ./setup.sh
+
+loki-prog "Testing the connection.."
+
+lokiw -e ssh fikus@server "echo Hello World!"
+loki-assert-out "Hello World!"
+
+loki-gorp
+loki-prog "Running part-1.sh.."
+
+lokiw -e ./part-1.sh
+
+if ! [ -f "/tmp/fenrir-shared/cacti/t.rex" ]; then
+    loki-log err "Cannot find the file"
+    finalise 8
+fi
+loki-assert-feq "/tmp/fenrir-shared/correct" "/tmp/fenrir-shared/cacti/t.rex"
+
+loki-gorp
+
+loki-points +15

@@ -1,0 +1,58 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "SSH-2: "
+
+function verify_script {
+    local filename=$1
+    if ! [ -x "$filename" ]; then
+        loki-log err "File '$filename' does not exist or is not executable!"
+        exit 8
+    fi
+}
+
+verify_script "setup.sh"
+verify_script "part-2.sh"
+
+##################################################################################
+
+loki-log info "Running setup.sh.."
+
+lokiw -e ./setup.sh
+
+loki-prog "Testing the connection.."
+
+lokiw -e ssh fikus@server "echo Hello World!"
+loki-assert-out "Hello World!"
+
+loki-gorp
+loki-prog "Running part-2.sh.."
+
+lokiw -e ./part-2.sh
+
+loki-gorp
+loki-prog "Testing client.."
+
+if ! [ -d "/home/fikus/to" ]; then
+	loki-log fail "File </home/fikus/to> does not exist"
+fi
+
+loki-assert-eq 1 "$(find "/home/fikus/to" -type f | wc -l | tr -d "$IFS")"
+
+loki-assert-feq "/tmp/fenrir-shared/from/email.addr" "/home/fikus/to/addr.email"
+
+loki-gorp
+loki-prog "Testing server.."
+
+if ! [ -d "/tmp/fenrir-shared/to" ]; then
+	loki-log fail "File </home/fikus/to> does not exist"
+fi
+
+loki-assert-eq 3 "$(find "/tmp/fenrir-shared/to/addrs" -type f | wc -l | tr -d "$IFS")"
+
+loki-assert-feq "/tmp/fenrir-shared/from/email.addr"              "/tmp/fenrir-shared/to/addrs/email.addr"
+loki-assert-feq "/tmp/fenrir-shared/from/otter/email.addr"        "/tmp/fenrir-shared/to/addrs/otter/email.addr"
+loki-assert-feq "/tmp/fenrir-shared/from/otter/beaver/email.addr" "/tmp/fenrir-shared/to/addrs/otter/beaver/email.addr"
+
+loki-gorp
+
+loki-points +15

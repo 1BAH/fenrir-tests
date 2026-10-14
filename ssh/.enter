@@ -1,0 +1,5 @@
+#! /usr/bin/env loki
+
+loki-log info "Setting up.."
+
+rm -f ~/.ssh/id_ed25519* ~/.ssh/config
