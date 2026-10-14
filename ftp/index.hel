@@ -12,3 +12,4 @@ cfgs=()
 branch="ftp"
 blocking=0
 inhost=0
+inline=0
