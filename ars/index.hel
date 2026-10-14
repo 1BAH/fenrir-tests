@@ -16,8 +16,7 @@ cfgs=(
 	"spec.tar.gz"
 )
 
-#image="ghcr.io/devtools-course/task-ssh:latest"
-image="gzip"
+image="ghcr.io/devtools-course/task-ars:latest"
 branch="ars"
 blocking=0
 inhost=0
