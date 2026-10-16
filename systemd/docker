@@ -1,0 +1,46 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "DCKR: "
+
+function verify_script {
+    local filename=$1
+    if ! [ -x "$filename" ]; then
+        loki-log err "File '$filename' does not exist or is not executable!"
+        exit 8
+    fi
+}
+
+verify_script "setup.sh"
+verify_script "teardown.sh"
+
+##################################################################################
+
+loki-log info "Running setup.sh.."
+
+lokiw -e ./setup.sh
+
+loki-prog "Testing /var/run/reckod.sock.."
+
+if ! [ -S /var/run/reckod.sock ]; then
+	loki-log fail "File was not found!"
+fi
+
+loki-gorp
+
+loki-prog "Testing server.."
+
+lokiw -e /usr/bin/client
+
+loki-gorp
+
+loki-log info "Running teardown.sh.."
+lokiw -e ./teardown.sh
+
+loki-prog "Testing server.."
+
+lokiw /usr/bin/client
+loki-assert-neq 0 "$?" "Server must be down!"
+
+loki-gorp
+
+loki-points +25

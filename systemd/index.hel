@@ -1,0 +1,13 @@
+
+scripts=(
+    "wsl"
+    "docker"
+)
+
+cfgs=()
+
+image="ghcr.io/devtools-course/task-systemd:latest"
+branch="systemd"
+blocking=0
+inhost=0
+inline=0

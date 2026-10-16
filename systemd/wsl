@@ -1,0 +1,81 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "WSL: "
+
+function verify_script {
+    local filename=$1
+    if ! [ -x "$filename" ]; then
+        loki-log err "File '$filename' does not exist or is not executable!"
+        exit 8
+    fi
+}
+
+function mount_has_opt {
+	if ! findmnt -no OPTIONS "$1" | grep -q "$2"; then
+		loki-log fail "Mount <$1> has no such option: <$2>!"
+		exit 4
+	fi
+}
+
+function test_mount {
+	if ! df -hxs | grep -q "$1"; then
+		loki-log fail "Mounting point <$1> was not found!"
+		exit 5
+	fi
+
+	loki-assert-eq "$2" "$(findmnt -no SIZE   "$1" | tr -d "$IFS")" "Invalid size"
+	loki-assert-eq "$3" "$(findmnt -no FSTYPE "$1" | tr -d "$IFS")" "Invalid fs type"
+}
+
+function no_mount {
+	if df -hxs | grep -q "$1"; then
+		loki-log fail "Mounting point <$1> was found!"
+		exit 5
+	fi
+}
+
+verify_script "setup.sh"
+verify_script "teardown.sh"
+
+##################################################################################
+
+loki-log info "Running setup.sh.."
+lokiw -e ./setup.sh
+
+loki-prog "Testing /mnt/c.."
+
+test_mount "/mnt/c" "2M" "fuseblk"
+
+loki-assert-eq 777 "$(stat -c "%a" /mnt/c/)" "Invalid /mnt/c mode!"
+
+lokiw -e gpg --import /key.gpg
+lokiw -e gpg --verify /mnt/c/plik.asc /mnt/c/plik
+
+lokiw -e cat /mnt/c/plik
+loki-assert-out "Witaj, swiecie!"
+
+loki-gorp
+
+loki-prog "Testing /temp.."
+
+test_mount "/temp" "2M" "tmpfs"
+
+mount_has_opt "/temp" "rw"
+mount_has_opt "/temp" "nosuid"
+mount_has_opt "/temp" "nodev"
+
+loki-assert-eq 1777 "$(stat -c "%a" /temp)" "Invalid /temp mode!"
+
+loki-gorp
+
+loki-log info "Running teardown.sh.."
+lokiw -e ./teardown.sh
+
+loki-prog "Testing filesystem.."
+
+no_mount "/temp"
+no_mount "/mnt/c"
+
+loki-gorp
+
+loki-points +20
