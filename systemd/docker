@@ -10,14 +10,21 @@ function verify_script {
     fi
 }
 
+function run_client {
+    if [ -n "$newgrp" ]; then
+    	sg reckod /usr/bin/client
+    else
+    	/usr/bin/client
+    fi
+}
+
 verify_script "setup.sh"
 verify_script "teardown.sh"
 
 ##################################################################################
 
 loki-log info "Running setup.sh.."
-
-lokiw -e ./setup.sh
+echo breach | lokiw -e sudo -S ./setup.sh
 
 loki-prog "Testing /var/run/reckod.sock.."
 
@@ -25,20 +32,28 @@ if ! [ -S /var/run/reckod.sock ]; then
 	loki-log fail "File was not found!"
 fi
 
+if grep 'reckod' /etc/group | grep -q "$(whoami)"; then
+	newgrp=1
+fi
+
 loki-gorp
 
 loki-prog "Testing server.."
 
-lokiw -e /usr/bin/client
+loki-log info "User info"
+loki-log info "name: <$(whoami)>"
+loki-log info "groups: <$(grep 'reckod' /etc/group | grep "$(whoami)" | cut -f1 -d":" | tr $'\n' ' ')>"
+
+lokiw -e run_client
 
 loki-gorp
 
 loki-log info "Running teardown.sh.."
-lokiw -e ./teardown.sh
+echo breach | lokiw -e sudo -S ./teardown.sh
 
 loki-prog "Testing server.."
 
-lokiw /usr/bin/client
+lokiw run_client
 loki-assert-neq 0 "$?" "Server must be down!"
 
 loki-gorp

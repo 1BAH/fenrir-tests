@@ -40,7 +40,7 @@ verify_script "teardown.sh"
 ##################################################################################
 
 loki-log info "Running setup.sh.."
-lokiw -e ./setup.sh
+echo breach | lokiw -e sudo -S ./setup.sh
 
 loki-prog "Testing /mnt/c.."
 
@@ -48,7 +48,7 @@ test_mount "/mnt/c" "2M" "fuseblk"
 
 loki-assert-eq 777 "$(stat -c "%a" /mnt/c/)" "Invalid /mnt/c mode!"
 
-lokiw -e gpg --import /key.gpg
+lokiw gpg --import /key.gpg
 lokiw -e gpg --verify /mnt/c/plik.asc /mnt/c/plik
 
 lokiw -e cat /mnt/c/plik
@@ -69,7 +69,7 @@ loki-assert-eq 1777 "$(stat -c "%a" /temp)" "Invalid /temp mode!"
 loki-gorp
 
 loki-log info "Running teardown.sh.."
-lokiw -e ./teardown.sh
+echo breach | lokiw -e sudo -S ./teardown.sh
 
 loki-prog "Testing filesystem.."
 
