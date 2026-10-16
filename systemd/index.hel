@@ -6,8 +6,7 @@ scripts=(
 
 cfgs=()
 
-#image="ghcr.io/devtools-course/task-systemd:latest"
-image="sysd"
+image="ghcr.io/devtools-course/task-systemd:latest"
 branch="systemd"
 blocking=0
 inhost=0
