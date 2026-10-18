@@ -4,13 +4,13 @@ loki-set-log-prefix "SL2-bf: "
 
 loki-prog "Detecting language.."
 
-if [ -f Regex.java ] && [ "$(wc -l Regex.java | cut -d' ' -f1)" -gt "13" ]; then
+if [ -f Regex.java ] && [ "$(wc -l Regex.java | grep -oE '[0-9]+')" -gt "13" ]; then
     loki-log info "Found: <java>"
     build_cmd=(javac Regex.java Numbers.java)
     run_cmd="java Numbers"
     cp "$(fenrir-task-path cfgs)/Numbers.java" .
     files_to_remove=(Numbers.java *.class)
-elif [ -f regex.cc ] && [ "$(wc -l regex.cc | cut -d' ' -f1)" -gt "12" ]; then
+elif [ -f regex.cc ] && [ "$(wc -l regex.cc | grep -oE '[0-9]+')" -gt "12" ]; then
     loki-log info "Found: <C++>"
     build_cmd=(g++ -std=c++23 regex.cc numbers.cc -o tests)
     run_cmd="./tests"
