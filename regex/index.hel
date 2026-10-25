@@ -1,4 +1,12 @@
-
+[ "${FENV}" = "LÆVATEINN" ] || {
+cat <<- OUT > /dev/stderr
+${BOLD}${RED}
+Invalid HEL format!
+Expected <LÆVATEINN>, got <${FENV}> instead!
+${ENDC}
+OUT
+exit 222
+}
 scripts=(
     "global.init"
     "globs-1"
@@ -8,21 +16,19 @@ scripts=(
     "sed-grep-2"
     "sed-grep-3"
     "stdlib-1"
-    "stdlib-2"
     "stdlib-1.enter"
-    "stdlib-2.enter"
     "stdlib-1.exit"
+    "stdlib-2"
+    "stdlib-2.enter"
     "stdlib-2.exit"
 )
-
 cfgs=(
-	"data.log"
-	"Logs.java"
-	"logs.cc"
-	"Numbers.java"
-	"numbers.cc"
+    "data.log"
+    "logs.cc"
+    "Logs.java"
+    "numbers.cc"
+    "Numbers.java"
 )
 
 image="ghcr.io/devtools-course/task-regex:latest"
-branch="regex"
 blocking=0

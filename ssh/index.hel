@@ -1,18 +1,24 @@
-
+[ "${FENV}" = "LÆVATEINN" ] || {
+cat <<- OUT > /dev/stderr
+${BOLD}${RED}
+Invalid HEL format!
+Expected <LÆVATEINN>, got <${FENV}> instead!
+${ENDC}
+OUT
+exit 222
+}
 scripts=(
-	".enter"
-	"env.up"
-	"env.down"
-	"part-2.enter"
+    "env.down"
+    "env.up"
     "part-1"
     "part-2"
+    "part-2.enter"
     "part-3"
+    ".enter"
 )
-
-cfgs=()
-
+cfgs=(
+)
 image="ghcr.io/devtools-course/task-ssh-client:latest"
-branch="ssh"
-blocking=0
-inhost=0
 inline=0
+inhost=0
+blocking=0

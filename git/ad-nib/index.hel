@@ -1,17 +1,25 @@
+[ "${FENV}" = "LÆVATEINN" ] || {
+cat <<- OUT > /dev/stderr
+${BOLD}${RED}
+Invalid HEL format!
+Expected <LÆVATEINN>, got <${FENV}> instead!
+${ENDC}
+OUT
+exit 222
+}
 scripts=(
-	".enter"
-	"global.init"
-    "rebase"
+    "global.init"
     "hooks"
-    "lfs"
-    "submodules"
     "ignore"
+    "lfs"
+    "rebase"
+    "submodules"
+    ".enter"
+)
+cfgs=(
 )
 
-cfgs=()
-
-branch="git/ad-nib"
-blocking=0
+image="ghcr.io/devtools-course/task-git-ad:latest"
 inline=0
 inlined=0
-image="ghcr.io/devtools-course/task-git-ad:latest"
+blocking=0

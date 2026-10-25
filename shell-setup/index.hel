@@ -1,4 +1,12 @@
-
+[ "${FENV}" = "LÆVATEINN" ] || {
+cat <<- OUT > /dev/stderr
+${BOLD}${RED}
+Invalid HEL format!
+Expected <LÆVATEINN>, got <${FENV}> instead!
+${ENDC}
+OUT
+exit 222
+}
 scripts=(
     "alias"
     "autocomplete"
@@ -6,13 +14,9 @@ scripts=(
     "global.init"
     ".enter"
 )
-
 cfgs=(
 )
-
 image="ghcr.io/devtools-course/task-setup-sh:latest"
-branch="shell-setup"
-blocking=0
-
-inhost=0
 inline=0
+inhost=0
+blocking=0

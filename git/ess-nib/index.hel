@@ -1,6 +1,15 @@
+[ "${FENV}" = "LÆVATEINN" ] || {
+cat <<- OUT > /dev/stderr
+${BOLD}${RED}
+Invalid HEL format!
+Expected <LÆVATEINN>, got <${FENV}> instead!
+${ENDC}
+OUT
+exit 222
+}
 scripts=(
-    ".enter"
     "part-1"
+    "part-10"
     "part-2"
     "part-3"
     "part-4"
@@ -9,12 +18,10 @@ scripts=(
     "part-7"
     "part-8"
     "part-9"
-    "part-10"
+    ".enter"
 )
-
-cfgs=()
-
-branch="git/ess-nib"
-blocking=0
+cfgs=(
+)
 inline=0
 inlined=0
+blocking=0

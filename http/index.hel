@@ -1,17 +1,23 @@
-
+[ "${FENV}" = "LÆVATEINN" ] || {
+cat <<- OUT > /dev/stderr
+${BOLD}${RED}
+Invalid HEL format!
+Expected <LÆVATEINN>, got <${FENV}> instead!
+${ENDC}
+OUT
+exit 222
+}
 scripts=(
-	".enter"
-	"env.up"
-	"env.down"
+    "env.down"
+    "env.up"
     "part-1"
     "part-2"
     "part-3"
     "part-4"
+    ".enter"
 )
-
-cfgs=()
-
-branch="http"
-blocking=0
-inhost=0
+cfgs=(
+)
 inline=0
+inhost=0
+blocking=0
