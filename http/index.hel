@@ -8,7 +8,6 @@ OUT
 exit 222
 }
 scripts=(
-    "env.down"
     "env.up"
     "part-1"
     "part-2"
