@@ -1,0 +1,9 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "V2: "
+
+lokiw -e "screamer"
+loki-assert-out "Got: 540
+INFO>> Hello World"
+
+loki-points +100
