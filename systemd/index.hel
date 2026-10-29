@@ -8,6 +8,7 @@ OUT
 exit 222
 }
 scripts=(
+	"env.up"
     "docker"
     "wsl"
 )
