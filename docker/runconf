@@ -49,7 +49,7 @@ loki-gorp
 
 loki-prog "Validate frt"
 if ! contains "$frt" "--rm"; then
-    loki-log err "Invalid trd"
+    loki-log err "Invalid frt"
     exit 1
 fi
 loki-gorp
