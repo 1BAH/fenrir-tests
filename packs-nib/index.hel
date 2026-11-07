@@ -1,0 +1,24 @@
+[ "${FENV}" = "LÆVATEINN" ] || {
+cat <<- OUT > /dev/stderr
+${BOLD}${RED}
+Invalid HEL format!
+Expected <LÆVATEINN>, got <${FENV}> instead!
+${ENDC}
+OUT
+exit 222
+}
+scripts=(
+    "crows-deb"
+    "ghost-deb"
+    "crows-rpm"
+    "ghost-rpm"
+    "global.init"
+    "score"
+    ".enter"
+)
+cfgs=(
+)
+inhost=0
+indocker=0
+inlined=0
+blocking=0

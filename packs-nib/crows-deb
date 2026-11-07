@@ -1,0 +1,8 @@
+#! /usr/bin/env loki
+
+fenrir task deb-nib || exit $?
+fenrir rund -nl .
+
+add_score
+
+fenrir task packs-nib &> /dev/null

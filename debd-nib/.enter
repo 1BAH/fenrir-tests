@@ -1,0 +1,26 @@
+#! /usr/bin/env loki
+
+function checkout {
+	part=$1
+
+    fenrir-change-branch packs || exit $?
+
+    dir="packs/$part"
+
+    if ! [ -d "$dir" ]; then
+    	loki-log err "Cannot find directory <$dir>"
+    	exit 6
+    fi
+
+    cd "$dir"
+}
+export -f checkout
+
+function verify_script {
+    local filename=$1
+    if ! [ -x "$filename" ]; then
+        loki-log err "File '$filename' does not exist or is not executable!"
+        exit 8
+    fi
+}
+export -f verify_script

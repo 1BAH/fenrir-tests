@@ -1,0 +1,23 @@
+#! /usr/bin/env loki
+
+function get_score_path {
+	echo "USING <${FENRIR_TMP_DIR}/$(cat "${FENRIR_TMP_DIR}/idx")>" >&2
+	echo "${FENRIR_TMP_DIR}/$(cat "${FENRIR_TMP_DIR}/idx")"
+}
+export -f get_score_path
+
+function add_score_d {
+	before=$(cat "$(get_score_path)")
+	delta=$1
+	new=$(( before + delta ))
+	echo "$new" > "$(get_score_path)"
+	loki-log info "Updated global score: <$before> + <$delta> => <$new>"
+}
+export -f add_score_d
+
+function add_score {
+	delta=$(cat "${FENRIR_TMP_DIR}/score")
+	delta=${delta:-0}
+	add_score_d "$delta"
+}
+export -f add_score

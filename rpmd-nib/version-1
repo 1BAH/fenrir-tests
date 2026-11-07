@@ -1,0 +1,72 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "RPM-V1: "
+
+checkout ghost
+verify_script "build-rpm.sh"
+
+##################################################################################
+platform=$(uname -m)
+
+package="./ghost-1.0.0.$platform.rpm"
+pts=10
+
+loki-log info "Running build-rpm.sh.."
+lokiw -e ./build-rpm.sh
+
+loki-log info "Installing.."
+echo breach | lokiw -e sudo -S dnf install --disablerepo='*' --cacheonly -y "$package"
+
+sleep 5s
+
+loki-prog "Testing util.."
+
+lokiw -e curl localhost:8870
+loki-assert-out "oltiws"
+
+echo breach | lokiw sudo -S systemctl list-units --type=service --state=running
+loki-assert-rout ".*ghost\.service.*"
+
+lokiw test -L /etc/systemd/system/multi-user.target.wants/ghost.service
+loki-assert-eq 0 $? "Service was not registered!"
+
+loki-gorp
+
+loki-prog "Testing header and library.."
+
+dir=$(fenrir-tmp -d)
+cat <<- CPP > "$dir/a.c"
+#include <stdio.h>
+#include <lihtar.h>
+
+
+int main(void) {
+    printf("%s\n", light());
+}
+CPP
+
+cd "$dir"
+
+lokiw -e musl-gcc -I/usr/include -L/usr/lib a.c -llihtar -o a.exe
+lokiw -e ./a.exe
+loki-assert-out "oltiws"
+
+loki-gorp
+
+loki-prog "Now checking uninstall.."
+
+echo breach | lokiw sudo -S dnf remove -y ghost
+loki-assert-eq 0 $?
+
+lokiw curl localhost:8870
+loki-assert-neq 0 $? "Server is awake!"
+
+echo breach | lokiw sudo -S systemctl list-units --type=service
+loki-assert-rnout ".*ghost\.service.*"
+
+lokiw test -L /etc/systemd/system/multi-user.target.wants/ghost.service
+loki-assert-neq 0 $? "Service is still registered!"
+
+loki-gorp
+
+loki-points +$pts

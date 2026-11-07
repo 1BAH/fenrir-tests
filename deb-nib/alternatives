@@ -1,0 +1,41 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "DEB-ALT: "
+
+checkout crows
+verify_script "build-deb.sh"
+
+##################################################################################
+pm="apt-get"
+package="./raven_1.0.0_all.deb"
+pts=5
+
+loki-log info "Running build-deb.sh.."
+lokiw -e ./build-deb.sh
+
+loki-log info "Installing.."
+echo breach | lokiw -e sudo -S "$pm" install -y "$package"
+
+loki-prog "Testing alternatives.."
+
+if ! [ -L /etc/alternatives/raven ]; then
+	loki-log fail "Alternative <raven> was not found"
+	exit 6
+fi
+
+lokiw -e readlink "$(which raven)"
+loki-assert-out "/etc/alternatives/raven"
+
+loki-points +$pts
+
+export LOKI_ASSERT_CB="loki-points -$pts"
+
+loki-prog "Now checking uninstall.."
+
+echo breach | lokiw sudo -S apt-get purge -y raven
+loki-assert-eq 0 $?
+
+lokiw test -L /etc/alternatives/raven
+loki-assert-neq 0 $? "Alternative was not removed!"
+
+loki-gorp

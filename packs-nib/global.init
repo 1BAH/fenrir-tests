@@ -1,0 +1,5 @@
+#! /usr/bin/env loki
+
+score=$(fenrir-tmp)
+echo 0 > "$score"
+loki-log info "Created aggregation score file: <$score>"

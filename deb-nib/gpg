@@ -1,0 +1,27 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "DEB-GPG: "
+
+checkout crows
+
+##################################################################################
+package="./raven.deb"
+pts=5
+
+
+lokiw test -f "$package"
+loki-assert-eq 0 $? "Package was not provided!"
+
+lokiw test -f "$package.asc"
+loki-assert-eq 0 $? "Signature was not provided!"
+
+lokiw test -f "pubkey.gpg"
+loki-assert-eq 0 $? "Public key was not provided!"
+
+loki-prog "Testing gpg.."
+lokiw gpg --import pubkey.gpg
+lokiw -e gpg --verify "$package.asc" "$package"
+
+loki-gorp
+
+loki-points +$pts

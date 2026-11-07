@@ -1,0 +1,41 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "RPM-MAN: "
+
+checkout crows
+verify_script "build-rpm.sh"
+
+##################################################################################
+pm="dnf"
+package="./raven-1.0.0.noarch.rpm"
+pts=5
+
+loki-log info "Running build-rpm.sh.."
+lokiw -e ./build-rpm.sh
+
+loki-log info "Installing.."
+echo breach | lokiw -e sudo -S "$pm" install --disablerepo='*' --cacheonly -y "$package"
+
+loki-prog "Testing man pages.."
+
+lokiw -e man raven
+loki-assert-regeq '.*NAME.*'                     "$(loki-get-out)" "Missing <NAME> section"
+loki-assert-regeq '.*OPTIONS.*'                  "$(loki-get-out)" "Missing <OPTIONS> section"
+loki-assert-regeq '.*SYNOPSIS.*'                 "$(loki-get-out)" "Missing <SYNOPSIS> section"
+loki-assert-regeq '.*RAVEN\(1\).*'               "$(loki-get-out)" "Missing header"
+loki-assert-regeq '.*raven.*-v\|--voice TIMES.*' "$(loki-get-out)" "Invalid synopsis"
+loki-gorp
+
+loki-points +$pts
+
+export LOKI_ASSERT_CB="loki-points -$pts"
+
+loki-prog "Now checking uninstall.."
+
+echo breach | lokiw sudo -S dnf remove -y raven
+loki-assert-eq 0 $?
+
+lokiw man raven
+loki-assert-neq 0 $? "Command <man raven> must fail!"
+
+loki-gorp

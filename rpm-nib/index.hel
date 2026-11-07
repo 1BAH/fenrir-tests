@@ -1,0 +1,23 @@
+[ "${FENV}" = "LÆVATEINN" ] || {
+cat <<- OUT > /dev/stderr
+${BOLD}${RED}
+Invalid HEL format!
+Expected <LÆVATEINN>, got <${FENV}> instead!
+${ENDC}
+OUT
+exit 222
+}
+scripts=(
+	"env.up"
+	".enter"
+    "core"
+    "man"
+    "alternatives"
+    "gpg"
+)
+cfgs=(
+)
+image="ghcr.io/devtools-course/task-packs-rpm:latest"
+inline=0
+inhost=0
+blocking=0

@@ -1,0 +1,41 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "DEB-MAN: "
+
+checkout crows
+verify_script "build-deb.sh"
+
+##################################################################################
+pm="apt-get"
+package="./raven_1.0.0_all.deb"
+pts=10
+
+loki-log info "Running build-deb.sh.."
+lokiw -e ./build-deb.sh
+
+loki-log info "Installing.."
+echo breach | lokiw -e sudo -S "$pm" install -y "$package"
+
+loki-prog "Testing man pages.."
+
+lokiw -e man raven
+loki-assert-regeq '.*NAME.*'                     "$(loki-get-out)" "Missing <NAME> section"
+loki-assert-regeq '.*OPTIONS.*'                  "$(loki-get-out)" "Missing <OPTIONS> section"
+loki-assert-regeq '.*SYNOPSIS.*'                 "$(loki-get-out)" "Missing <SYNOPSIS> section"
+loki-assert-regeq '.*RAVEN\(1\).*'               "$(loki-get-out)" "Missing header"
+loki-assert-regeq '.*raven.*-v\|--voice TIMES.*' "$(loki-get-out)" "Invalid synopsis"
+loki-gorp
+
+loki-points +$pts
+
+export LOKI_ASSERT_CB="loki-points -$pts"
+
+loki-prog "Now checking uninstall.."
+
+echo breach | lokiw sudo -S apt-get purge -y raven
+loki-assert-eq 0 $?
+
+lokiw man raven
+loki-assert-neq 0 $? "Command <man raven> must fail!"
+
+loki-gorp

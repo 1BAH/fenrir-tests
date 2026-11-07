@@ -1,0 +1,8 @@
+
+main=(
+    "crows-deb"
+    "crows-rpm"
+    "ghost-deb"
+    "ghost-rpm"
+    "score"
+)

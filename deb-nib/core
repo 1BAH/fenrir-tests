@@ -1,0 +1,81 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "DEB-CORE: "
+
+checkout crows
+verify_script "build-deb.sh"
+
+##################################################################################
+pm="apt-get"
+package="./raven_1.0.0_all.deb"
+pts=5
+
+loki-log info "Running build-deb.sh.."
+lokiw -e ./build-deb.sh
+
+loki-log info "Installing.."
+echo breach | lokiw -e sudo -S "$pm" install -y "$package"
+
+loki-prog "Testing util.."
+
+lokiw -e raven -v 1
+loki-assert-out "CROAK!"
+
+lokiw -e raven -f
+lokiw -e cat /tmp/tomb
+loki-assert-out "CROAK!"
+
+echo breach | lokiw -e sudo -S chown fikus /etc/raven.conf
+echo 'msg="muerte"' > /etc/raven.conf
+
+lokiw -e raven -v 1
+loki-assert-out "muerte"
+
+loki-gorp
+
+loki-prog "Testing supplementary files.."
+loki-prog "License"
+if ! [ -f "/usr/share/doc/raven/LICENSE" ]; then
+	loki-log fail "License was not installed!"
+	exit 6
+fi
+loki-gorp
+
+loki-prog "Autocomplete"
+
+for file in /usr/share/bash-completion/completions/*raven*; do
+	compl=$file
+	break
+done
+
+loki-log info "Detected autocomplete script: <$compl>"
+if ! [ -x "$compl" ]; then
+	loki-log fail "Autocomplete was not installed!"
+	exit 6
+fi
+loki-gorp
+loki-gorp
+
+loki-points +$pts
+
+export LOKI_ASSERT_CB="loki-points -$pts"
+
+loki-prog "Now checking uninstall.."
+
+echo breach | lokiw sudo -S apt-get purge -y raven
+loki-assert-eq 0 $?
+
+lokiw raven
+loki-assert-neq 0 $? "Command <raven> must fail!"
+
+lokiw test -f "/usr/share/doc/raven/LICENSE"
+loki-assert-neq 0 $? "License was not removed!"
+
+lokiw test -f "/etc/raven.conf"
+loki-assert-neq 0 $? "Conf file was not removed!"
+
+lokiw test -x "$compl"
+loki-assert-neq 0 $? "Autocomplete was not removed!"
+
+
+loki-gorp

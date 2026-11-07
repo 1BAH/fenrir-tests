@@ -1,0 +1,8 @@
+
+main=(
+    "walk-inspections"
+    "core"
+    "man"
+    "alternatives"
+    "gpg"
+)

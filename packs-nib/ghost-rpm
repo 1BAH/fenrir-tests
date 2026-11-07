@@ -1,0 +1,9 @@
+#! /usr/bin/env loki
+
+fenrir task rpmd-nib || exit $?
+fenrir rund -nl . | tee /tmp/out
+
+delta=$(cat /tmp/out | grep 'Final score' | grep -oE ': [0-9]+' | grep -oE '[0-9]+')
+add_score_d "$delta"
+
+fenrir task packs-nib &> /dev/null

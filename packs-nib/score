@@ -1,0 +1,6 @@
+#! /usr/bin/env loki
+
+loki-log info "Saving global score.."
+cat "$(get_score_path)" > "${FENRIR_TMP_DIR}/score"
+
+fenrir task packs-nib &> /dev/null
