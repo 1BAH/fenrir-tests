@@ -2,7 +2,10 @@
 
 fenrir task deb-nib || exit $?
 fenrir rund -nl .
+ecode=$?
 
 add_score
 
 fenrir task packs-nib &> /dev/null
+
+exit $ecode
