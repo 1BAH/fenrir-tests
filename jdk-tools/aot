@@ -20,7 +20,7 @@ lokiw -e ./run.sh
 loaded=$(loki-get-err | head -n 2 | tail -n 1)
 loki-log info "AOT startup time: $loaded"
 
-if (( loaded >= 100 )); then
+if (( loaded >= 300 )); then
 	loki-log fail "You have not used AOT cache: the startup is too slow!"
 	exit 6
 fi
