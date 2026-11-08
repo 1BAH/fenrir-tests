@@ -1,0 +1,44 @@
+#! /usr/bin/env loki
+
+cd multi || exit $?
+
+out=$(fenrir-tmp -d)
+
+lokiw -e ./jar.sh "$out"
+lokiw -e ./entrypoint.sh "$out"
+
+lokiw -e ls -1A "$out"
+loki-assert-out "$(cat <<- JARS
+es.jar
+fr.jar
+it.jar
+main.jar
+JARS
+)"
+
+lokiw -e jar tf "$out/main.jar"
+loki-assert-out "$(cat <<- CLASSES
+META-INF/
+META-INF/MANIFEST.MF
+Bar.class
+CLASSES
+)"
+
+lokiw -e java -jar "$out/main.jar"
+loki-assert-out "$(cat <<- OUT
+Client 1 >>
+fr.cognac.Courvoisier
+<< Client 1
+Client 2 >>
+it.wine.Martini
+it.olives.Lazio
+<< Client 2
+Client 3 >>
+fr.wine.Bordeaux
+es.olives.Manzanilla
+fr.cognac.Hennessy
+<< Client 3
+OUT
+)"
+
+loki-points +10

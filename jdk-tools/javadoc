@@ -1,0 +1,18 @@
+#! /usr/bin/env loki
+
+cd docs || exit $?
+
+out=$(fenrir-tmp -d)
+
+lokiw -e ./gendocs.sh "$out"
+
+lokiw -e cat "$out"/root/package-summary.html
+loki-assert-rnout '.*<div class="col-first even-row-color class-summary class-summary-tab2"><a href="Fst.html" title="class in root">Fst</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">&nbsp;</div>.*' "No javadoc for <Fst.java>"
+loki-assert-rnout '.*<div class="col-first even-row-color class-summary class-summary-tab2"><a href="Snd.html" title="class in root">Snd</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">&nbsp;</div>.*' "No javadoc for <Snd.java>"
+loki-assert-rnout '.*<div class="col-first even-row-color class-summary class-summary-tab2"><a href="Trd.html" title="class in root">Trd</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">&nbsp;</div>.*' "No javadoc for <Trd.java>"
+loki-assert-rout '.*Cool.*' "Missing package description"
+
+loki-points +5

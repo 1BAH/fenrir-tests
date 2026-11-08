@@ -1,0 +1,64 @@
+#! /usr/bin/env loki
+
+cd multi || exit $?
+
+fr=$(fenrir-tmp -d)
+es=$(fenrir-tmp -d)
+it=$(fenrir-tmp -d)
+
+lokiw -e ./build.sh it "$it"
+lokiw -e ./build.sh fr "$fr"
+lokiw -e ./build.sh es "$es"
+
+
+loki-assert-eq "$(cat <<- CLASSES
+es/producto/Producto.class
+es/producto/Productor.class
+fr/cognac/Cognac.class
+fr/cognac/Courvoisier.class
+fr/cognac/Hennessy.class
+fr/Grapes.class
+fr/run/Runner.class
+fr/wine/Bordeaux.class
+it/wine/Wine.class
+CLASSES
+)" "$(find "$fr" -type f -name '*.class' | sort | sed -E "s|${FENRIR_TMP_DIR}/[0-9]*/(.*)|\1|g")"
+
+loki-assert-eq "$(cat <<- CLASSES
+es/olives/Olives.class
+es/producto/Producto.class
+es/producto/Productor.class
+it/olives/Lazio.class
+it/run/Runner.class
+it/wine/Martini.class
+it/wine/Wine.class
+CLASSES
+)" "$(find "$it" -type f -name '*.class' | sort | sed -E "s|${FENRIR_TMP_DIR}/[0-9]*/(.*)|\1|g")"
+
+loki-assert-eq "$(cat <<- CLASSES
+es/olives/Manzanilla.class
+es/olives/Olives.class
+es/producto/Producto.class
+es/producto/Productor.class
+es/run/Runner.class
+CLASSES
+)" "$(find "$es" -type f -name '*.class' | sort | sed -E "s|${FENRIR_TMP_DIR}/[0-9]*/(.*)|\1|g")"
+
+lokiw -e ./run.sh "$fr" "$es" "$it"
+loki-assert-out "$(cat <<- OUT
+Client 1 >>
+fr.cognac.Courvoisier
+<< Client 1
+Client 2 >>
+it.wine.Martini
+it.olives.Lazio
+<< Client 2
+Client 3 >>
+fr.wine.Bordeaux
+es.olives.Manzanilla
+fr.cognac.Hennessy
+<< Client 3
+OUT
+)"
+
+loki-points +10

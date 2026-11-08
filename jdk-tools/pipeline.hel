@@ -1,0 +1,10 @@
+
+main=(
+    "simple"
+    "javadoc"
+    "combine"
+    "jars"
+    "jar-cp"
+    "aot"
+)
+

@@ -1,0 +1,25 @@
+#! /usr/bin/env loki
+
+cd jit || exit $?
+rm -fr gen *.class *.aot *.jar
+
+lokiw -e ./gen_aot.sh
+loaded=$(loki-get-err | head -n 2 | tail -n 1)
+
+if (( loaded < 300 )); then
+	loki-log fail "Java cannot load 3k classes that fast!"
+	exit 5
+fi
+
+lokiw -u "ls -1 gen | wc -l"
+loki-assert-out 9002 "You must generate 3k classes!"
+
+lokiw -e ./run.sh
+loaded=$(loki-get-err | head -n 2 | tail -n 1)
+
+if (( loaded >= 100 )); then
+	loki-log fail "You have not used AOT cache: the startup is too slow!"
+	exit 6
+fi
+
+loki-points +10

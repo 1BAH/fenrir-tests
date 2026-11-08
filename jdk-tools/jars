@@ -1,0 +1,79 @@
+#! /usr/bin/env loki
+
+cd multi || exit $?
+
+out=$(fenrir-tmp -d)
+
+lokiw -e ./jar.sh "$out"
+
+lokiw -e jar tf "$out/fr.jar"
+loki-assert-out "$(cat <<- CLASSES
+META-INF/
+META-INF/MANIFEST.MF
+fr/
+fr/Grapes.class
+fr/cognac/
+fr/cognac/Cognac.class
+fr/cognac/Courvoisier.class
+fr/cognac/Hennessy.class
+fr/run/
+fr/run/Runner.class
+fr/wine/
+fr/wine/Bordeaux.class
+CLASSES
+)"
+
+lokiw -e jar tf "$out/it.jar"
+loki-assert-out "$(cat <<- CLASSES
+META-INF/
+META-INF/MANIFEST.MF
+it/
+it/olives/
+it/olives/Lazio.class
+it/run/
+it/run/Runner.class
+it/wine/
+it/wine/Martini.class
+it/wine/Wine.class
+CLASSES
+)"
+
+lokiw -e jar tf "$out/es.jar"
+loki-assert-out "$(cat <<- CLASSES
+META-INF/
+META-INF/MANIFEST.MF
+es/
+es/olives/
+es/olives/Manzanilla.class
+es/olives/Olives.class
+es/producto/
+es/producto/Producto.class
+es/producto/Productor.class
+es/run/
+es/run/Runner.class
+CLASSES
+)"
+
+lokiw -e java -jar "$out/fr.jar"
+loki-assert-out "$(cat <<- OUT
+fr.cognac.Cognac
+fr.cognac.Courvoisier
+fr.cognac.Hennessy
+OUT
+)"
+
+lokiw -e java -jar "$out/it.jar"
+loki-assert-out "$(cat <<- OUT
+it.wine.Martini
+it.wine.Wine
+OUT
+)"
+
+lokiw -e java -jar "$out/es.jar"
+loki-assert-out "$(cat <<- OUT
+es.olives.Manzanilla
+es.olives.Olives
+OUT
+)"
+
+loki-points +10
