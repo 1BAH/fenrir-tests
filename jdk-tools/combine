@@ -22,7 +22,7 @@ fr/run/Runner.class
 fr/wine/Bordeaux.class
 it/wine/Wine.class
 CLASSES
-)" "$(find "$fr" -type f -name '*.class' | sort | sed -E "s|${FENRIR_TMP_DIR}/[0-9]*/(.*)|\1|g")"
+)" "$(find "$fr" -type f -name '*.class' | sort -f | sed -E "s|${FENRIR_TMP_DIR}/[0-9]*/(.*)|\1|g")"
 
 loki-assert-eq "$(cat <<- CLASSES
 es/olives/Olives.class
@@ -33,7 +33,7 @@ it/run/Runner.class
 it/wine/Martini.class
 it/wine/Wine.class
 CLASSES
-)" "$(find "$it" -type f -name '*.class' | sort | sed -E "s|${FENRIR_TMP_DIR}/[0-9]*/(.*)|\1|g")"
+)" "$(find "$it" -type f -name '*.class' | sort -f | sed -E "s|${FENRIR_TMP_DIR}/[0-9]*/(.*)|\1|g")"
 
 loki-assert-eq "$(cat <<- CLASSES
 es/olives/Manzanilla.class
@@ -42,7 +42,7 @@ es/producto/Producto.class
 es/producto/Productor.class
 es/run/Runner.class
 CLASSES
-)" "$(find "$es" -type f -name '*.class' | sort | sed -E "s|${FENRIR_TMP_DIR}/[0-9]*/(.*)|\1|g")"
+)" "$(find "$es" -type f -name '*.class' | sort -f | sed -E "s|${FENRIR_TMP_DIR}/[0-9]*/(.*)|\1|g")"
 
 lokiw -e ./run.sh "$fr" "$es" "$it"
 loki-assert-out "$(cat <<- OUT
