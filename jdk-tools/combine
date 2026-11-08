@@ -17,7 +17,7 @@ es/producto/Productor.class
 fr/cognac/Cognac.class
 fr/cognac/Courvoisier.class
 fr/cognac/Hennessy.class
-fr/Grapes.class
+fr/local/Calvados.class
 fr/run/Runner.class
 fr/wine/Bordeaux.class
 it/wine/Wine.class
@@ -28,6 +28,7 @@ loki-assert-eq "$(cat <<- CLASSES
 es/olives/Olives.class
 es/producto/Producto.class
 es/producto/Productor.class
+it/local/Limoncello.class
 it/olives/Lazio.class
 it/run/Runner.class
 it/wine/Martini.class
@@ -36,6 +37,7 @@ CLASSES
 )" "$(find "$it" -type f -name '*.class' | sort -f | sed -E "s|${FENRIR_TMP_DIR}/[0-9]*/(.*)|\1|g")"
 
 loki-assert-eq "$(cat <<- CLASSES
+es/local/Sangria.class
 es/olives/Manzanilla.class
 es/olives/Olives.class
 es/producto/Producto.class

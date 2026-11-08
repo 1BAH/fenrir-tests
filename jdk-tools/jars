@@ -11,11 +11,12 @@ loki-assert-out "$(cat <<- CLASSES
 META-INF/
 META-INF/MANIFEST.MF
 fr/
-fr/Grapes.class
 fr/cognac/
 fr/cognac/Cognac.class
 fr/cognac/Courvoisier.class
 fr/cognac/Hennessy.class
+fr/local/
+fr/local/Calvados.class
 fr/run/
 fr/run/Runner.class
 fr/wine/
@@ -28,6 +29,8 @@ loki-assert-out "$(cat <<- CLASSES
 META-INF/
 META-INF/MANIFEST.MF
 it/
+it/local/
+it/local/Limoncello.class
 it/olives/
 it/olives/Lazio.class
 it/run/
@@ -43,6 +46,8 @@ loki-assert-out "$(cat <<- CLASSES
 META-INF/
 META-INF/MANIFEST.MF
 es/
+es/local/
+es/local/Sangria.class
 es/olives/
 es/olives/Manzanilla.class
 es/olives/Olives.class
