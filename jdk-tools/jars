@@ -56,23 +56,19 @@ CLASSES
 
 lokiw -e java -jar "$out/fr.jar"
 loki-assert-out "$(cat <<- OUT
-fr.cognac.Cognac
-fr.cognac.Courvoisier
-fr.cognac.Hennessy
+fr.local.Calvados
 OUT
 )"
 
 lokiw -e java -jar "$out/it.jar"
 loki-assert-out "$(cat <<- OUT
-it.wine.Martini
-it.wine.Wine
+it.local.Limoncello
 OUT
 )"
 
 lokiw -e java -jar "$out/es.jar"
 loki-assert-out "$(cat <<- OUT
-es.olives.Manzanilla
-es.olives.Olives
+es.local.Sangria
 OUT
 )"
 
