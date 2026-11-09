@@ -17,5 +17,5 @@ scripts=(
 )
 cfgs=(
 )
-image="jdk"
+image="ghcr.io/devtools-course/task-jdk-tools:latest"
 blocking=0

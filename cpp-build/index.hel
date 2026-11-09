@@ -19,5 +19,5 @@ scripts=(
 )
 cfgs=(
 )
-image="cpp"
+image="ghcr.io/devtools-course/task-cpp-build:latest"
 blocking=0
