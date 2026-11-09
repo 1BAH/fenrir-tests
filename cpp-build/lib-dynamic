@@ -1,0 +1,59 @@
+#! /usr/bin/env loki
+
+
+
+lokiw -e -u "find lib -type f -and \( -not -name '*.sh' \) | wc -l"
+loki-assert-out 5
+
+lokiw -e -u "find lib -type f -and \( -name '*.hh' -or -name '*.cc' \) | sort "
+loki-assert-out "$(cat <<- OUT
+lib/moduleA/iterator.cc
+lib/moduleA/iterator.hh
+lib/moduleB/array.cc
+lib/moduleB/array.hh
+lib/use.cc
+OUT
+)"
+
+lokiw -e cd lib
+
+verify_script "build-dynamic.sh"
+
+out=$(fenrir-tmp -d)
+
+lokiw -e ./build-dynamic.sh "$out"
+
+lokiw -e -u "find '$out' -type f -maxdepth 1 | wc -l"
+loki-assert-out 0
+
+cat <<- CC > "$out/a.cc"
+#include <iostream>
+#include <ostream>
+
+#include "iterator.hh"
+#include "array.hh"
+
+int main() {
+    devtools::array arr(3);
+    arr.put(0, 3);
+    arr.put(1, 2);
+    arr.put(2, 1);
+
+    auto it = arr.iterator();
+    while (it.has_next()) {
+        std::cout << it.next() << std::endl;
+    }
+}
+CC
+
+
+lokiw -e g++ "$out/a.cc" -I "$out/include" -L "$out/lib" -ldevtools -o "$out/run"
+lokiw "$out/run"
+loki-assert-neq 0 $?
+
+LD_LIBRARY_PATH="$out/lib" lokiw -e "$out/run"
+loki-assert-out "3
+2
+1"
+
+loki-points +5

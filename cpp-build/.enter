@@ -1,0 +1,11 @@
+#! /usr/bin/env loki
+
+function verify_script {
+    local filename=$1
+    if ! [ -x "$filename" ]; then
+        loki-log err "File '$filename' does not exist or is not executable!"
+        exit 8
+    fi
+}
+export -f verify_script
+

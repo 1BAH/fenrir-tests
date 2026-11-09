@@ -1,0 +1,26 @@
+#! /usr/bin/env loki
+
+
+lokiw -e -u "find simple -type f | wc -l"
+loki-assert-out 4
+
+lokiw -e -u "find simple -type f -and \( -name '*.hh' -or -name '*.cc' \) | sort"
+loki-assert-out "$(cat <<- OUT
+simple/deps/deps.cc
+simple/deps/deps.hh
+simple/main.cc
+OUT
+)"
+
+lokiw -e cd simple
+
+verify_script "build.sh"
+
+out=$(fenrir-tmp -d)
+
+lokiw -e ./build.sh "$out"
+
+lokiw -e "$out/runner"
+loki-assert-out "24 qwerty"
+
+loki-points +5

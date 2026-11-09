@@ -1,0 +1,39 @@
+#! /usr/bin/env loki
+
+
+lokiw -e -u "find broken -type f -and \( -not -name '*.sh' \) | wc -l"
+loki-assert-out 10
+
+lokiw -e -u "find broken -type f -and \( -not -name '*.sh' \) | sort "
+loki-assert-out "$(cat <<- OUT
+broken/entities/Animal.cpp
+broken/entities/Animal.hpp
+broken/entities/Goat.cpp
+broken/entities/Goat.hpp
+broken/entities/screaming.hpp
+broken/lib/even.cpp
+broken/lib/even.hpp
+broken/lib/odd.cpp
+broken/lib/odd.hpp
+broken/main.cpp
+OUT
+)"
+
+lokiw -e cd broken
+
+verify_script "build.sh"
+
+out=$(fenrir-tmp -d)
+
+lokiw -e ./build.sh "$out"
+
+lokiw -e find "$out" -type f -maxdepth 1
+loki-assert-out "$out/run"
+
+echo 6 | lokiw -e "$out/run"
+loki-assert-out ""
+
+echo 7 | lokiw -e "$out/run"
+loki-assert-out "Now I'm lyin' on the cold hard ground ... AAAAAAAAAA"
+
+loki-points +10

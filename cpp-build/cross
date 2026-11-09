@@ -1,0 +1,30 @@
+#! /usr/bin/env loki
+
+lokiw -e -u "find c-cxx -type f -and \( -not -name '*.sh' \) | wc -l"
+loki-assert-out 4
+
+lokiw -e -u "find c-cxx -type f -and \( -not -name '*.sh' \) | sort "
+loki-assert-out "$(cat <<- OUT
+c-cxx/deps/deps.c
+c-cxx/deps/deps.h
+c-cxx/main.cc
+c-cxx/other.c
+OUT
+)"
+
+lokiw -e cd c-cxx
+
+verify_script "build.sh"
+
+out=$(fenrir-tmp -d)
+
+lokiw -e ./build.sh "$out"
+
+lokiw -e find "$out" -type f -maxdepth 1
+loki-assert-out "$out/run"
+
+lokiw -e "$out/run"
+loki-assert-out "42
+16"
+
+loki-points +10

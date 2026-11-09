@@ -1,0 +1,10 @@
+
+main=(
+    "simple"
+    "lib-static"
+    "lib-dynamic"
+    "libs"
+    "static"
+    "cross"
+    "headers"
+)
