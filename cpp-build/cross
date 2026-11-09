@@ -26,6 +26,7 @@ verify_script "build.sh"
 out=$(fenrir-tmp -d)
 
 lokiw -e ./build.sh "$out"
+loki-assert-rout '.*-Wendif-labels.*' "You have use a wrong C standard!"
 
 lokiw -e find "$out" -type f -maxdepth 1
 loki-assert-out "$out/run"
