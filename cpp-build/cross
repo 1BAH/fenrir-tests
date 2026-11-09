@@ -12,7 +12,14 @@ c-cxx/other.c
 OUT
 )"
 
+
 lokiw -e cd c-cxx
+
+lokiw -e -u "grep 'extern' main.cc | wc -l"
+loki-assert-out 1 "You cannot add extra externs!"
+
+lokiw -e -u "grep 'include' main.cc | wc -l"
+loki-assert-out 2 "You must preserve all includes!"
 
 verify_script "build.sh"
 
