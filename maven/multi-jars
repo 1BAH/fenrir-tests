@@ -1,0 +1,72 @@
+#! /usr/bin/env loki
+
+function destroy {
+	if [[ -v pid1 ]]; then
+		kill -9 $pid1 &> /dev/null
+	fi
+
+	if [[ -v pid2 ]]; then
+		kill -9 $pid2 &> /dev/null
+	fi
+}
+
+export LOKI_ASSERT_CB="destroy"
+loki-log warn "Do not use Ctrl+C until the testcase is finished!"
+
+dir=$(fenrir-tmp -d)
+reserve=$(fenrir-tmp -d)
+
+loki-prog "Building the project.."
+
+lokiw -e cd server
+
+lokiw -e mvn clean package "-Dinstall.prefix=$dir"
+
+lokiw -u "ls -1 \"$dir/services\" | sort"
+loki-assert-out "server-a-1.0.0.jar
+server-b-1.0.0.jar"
+
+loki-gorp
+loki-prog "Running jars.."
+
+java -jar "$dir/services/server-a-1.0.0.jar" &
+pid1=$!
+
+sleep 1s
+
+lokiw ps -p $pid1
+loki-assert-eq 0 $? "Failed to start server"
+
+java -jar "$dir/services/server-b-1.0.0.jar" &
+pid2=$!
+
+sleep 1s
+
+lokiw ps -p $pid2
+loki-assert-eq 0 $? "Failed to start server"
+
+lokiw -e curl -X GET http://localhost:7777/echo -H 'Content-Type: application/json' -d '{"name":"Fry"}'
+loki-assert-out '{"name":"Fry"}'
+
+lokiw -e curl -X GET http://localhost:7778/echo -H 'Content-Type: application/json' -d '{"name":"Fry"}'
+loki-assert-out '{"from":"Leela","name":"Fry","message":"HI"}'
+
+destroy
+loki-gorp
+
+loki-prog "Testing obesity.."
+
+for jar in "${dir}/services"/*.jar; do
+	loki-log info "Now: <$jar>"
+	size=$(du -xs "${jar}" | cut -f1)
+
+	if (( size >= 20 )); then
+		loki-log fail "The jar is too fat!"
+		exit 8
+	fi
+done
+
+loki-gorp
+
+
+loki-points +20

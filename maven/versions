@@ -1,0 +1,10 @@
+#! /usr/bin/env loki
+
+lokiw -e cd meeting
+
+lokiw -e mvn clean package
+
+lokiw -e java -jar target/meeting-1.0-SNAPSHOT.jar
+loki-assert-rout ".*Remove element: com\.github\.devtoolscourse\.Persona@.*"
+
+loki-points +20

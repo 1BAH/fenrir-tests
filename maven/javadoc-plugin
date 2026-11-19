@@ -1,0 +1,144 @@
+#! /usr/bin/env loki
+
+lokiw -e cd javadoc
+init_dir=${PWD}
+
+repo=$(cat repo.xml)
+
+loki-prog "Creating test project.."
+
+dir=$(fenrir-tmp -d)
+
+mkdir -p "${dir}/src/main/java/"{a,b,c}
+
+cat <<- JAVA >> "${dir}/src/main/java/a/A.java"
+package a;
+/**
+ * Baja jao
+ */
+public class A { }
+JAVA
+
+cat <<- JAVA >> "${dir}/src/main/java/b/B.java"
+package b;
+/**
+ * Baja jao
+ */
+public class B { }
+JAVA
+
+cat <<- JAVA >> "${dir}/src/main/java/c/C.java"
+package c;
+/**
+ * Baja jao
+ */
+public class C { }
+JAVA
+
+cat <<- JAVA > "${dir}/pom.xml"
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.github.devtoolscourse</groupId>
+    <artifactId>test</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.github.devtoolscourse</groupId>
+                <artifactId>javadoc-plugin</artifactId>
+                <version>0.1.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>javadoc</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+JAVA
+
+loki-log info "Generated pom:"
+cat "${dir}/pom.xml"
+
+loki-gorp
+
+loki-prog "Testing provided plugin"
+rm -fr ~/.m2/repository/com/github/devtoolscourse/javadoc-plugin "${dir}/target"
+
+lokiw -e cd "${init_dir}"
+lokiw -e mvn clean install
+
+lokiw -e cd "${dir}"
+lokiw -e mvn clean process-sources
+
+lokiw -e cat "${dir}/target/site/a/A.html"
+loki-assert-rout ".*Baja jao.*"
+
+lokiw -e cat "${dir}/target/site/b/B.html"
+loki-assert-rout ".*Baja jao.*"
+
+lokiw -e cat "${dir}/target/site/c/C.html"
+loki-assert-rout ".*Baja jao.*"
+
+loki-gorp
+
+loki-gorp "Testing plugin from repository"
+
+cat <<- JAVA > "${dir}/pom.xml"
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.github.devtoolscourse</groupId>
+    <artifactId>test</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    ${repo}
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.github.devtoolscourse</groupId>
+                <artifactId>javadoc-plugin</artifactId>
+                <version>0.1.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>javadoc</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+JAVA
+
+loki-log info "Generated pom:"
+cat "${dir}/pom.xml"
+
+rm -fr ~/.m2/repository/com/github/devtoolscourse/javadoc-plugin "${dir}/target"
+lokiw -e cd "${dir}"
+lokiw -e mvn process-sources
+
+lokiw -e cat "${dir}/target/site/a/A.html"
+loki-assert-rout ".*Baja jao.*"
+
+lokiw -e cat "${dir}/target/site/b/B.html"
+loki-assert-rout ".*Baja jao.*"
+
+lokiw -e cat "${dir}/target/site/c/C.html"
+loki-assert-rout ".*Baja jao.*"
+
+loki-gorp
+
+loki-points +20

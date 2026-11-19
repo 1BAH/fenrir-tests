@@ -1,0 +1,9 @@
+
+main=(
+	"walk-inspections"
+    "simple"
+    "versions"
+    "multi-jars"
+    "profiles"
+    "javadoc-plugin"
+)

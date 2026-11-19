@@ -1,0 +1,32 @@
+#! /usr/bin/env loki
+
+lokiw -e cd profiles
+
+loki-prog "Testing default settings.."
+lokiw -e mvn clean package
+
+lokiw -e java -jar core/target/core-1.0-SNAPSHOT.jar
+loki-assert-out "DEV
+db://user:pass/db"
+loki-gorp
+
+loki-prog "Testing <dev> profile.."
+lokiw -e mvn clean package -Pdev
+
+lokiw -e java -jar core/target/core-1.0-SNAPSHOT.jar
+loki-assert-out "DEV
+db://user:pass/db"
+loki-gorp
+
+loki-prog "Testing <prod> profile.."
+export USERNAME=$RANDOM
+export PASSWORD=$RANDOM
+
+lokiw -e mvn clean package -Pprod
+
+lokiw -e java -jar core/target/core-1.0-SNAPSHOT.jar
+loki-assert-out "PROD
+db://$USERNAME:$PASSWORD/db"
+loki-gorp
+
+loki-points +20

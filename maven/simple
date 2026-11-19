@@ -1,0 +1,18 @@
+#! /usr/bin/env loki
+
+lokiw -e cd simple
+
+loki-log warn "When running in env for the first time, it might take some time to download all the dependencies: be patient!"
+
+lokiw -e mvn clean install
+
+lokiw -e java -cp target/simple.jar com.github.devtoolscourse.Main
+loki-assert-out "com.github.devtoolscourse.simple.Deps" "You have misplaced the files!"
+
+lokiw -e java -jar target/simple.jar
+loki-assert-out "com.github.devtoolscourse.simple.Deps"
+
+lokiw -e java -jar ~/.m2/repository/com/github/devtoolscourse/simple/0.1-SNAPSHOT/simple-0.1-SNAPSHOT.jar
+loki-assert-out "com.github.devtoolscourse.simple.Deps"
+
+loki-points +10
