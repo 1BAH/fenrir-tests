@@ -2,7 +2,7 @@
 
 loki-set-log-prefix "L: "
 
-lokiw -e pushd lib part-5
+lokiw -e pushd lib
 
 libdir=$(fenrir-tmp -d)
 
