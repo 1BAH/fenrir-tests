@@ -1,8 +1,8 @@
 #! /usr/bin/env loki
 
-loki-set-log-prefix "P4: "
+loki-set-log-prefix "I: "
 
-lokiw -e pushd part-4
+lokiw -e pushd includes
 
 rm -fr build
 rm -fr bin

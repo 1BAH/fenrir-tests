@@ -1,8 +1,8 @@
 #! /usr/bin/env loki
 
-loki-set-log-prefix "P6: "
+loki-set-log-prefix "M: "
 
-lokiw -e pushd part-6
+lokiw -e pushd module
 
 rm -fr build lib/build
 rm -fr bin   lib/bin
@@ -63,4 +63,4 @@ if [[ "$stdout" == "${stdout_without_answer}" ]]; then
     exit 8
 fi
 
-loki-points +10
+loki-points +15

@@ -1,8 +1,8 @@
 #! /usr/bin/env loki
 
-loki-set-log-prefix "P7: "
+loki-set-log-prefix "P: "
 
-lokiw -e pushd part-7
+lokiw -e pushd package
 
 install_dir=$(fenrir-tmp -d)
 backup=$(fenrir-tmp)
@@ -129,4 +129,4 @@ loki-gorp
 
 loki-gorp
 
-loki-points +30
+loki-points +25

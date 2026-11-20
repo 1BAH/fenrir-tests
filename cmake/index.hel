@@ -1,17 +1,22 @@
+[ "${FENV}" = "LÆVATEINN" ] || {
+cat <<- OUT > /dev/stderr
+${BOLD}${RED}
+Invalid HEL format!
+Expected <LÆVATEINN>, got <${FENV}> instead!
+${ENDC}
+OUT
+exit 222
+}
 scripts=(
-    "part-1"
-    "part-2"
-    "part-3"
-    "part-4"
-    "part-5"
-    "part-6"
-    "part-7"
-    "part-8"
+    "simple"
+    "c-cxx"
+    "includes"
+    "dependencies"
+    "module"
+    "lib"
+    "package"
 )
-
-cfgs=()
-
-image="registry.gitlab.com/ygdrasil/progtech/tech-tasks/cmake/cmake:latest"
-branch="cmake"
+cfgs=(
+)
+image="ghcr.io/devtools-course/task-cmake:latest"
 blocking=0
-#inline=0

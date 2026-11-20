@@ -1,8 +1,8 @@
 #! /usr/bin/env loki
 
-loki-set-log-prefix "P2: "
+loki-set-log-prefix "C-CXX: "
 
-lokiw -e pushd part-2
+lokiw -e pushd c-cxx
 
 rm -fr build
 rm -fr bin

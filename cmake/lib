@@ -1,8 +1,8 @@
 #! /usr/bin/env loki
 
-loki-set-log-prefix "P5: "
+loki-set-log-prefix "L: "
 
-lokiw -e pushd part-5
+lokiw -e pushd lib part-5
 
 libdir=$(fenrir-tmp -d)
 
@@ -76,4 +76,4 @@ loki-assert-err "c"
 
 loki-gorp
 
-loki-points +10
+loki-points +20

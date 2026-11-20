@@ -1,32 +1,31 @@
 #! /usr/bin/env loki
 
-loki-set-log-prefix "P8: "
+loki-set-log-prefix "SMP: "
 
-lokiw -e pushd part-8
+lokiw -e pushd simple
 
 rm -fr build
 rm -fr bin
-
-if ! [ -f CMakeLists.txt ]; then
-    loki-log err "No CMakeLists.txt is provided!"
-    exit 66
-fi
 
 if ! lokiw cmake -B build; then
     loki-log fail "CMake configuration & generation has failed!"
     exit 1
 fi
 
+
 if ! lokiw cmake --build build; then
     loki-log fail "CMake execution has failed!"
     exit 1
 fi
 
-if ! [ -d "build/_deps" ]; then
-    loki-log fail "You have not used FetchContent!"
-    exit 8
+if ! [ -f bin/say-hi ]; then
+    loki-log err "File 'say-hi' was not found!"
+    exit 1
 fi
 
-lokiw -e ./build/example
+lokiw -e ./bin/say-hi
+
+loki-assert-out "9 qwerty"
+loki-assert-err ""
 
 loki-points +5
