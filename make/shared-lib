@@ -22,4 +22,4 @@ loki-assert-rout "shared object"
 
 rm -fr bin build lib
 
-loki-points +35
+loki-points +30

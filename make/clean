@@ -9,4 +9,4 @@ if [ -d lib ] || [ -d bin ] || [ -d build ]; then
     exit 7
 fi
 
-loki-points +10
+loki-points +5

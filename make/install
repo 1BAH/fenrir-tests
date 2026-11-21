@@ -2,10 +2,28 @@
 
 loki-set-log-prefix "INS: "
 
-loki-prog "Installing.."
+loki-prog "Installing (testdir).."
+testdir=$(fenrir-tmp -d)
+
 lokiw -e make
-echo "breach" | sudo -S make install
-loki-assert-eq 0 $?
+lokiw make install DESTDIR="${testdir}"
+loki-gorp
+
+loki-prog "Testing the libraries"
+lokiw -u "readelf -d '${testdir}/lib/libludus.so' | grep SONAME | grep -oE '\[.*\]'"
+loki-assert-out "[libludus.so]"
+
+lokiw -e readlink "${testdir}/lib/libludus.so"
+loki-assert-out "${testdir}/lib/libludus.so.2"
+
+lokiw -u "readelf -d '${testdir}/lib/libludus.so.1' | grep SONAME | grep -oE '\[.*\]'"
+loki-assert-out "[libludus.so]"
+
+loki-gorp
+
+loki-prog "Installing (system).."
+lokiw -e make
+echo "breach" | lokiw -e sudo -S make install DESTDIR=/usr/local
 loki-gorp
 
 loki-prog "Testing the binary"
@@ -21,4 +39,4 @@ loki-assert-rout "Panem et circenses!"
 loki-assert-rout "gladiator mortuus est!"
 loki-gorp
 
-loki-points +10
+loki-points +15

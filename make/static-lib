@@ -14,4 +14,4 @@ loki-assert-rout "ar archive"
 
 rm -fr bin build lib
 
-loki-points +30
+loki-points +25
