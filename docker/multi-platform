@@ -1,0 +1,71 @@
+#! /usr/bin/env loki
+
+function contains {
+    str=$1
+    pattern=$2
+
+    [[ $str == *${pattern}* ]]
+}
+
+declare -A limits=( [java]=30000000 [cpp]=500000 )
+
+loki-set-log-prefix "MP: "
+
+lokiw -e pushd multi
+
+loki-prog "Detecting variant.."
+
+if ! [ -f Dockerfile ]; then
+	loki-log fail "Cannot find Dockerfile!"
+	exit 11
+fi
+
+if ! [ -f variant ]; then
+	loki-log fail "The variant was not chosen!"
+	exit 11
+fi
+
+var=$(< variant)
+
+case "$var" in
+	java|cpp)
+		loki-log info "Variant is <$var>"
+	;;
+	*)
+  		loki-log fail "Unknowm variant <$var>"
+  		exit 12
+	;;
+esac
+
+loki-gorp
+
+loki-prog "Check platforms"
+
+lokiw -e git remote get-url origin
+remote=$(loki-get-out)
+remote=${remote%.git}
+remote=${remote#*:}
+
+image="registry.gitlab.com/$remote:$var"
+loki-log info "Image: '${image}'"
+
+lokiw -e docker manifest inspect "$image"
+loki-assert-rout ".*amd64.*" "Your image does not support amd64 platform"
+loki-assert-rout ".*arm64.*" "Your image does not support arm64 platform"
+loki-assert-rout ".*ppc64le.*" "Your image does not support ppc64le platform"
+
+loki-gorp
+
+loki-prog "Verifying the image.."
+lokiw -e docker run --rm "$image" 11
+loki-assert-out "11 44"
+loki-gorp
+
+real=$(docker inspect -f '{{.Size}}' "$image")
+exp=${limits[$var]}
+if (( real > exp )); then
+    loki-log err "The image is too heavy! $real >> $exp"
+    exit 7
+fi
+
+loki-points +30

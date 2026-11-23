@@ -106,20 +106,14 @@ loki-prog "Destruct the environment"
 }
 loki-gorp
 
-if contains "$(docker network ls --format '{{ .Name }}')" korea; then
-    loki-log err "You haven't removed the network"
-    exit 5
-fi
+lokiw docker network ls --format '{{ .Name }}'
+loki-assert-rnout '.*korea.*' "You haven't removed the network"
 
-if contains "$(docker volume ls --format '{{ .Name }}')" hanja; then
-    loki-log err "You haven't removed the volume"
-    exit 5
-fi
+lokiw docker volume ls --format '{{ .Name }}'
+loki-assert-rnout '.*hanja.*' "You haven't removed the volume"
 
-if contains "$(docker container ls -a --format '{{ .Names }}')" south ||
-   contains "$(docker container ls -a --format '{{ .Names }}')" north; then
-    loki-log err "You haven't removed the containers"
-    exit 5
-fi
+lokiw docker container ls -a --format '{{ .Name }}'
+loki-assert-rnout '.*south.*' "You haven't removed the containers"
+loki-assert-rnout '.*north.*' "You haven't removed the containers"
 
 loki-points +30

@@ -1,9 +1,17 @@
-
+[ "${FENV}" = "LÆVATEINN" ] || {
+cat <<- OUT > /dev/stderr
+${BOLD}${RED}
+Invalid HEL format!
+Expected <LÆVATEINN>, got <${FENV}> instead!
+${ENDC}
+OUT
+exit 222
+}
 scripts=(
     "runconf"
     "gpine"
     "ping-pong"
-    "standalone"
+    "multi-platform"
 )
 
 cfgs=()
@@ -12,3 +20,4 @@ branch="docker"
 blocking=0
 inhost=0
 indocker=0
+inlined=0
