@@ -16,5 +16,5 @@ scripts=(
 )
 cfgs=(
 )
-image="mvn"
+image="ghcr.io/devtools-course/task-maven:latest"
 blocking=0

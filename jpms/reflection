@@ -1,0 +1,40 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "REFL: "
+
+lokiw -e cd reflection
+
+out=$(fenrir-tmp -d)
+
+loki-prog "Running build.sh.."
+
+lokiw -e ./build.sh "$out"
+
+lokiw -u 'find . | wc -l'
+loki-assert-out 13 "You have not removed build dirs"
+
+loki-gorp
+loki-prog "Testing image.."
+
+lokiw -e -u "java --describe-module dt.jpms.usage -p '${out}' | sort"
+loki-assert-out "contains com.github.devtoolscourse.usage
+dt.jpms.usage@1.0 file://${out}/usage.jar
+requires dt.jpms.member
+requires java.base mandated"
+
+
+lokiw -e ./run.sh m "$out"
+loki-assert-out "public
+CANNOT READ FIELD prot
+CANNOT READ FIELD packpriv
+CANNOT READ FIELD priv"
+
+lokiw -e ./run.sh n "$out"
+loki-assert-out "public
+protected
+package-private
+private"
+
+loki-gorp
+
+loki-points +10

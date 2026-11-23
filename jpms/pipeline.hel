@@ -1,0 +1,9 @@
+
+main=(
+    "walk-inspections"
+	"compilation"
+	"reflection"
+	"services"
+	"image"
+)
+

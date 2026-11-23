@@ -1,0 +1,38 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "IMG: "
+
+lokiw -e cd image
+
+ar=$(fenrir-tmp)
+out=$(fenrir-tmp -d)
+rm "$ar"
+
+loki-prog "Running build.sh.."
+
+lokiw -e ./build.sh "$ar"
+
+lokiw -u 'find . | wc -l'
+loki-assert-out 9 "You have not removed build dirs"
+
+loki-gorp
+loki-prog "Testing image.."
+
+lokiw -e tar xf "$ar" -C "$out"
+
+lokiw -e "$out/"*/bin/runner
+loki-assert-out ""
+
+lokiw -e "$out/"*/bin/runner 12 34
+loki-assert-out "Arg: 12
+Arg: 34"
+
+lokiw -u "du -xs '${ar}' | cut -f1"
+if (( $(loki-get-out) > 20000 )); then
+	loki-log fail "The image is too heavy!"
+	exit 7
+fi
+
+loki-gorp
+
+loki-points +20

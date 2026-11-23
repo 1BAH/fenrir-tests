@@ -1,0 +1,31 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "CMPL: "
+
+lokiw -e cd compilation
+
+out=$(fenrir-tmp -d)
+
+loki-prog "Running build.sh.."
+
+lokiw -e ./build.sh "$out"
+
+lokiw -u 'find . -type f -not -name "*.iml" | wc -l'
+loki-assert-out 7 "You have not removed build dirs"
+
+loki-gorp
+loki-prog "Testing jars.."
+
+lokiw -e -u "java -p '$(fenrir-task-path cfgs):$out' -m dt.jpms.beekeeper | sort"
+loki-assert-out 'Apis
+Bombus
+Cannot access com.github.devtoolscourse.bee.workers.CarpenterBee
+Cannot access com.github.devtoolscourse.bee.workers.MiningBee
+com.github.devtoolscourse.bee.workers.CarpenterBee
+com.github.devtoolscourse.bee.workers.MiningBee
+com.github.devtoolscourse.bee.yard.Bumblebee
+com.github.devtoolscourse.bee.yard.Honeybee'
+
+loki-gorp
+
+loki-points +30

@@ -1,0 +1,20 @@
+[ "${FENV}" = "LÆVATEINN" ] || {
+cat <<- OUT > /dev/stderr
+${BOLD}${RED}
+Invalid HEL format!
+Expected <LÆVATEINN>, got <${FENV}> instead!
+${ENDC}
+OUT
+exit 222
+}
+scripts=(
+    "compilation"
+    "image"
+    "reflection"
+    "services"
+)
+cfgs=(
+    "beekeeper.jar"
+)
+image="ghcr.io/devtools-course/task-jpms:latest"
+blocking=0
