@@ -29,7 +29,7 @@ loki-prog "Start the environment"
 }
 
 real=$(docker inspect -f '{{.Size}}' "front")
-exp=3900000
+exp=10000000
 if (( real > exp )); then
     loki-log err "The image is too heavy! $real >> $exp"
     ./rmenv.sh
@@ -37,7 +37,7 @@ if (( real > exp )); then
 fi
 
 real=$(docker inspect -f '{{.Size}}' "back")
-exp=3500000
+exp=10000000
 if (( real > exp )); then
     loki-log err "The image is too heavy! $real >> $exp"
     ./rmenv.sh

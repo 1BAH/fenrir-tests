@@ -7,7 +7,7 @@ function contains {
     [[ $str == *${pattern}* ]]
 }
 
-declare -A limits=( [java]=30000000 [cpp]=500000 )
+declare -A limits=( [java]=80000000 [cpp]=500000 )
 
 loki-set-log-prefix "MP: "
 

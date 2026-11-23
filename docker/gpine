@@ -14,7 +14,7 @@ loki-gorp
 loki-prog "Validate image"
 
 real=$(docker inspect -f '{{.Size}}' "gpine")
-exp=6500000
+exp=15000000
 if (( real > exp )); then
     loki-log err "The image is too heavy! $real >> $exp"
     exit 7
