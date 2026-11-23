@@ -28,16 +28,20 @@ loki-prog "Start the environment"
     exit 56
 }
 
-if (( $(docker inspect -f '{{.Size}}' front) > 3900000 )); then
-    loki-log err "Image 'front' is too heavy"
+real=$(docker inspect -f '{{.Size}}' "front")
+exp=3900000
+if (( real > exp )); then
+    loki-log err "The image is too heavy! $real >> $exp"
     ./rmenv.sh
-    exit 6
+    exit 7
 fi
 
-if (( $(docker inspect -f '{{.Size}}' back) > 3500000 )); then
-    loki-log err "Image 'back' is too heavy"
+real=$(docker inspect -f '{{.Size}}' "back")
+exp=3500000
+if (( real > exp )); then
+    loki-log err "The image is too heavy! $real >> $exp"
     ./rmenv.sh
-    exit 6
+    exit 7
 fi
 
 if ! contains "$(docker network ls --format '{{ .Name }}')" korea; then

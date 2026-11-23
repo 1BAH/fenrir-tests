@@ -44,9 +44,9 @@ loki-prog "Check platforms"
 lokiw -e git remote get-url origin
 remote=$(loki-get-out)
 remote=${remote%.git}
-remote=${remote#*:}
+remote=${remote#*gitlab.com}
 
-image="registry.gitlab.com/$remote:$var"
+image="registry.gitlab.com/${remote:1}:$var"
 loki-log info "Image: '${image}'"
 
 lokiw -e docker manifest inspect "$image"

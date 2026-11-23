@@ -12,10 +12,12 @@ docker build -t gpine . || {
 loki-gorp
 
 loki-prog "Validate image"
-size=$(docker inspect -f "{{.Size}}" gpine)
-if (( 6500000 < size )); then
-    loki-log fail "The image is to heavy!"
-    exit 57
+
+real=$(docker inspect -f '{{.Size}}' "$image")
+exp=6500000
+if (( real > exp )); then
+    loki-log err "The image is too heavy! $real >> $exp"
+    exit 7
 fi
 
 lokiw -e docker run --rm gpine -c 'var q 123 && var a 432 && sum $q $a'
