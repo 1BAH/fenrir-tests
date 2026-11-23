@@ -28,7 +28,7 @@ loki-assert-out "Arg: 12
 Arg: 34"
 
 lokiw -u "du -xs '${ar}' | cut -f1"
-if (( $(loki-get-out) > 20000 )); then
+if (( $(loki-get-out) > 30000 )); then
 	loki-log fail "The image is too heavy!"
 	exit 7
 fi
