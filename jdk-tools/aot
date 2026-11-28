@@ -13,7 +13,7 @@ if (( loaded < 300 )); then
 	exit 5
 fi
 
-lokiw -u "ls -1 gen | wc -l"
+lokiw -u "ls -1 gen | wc -l | tr -d \"$IFS\""
 loki-assert-out 4502 "You must generate 1.5k classes!"
 
 lokiw -e ./run.sh

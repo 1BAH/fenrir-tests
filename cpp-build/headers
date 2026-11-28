@@ -1,7 +1,7 @@
 #! /usr/bin/env loki
 
 
-lokiw -e -u "find broken -type f -and \( -not -name '*.sh' \) | wc -l"
+lokiw -e -u "find broken -type f -and \( -not -name '*.sh' \) | wc -l | tr -d \"$IFS\""
 loki-assert-out 10
 
 lokiw -e -u "find broken -type f -and \( -not -name '*.sh' \) | sort "

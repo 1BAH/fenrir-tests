@@ -10,7 +10,7 @@ loki-prog "Running build.sh.."
 
 lokiw -e ./build.sh "$out"
 
-lokiw -u 'find . | wc -l'
+lokiw -u "find . | wc -l | tr -d \"$IFS\""
 loki-assert-out 13 "You have not removed build dirs"
 
 loki-gorp

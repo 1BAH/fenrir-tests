@@ -40,10 +40,10 @@ loki-gorp
 loki-prog "Testing archivation.."
 
 lokiw -e "./${filename}" -a "${out_dir}/o.tar" "${ar_dir}"
-loki-assert-eq 12 "$(tar tf "${out_dir}/o.tar" | wc -l)"
+loki-assert-eq 12 "$(tar tf "${out_dir}/o.tar" | wc -l | tr -d "$IFS")"
 
 lokiw -e "./${filename}" -a "${out_dir}/oo.tar" "${ar_dir}"/{1..4}
-loki-assert-eq 4 "$(tar tf "${out_dir}/oo.tar" | wc -l)"
+loki-assert-eq 4 "$(tar tf "${out_dir}/oo.tar" | wc -l | tr -d "$IFS")"
 
 loki-gorp
 

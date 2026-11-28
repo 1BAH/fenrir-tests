@@ -2,7 +2,7 @@
 
 
 
-lokiw -e -u "find lib -type f -and \( -not -name '*.sh' \) | wc -l"
+lokiw -e -u "find lib -type f -and \( -not -name '*.sh' \) | wc -l | tr -d \"$IFS\""
 loki-assert-out 5
 
 lokiw -e -u "find lib -type f -and \( -name '*.hh' -or -name '*.cc' \) | sort "
@@ -23,7 +23,7 @@ out=$(fenrir-tmp -d)
 
 lokiw -e ./build-dynamic.sh "$out"
 
-lokiw -e -u "find '$out' -type f -maxdepth 1 | wc -l"
+lokiw -e -u "find '$out' -type f -maxdepth 1 | wc -l | tr -d \"$IFS\""
 loki-assert-out 0
 
 cat <<- CC > "$out/a.cc"

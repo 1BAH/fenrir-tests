@@ -19,7 +19,7 @@ loki-prog "Running build.sh.."
 
 lokiw -e ./build.sh "$out"
 
-lokiw -u 'find . -type f -not -name "*.iml" | wc -l'
+lokiw -u "find . -type f -not -name \"*.iml\" | wc -l | tr -d \"$IFS\""
 loki-assert-out 18 "You have not removed build dirs"
 
 loki-gorp

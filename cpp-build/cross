@@ -1,6 +1,6 @@
 #! /usr/bin/env loki
 
-lokiw -e -u "find c-cxx -type f -and \( -not -name '*.sh' \) | wc -l"
+lokiw -e -u "find c-cxx -type f -and \( -not -name '*.sh' \) | wc -l | tr -d \"$IFS\""
 loki-assert-out 4
 
 lokiw -e -u "find c-cxx -type f -and \( -not -name '*.sh' \) | sort "
@@ -15,10 +15,10 @@ OUT
 
 lokiw -e cd c-cxx
 
-lokiw -e -u "grep 'extern' main.cc | wc -l"
+lokiw -e -u "grep 'extern' main.cc | wc -l | tr -d \"$IFS\""
 loki-assert-out 1 "You cannot add extra externs!"
 
-lokiw -e -u "grep 'include' main.cc | wc -l"
+lokiw -e -u "grep 'include' main.cc | wc -l | tr -d \"$IFS\""
 loki-assert-out 2 "You must preserve all includes!"
 
 verify_script "build.sh"
